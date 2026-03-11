@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigraviti | Tizza Bo'g'imi Tahlili</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-bone"></i>
+                <h2>Antigraviti</h2>
+                <span class="badge">Ekspert Tizim</span>
+            </div>
+            
+            <div class="patient-profile">
+                <div class="avatar">
+                    <img src="https://i.pravatar.cc/150?img=11" alt="Bemor">
+                    <div class="status-dot"></div>
+                </div>
+                <h3 style="display: flex; align-items: center; justify-content: center;">Bemor: #84920-UZ <button id="editProfileBtn" class="btn-icon" title="O'zgartirish"><i class="fa-solid fa-pen"></i></button></h3>
+                <p id="patientAgeDisplay">Yoshi: <span id="valAge">54</span> yosh</p>
+                <div id="patientBmiDisplay" class="bmi-badge danger">BMI: <span id="valBmi">32.4</span> (<span id="valBmiText">I darajali semizlik</span>)</div>
+            </div>
+
+            <nav class="menu">
+                <a href="#" class="active"><i class="fa-solid fa-chart-pie"></i> Diagnostik Xulosa</a>
+                <a href="#"><i class="fa-solid fa-clock-rotate-left"></i> Dinamika Tarixi</a>
+                <a href="#"><i class="fa-solid fa-user-doctor"></i> Shifokor Eslatmasi</a>
+                <a href="#"><i class="fa-solid fa-gear"></i> Sozlamalar</a>
+            </nav>
+
+            <div class="auth-status">
+                <i class="fa-solid fa-shield-halved"></i>
+                <div>
+                    <h4>Xavfsiz ulanish</h4>
+                    <p>2FA orqali tasdiqlangan</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <div class="header-title">
+                    <h1>Tahlil Natijalari</h1>
+                    <p>Sun'iy intellekt (Fuzzy Logic) va tasvir diagnostikasi asosida</p>
+                </div>
+                <div class="actions">
+                    <button class="btn secondary"><i class="fa-solid fa-download"></i> PDF yuklash</button>
+                    <button class="btn primary"><i class="fa-solid fa-share-nodes"></i> Shifokorga yuborish</button>
+                </div>
+            </header>
+
+            <div class="content-grid">
+                <!-- Upload X-Ray Card -->
+                <div class="card upload-card full-width" style="text-align: center; border-left: 4px solid var(--primary);">
+                    <div class="card-body">
+                        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 32px; color: var(--primary); margin-bottom: 12px;"></i>
+                        <h3 style="margin-bottom: 12px;">Yangi Tasvir Yuklash (Rentgen / MRT)</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 14px;">Kellgren-Lawrence darajasini AI orqali aniqlash uchun tasvirni yuklang.</p>
+                        
+                        <input type="file" id="xrayUpload" accept="image/*" style="display: none;">
+                        <button class="btn primary" style="margin: 0 auto;" onclick="document.getElementById('xrayUpload').click()">
+                            <i class="fa-solid fa-camera"></i> Tasvir Tanlash
+                        </button>
+                        
+                        <div id="uploadResult" style="margin-top: 20px; font-size: 15px; font-weight: 500;"></div>
+                        <img id="imagePreview" style="max-width: 100%; max-height: 250px; margin: 20px auto 0; border-radius: 8px; box-shadow: var(--shadow-md); display: none;">
+                    </div>
+                </div>
+
+                <!-- Diagnostik Xulosa Card -->
+                <div class="card diagnosis-card full-width">
+                    <div class="card-header">
+                        <i class="fa-solid fa-stethoscope"></i>
+                        <h3>Diagnostik Xulosa</h3>
+                        <span class="severity">Kutilyapti...</span>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Kellgren-Lawrence klassifikatsiyasi:</strong> <span id="klGradeText">Natija kutilmoqda</span></p>
+                        <p class="description"><strong>Tizim xulosasi:</strong> Tahlilni boshlash uchun avval tepadan tasvir yuklang.</p>
+                        
+                        <div class="clinical-analysis">
+                            <h4><i class="fa-solid fa-brain"></i> AI Klinik Tahlili (Fuzzy Logic)</h4>
+                            <p>Bemorning yoshi (54), BMI ko‘rsatkichi (32.4) va bo‘g‘im tirqishi holati tahlil qilindi. <br><i>(To'liq ishlash uchun model natijasi kutilmoqda...)</i></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dynamics Chart -->
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <h3>Bo'g'im Tirqishi Dinamikasi</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="dynamicsChart"></canvas>
+                        </div>
+                        <div class="trend-indicator" style="background-color: var(--primary-light); color: var(--text-muted);">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                            <span>Grafig ishlashi uchun avval tahlilni yakunlang.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Treatment & Activity -->
+                <div class="card recommendation-card">
+                    <div class="card-header">
+                        <i class="fa-solid fa-notes-medical"></i>
+                        <h3>Tavsiya va Rejim</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="treatment-section">
+                            <h4>Davo Rejasi</h4>
+                            <ul>
+                                <li style="color: var(--text-muted);">Tasvir tahlili tugagandan so'ng aniq davo rejasi shakllantiriladi.</li>
+                            </ul>
+                        </div>
+                        <div class="activity-section">
+                            <div class="activity allowed">
+                                <h5><i class="fa-solid fa-check-circle"></i> Mumkin</h5>
+                                <p>Kutilmoqda...</p>
+                            </div>
+                            <div class="activity forbidden">
+                                <h5><i class="fa-solid fa-ban"></i> Taqiqlangan</h5>
+                                <p>Kutilmoqda...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doctor's Note -->
+                <div class="card doctor-note full-width">
+                    <div class="card-header">
+                        <i class="fa-solid fa-user-md"></i>
+                        <h3>Mutaxassis uchun Eslatma</h3>
+                    </div>
+                    <div class="card-body">
+                        <code>
+                            Gonartroz Dextra (Bemor shartli ma'lumotlari yuklandi). Tizimli tahlil natijasini kutish rejimiga o'tildi...
+                        </code>
+                    </div>
+                </div>
+
+            </div>
+
+            <footer class="disclaimer">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <p><strong>Ogohlantirish:</strong> Ushbu tizim AI va tasvirni tahlil qilish asosida ishlovchi yordamchi diagnostika vositasidir. Yakuniy tashxis va davo choralari vakolatli shifokor tomonidan tasdiqlanishi shart.</p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Bemor profilini qanday o'zgartirish</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Yoshi:</label>
+                    <input type="number" id="inputAge" value="54" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>BMI (Tana vazni indeksi):</label>
+                    <input type="number" step="0.1" id="inputBmi" value="32.4" class="form-control">
+                </div>
+                <button id="saveProfileBtn" class="btn primary" style="width: 100%; justify-content: center; margin-top: 16px;">Saqlash</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
