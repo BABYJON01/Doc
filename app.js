@@ -153,7 +153,12 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('file', file);
 
             try {
-                const response = await fetch('http://localhost:8000/predict', {
+                // Determine API URL based on environment (local vs vercel)
+                const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                    ? 'http://localhost:8000/predict' 
+                    : '/api/predict';
+
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     body: formData
                 });
