@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+python-multipart
+# Optional: Uncomment below to use the real PyTorch AI models
+# torch
+# torchvision
+# Pillow
