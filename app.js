@@ -21,14 +21,34 @@ const translations = {
         forbidden: "Taqiqlangan",
         docNote: "Mutaxassis uchun Eslatma",
         pdfBtn: "PDF shaklida yuklab olish",
-        shareBtn: "Yuborish"
+        shareBtn: "Yuborish",
+        resultsTitle: "Tahlil Natijalari",
+        resultsSubtitle: "Sun'iy intellekt (Fuzzy Logic) va tasvir diagnostikasi asosida",
+        fuzzyLogicTitle: "AI Klinik Tahlili (Fuzzy Logic)",
+        fuzzyLogicPending: "Bemorning parametrlari bo'yicha batafsil xulosa tayyorlanmoqda...",
+        idDate: "ID / Sana",
+        patientNameCol: "Bemor Ismi",
+        diagnosisCol: "Tashxis (Grade)",
+        docSettingsTitle: "Shifokor Ma'lumotlari:",
+        themeTitle: "Mavzu (Theme):",
+        langTitle: "Til (Language):",
+        saveBtn: "Saqlash",
+        emptyDb: "Bemorlar bazasi bo'sh",
+        personalCabinet: "Shaxsiy Kabinet",
+        gr0: "0 daraja (Norma / Sog'lom)",
+        gr1: "I darajali osteoartroz (Boshlang'ich/Shubha)",
+        gr2: "II darajali osteoartroz (Boshlang'ich/Yengil)",
+        gr3: "III darajali osteoartroz (O'rta bosqich)",
+        gr4: "IV darajali osteoartroz (Og'ir bosqich)",
+        errorInvalid: "Xato: Noto'g'ri Tasvir",
+        errorImgNotFound: "Yuklangan faylda shifokor uchun yaroqli bo'lgan xulosa chiqarilmadi."
     },
     ru: {
         newAnalysis: "Новый Анализ",
         database: "База Пациентов",
         settings: "Настройки",
-        totalPatients: "Всего обслужено пациентов",
-        uploadTitle: "Данные Нового Пациента",
+        totalPatients: "Всего пациентов",
+        uploadTitle: "Данные Пациента",
         uploadDesc: "Зарегистрируйте пациента и загрузите МРТ/Рентген снимок для начала анализа.",
         firstName: "Имя:",
         lastName: "Фамилия:",
@@ -45,7 +65,27 @@ const translations = {
         forbidden: "Запрещено",
         docNote: "Заметка для специалиста",
         pdfBtn: "Скачать в формате PDF",
-        shareBtn: "Поделиться"
+        shareBtn: "Поделиться",
+        resultsTitle: "Результаты Анализа",
+        resultsSubtitle: "На основе искусственного интеллекта (Fuzzy Logic) и лучевой диагностики",
+        fuzzyLogicTitle: "Клинический Анализ ИИ (Fuzzy Logic)",
+        fuzzyLogicPending: "Подробное заключение по параметрам пациента подготавливается...",
+        idDate: "ID / Дата",
+        patientNameCol: "Имя Пациента",
+        diagnosisCol: "Диагноз (Степень)",
+        docSettingsTitle: "Данные Врача:",
+        themeTitle: "Тема (Theme):",
+        langTitle: "Язык (Language):",
+        saveBtn: "Сохранить",
+        emptyDb: "База пациентов пуста",
+        personalCabinet: "Личный Кабинет",
+        gr0: "0 Степень (Норма / Здоров)",
+        gr1: "Остеоартроз I степени (Начальная/Сомнение)",
+        gr2: "Остеоартроз II степени (Начальная/Легкая)",
+        gr3: "Остеоартроз III степени (Средняя)",
+        gr4: "Остеоартроз IV степени (Тяжелая)",
+        errorInvalid: "Ошибка: Неверное изображение",
+        errorImgNotFound: "В загруженном файле не найдено полезного заключения для врача."
     },
     en: {
         newAnalysis: "New Analysis",
@@ -69,9 +109,31 @@ const translations = {
         forbidden: "Forbidden",
         docNote: "Specialist Note",
         pdfBtn: "Download as PDF",
-        shareBtn: "Share"
+        shareBtn: "Share",
+        resultsTitle: "Analysis Results",
+        resultsSubtitle: "Based on Artificial Intelligence (Fuzzy Logic) and image diagnostics",
+        fuzzyLogicTitle: "AI Clinical Analysis (Fuzzy Logic)",
+        fuzzyLogicPending: "Detailed conclusion based on patient parameters is being prepared...",
+        idDate: "ID / Date",
+        patientNameCol: "Patient Name",
+        diagnosisCol: "Diagnosis (Grade)",
+        docSettingsTitle: "Doctor Details:",
+        themeTitle: "Theme:",
+        langTitle: "Language:",
+        saveBtn: "Save",
+        emptyDb: "Patient database is empty",
+        personalCabinet: "Personal Cabinet",
+        gr0: "Grade 0 (Normal / Healthy)",
+        gr1: "Grade I Osteoarthritis (Doubtful)",
+        gr2: "Grade II Osteoarthritis (Mild)",
+        gr3: "Grade III Osteoarthritis (Moderate)",
+        gr4: "Grade IV Osteoarthritis (Severe)",
+        errorInvalid: "Error: Invalid Image",
+        errorImgNotFound: "No useful clinical conclusion could be drawn from the uploaded file."
     }
 };
+
+window.currentLang = 'uz';
 
 document.addEventListener('DOMContentLoaded', function() {
     
@@ -82,11 +144,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalPatientsEl = document.getElementById('totalPatientsCount');
     if (totalPatientsEl) totalPatientsEl.textContent = totalPatients;
 
-    // Load Avatar
+    // Load Doctor Profile
     const savedAvatar = localStorage.getItem('doctorAvatar');
-    if(savedAvatar) {
-        document.getElementById('doctorAvatarImg').src = savedAvatar;
-    }
+    if(savedAvatar) document.getElementById('doctorAvatarImg').src = savedAvatar;
+    
+    const savedDocName = localStorage.getItem('doctorName') || "Dr. Alisher V.";
+    const savedDocSpec = localStorage.getItem('doctorSpecialty') || "Ortoped-Travmatolog";
+    
+    document.getElementById('docNameDisplay').innerHTML = savedDocName + ` <i class="fa-solid fa-pen-to-square" style="font-size: 14px; opacity: 0.5;"></i>`;
+    document.getElementById('docSpecialtyDisplay').textContent = savedDocSpec;
 
     // Avatar Upload Logic
     const avatarContainer = document.getElementById('doctorAvatarContainer');
@@ -136,14 +202,21 @@ document.addEventListener('DOMContentLoaded', function() {
     if(openSettingsBtn) {
         openSettingsBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            // load current theme & lang
+            // load current theme & lang & doc
             const currentTheme = localStorage.getItem('theme') || 'light';
             const currentLang = localStorage.getItem('lang') || 'uz';
             document.getElementById('themeSelect').value = currentTheme;
             document.getElementById('languageSelect').value = currentLang;
+            
+            document.getElementById('docNameInput').value = localStorage.getItem('doctorName') || "Dr. Alisher V.";
+            document.getElementById('docSpecialtyInput').value = localStorage.getItem('doctorSpecialty') || "Ortoped-Travmatolog";
+            
             settingsModal.style.display = 'block';
         });
     }
+    // Also allow opening settings via clicking Doctor Name
+    document.getElementById('docNameDisplay').addEventListener('click', () => openSettingsBtn.click());
+    
     if(closeSettingsBtn) closeSettingsBtn.addEventListener('click', () => settingsModal.style.display = 'none');
 
     const saveSettingsBtn = document.getElementById('saveSettingsBtn');
@@ -152,8 +225,16 @@ document.addEventListener('DOMContentLoaded', function() {
              const theme = document.getElementById('themeSelect').value;
              const lang = document.getElementById('languageSelect').value;
              
+             const nName = document.getElementById('docNameInput').value;
+             const nSpec = document.getElementById('docSpecialtyInput').value;
+             
              localStorage.setItem('theme', theme);
              localStorage.setItem('lang', lang);
+             localStorage.setItem('doctorName', nName);
+             localStorage.setItem('doctorSpecialty', nSpec);
+             
+             document.getElementById('docNameDisplay').innerHTML = nName + ` <i class="fa-solid fa-pen-to-square" style="font-size: 14px; opacity: 0.5;"></i>`;
+             document.getElementById('docSpecialtyDisplay').textContent = nSpec;
              
              applyTheme(theme);
              applyLanguage(lang);
@@ -167,6 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
     applyLanguage(localStorage.getItem('lang') || 'uz');
 
     function applyLanguage(lang) {
+        window.currentLang = lang;
         const dict = translations[lang] || translations['uz'];
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
@@ -204,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if(!tbody) return;
         tbody.innerHTML = '';
         if(patientsDB.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 20px;">Bemorlar bazasi bo\'sh</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 20px;">${translations[window.currentLang]?.emptyDb || "Bemorlar bazasi bo'sh"}</td></tr>`;
             return;
         }
         // show latest first
@@ -370,33 +452,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Successful response
                 resultDiv.innerHTML = `<span style="color: var(--success);"><i class="fa-solid fa-check-circle"></i> Tahlil yakunlandi: <strong>${data.detail}</strong></span><br><span style="font-size: 12px; color: var(--text-muted);">(Model manbasi: ${data.has_torch ? 'PyTorch ResNet' : 'Demonstratsiya'})</span>`;
                 
-                // Increment Stats & Save
-                if (data.prediction !== -1) {
-                    const newPatient = {
-                         id: Date.now(),
-                         date: new Date().toLocaleDateString('uz-UZ'),
-                         name: patientFullName,
-                         grade: data.prediction,
-                         grade_text: `Grade ${data.prediction}`
-                    };
-                    patientsDB.push(newPatient);
-                    localStorage.setItem('patientsDB', JSON.stringify(patientsDB));
-                    
-                    totalPatients = patientsDB.length;
-                    if(document.getElementById('totalPatientsCount')) {
-                        document.getElementById('totalPatientsCount').textContent = totalPatients;
-                    }
-                }
-
+                // Inc                const d = translations[window.currentLang] || translations['uz'];
+                
                 // Update Dashboard Dynamically
                 if (data.prediction === -1) {
-                    resultDiv.innerHTML = `<span style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> <strong>${data.detail}</strong></span>`;
-                    document.querySelector('.diagnosis-card .severity').textContent = `Xato: Noto'g'ri Tasvir`;
+                    resultDiv.innerHTML = `<span style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> <strong>${d.errorInvalid}</strong></span>`;
+                    document.querySelector('.diagnosis-card .severity').textContent = d.errorInvalid;
                     document.querySelector('.diagnosis-card .severity').className = 'severity';
-                    document.querySelector('.diagnosis-card .severity').style.backgroundColor = '#fee2e2';
+                    document.querySelector('.diagnosis-card .severity').style.backgroundColor = '#theme-dependent-overriden-later';
                     document.querySelector('.diagnosis-card .severity').style.color = '#991b1b';
-                    document.getElementById('klGradeText').textContent = "Aniqlanmadi";
-                    document.querySelector('.diagnosis-card .description').innerHTML = `<strong>Tizim xulosasi:</strong> Yuklangan faylda shifokor uchun yaroqli bo'lgan xulosa chiqarilmadi.`;
+                    document.getElementById('klGradeText').textContent = "---";
+                    document.querySelector('.diagnosis-card .description').innerHTML = `<strong>${d.systemConclusion}</strong> ${d.errorImgNotFound}`;
                 } else {
                     document.querySelector('.diagnosis-card .severity').textContent = `Grade: ${data.prediction}`;
                     
@@ -409,164 +475,115 @@ document.addEventListener('DOMContentLoaded', function() {
                     let noteHtml = "";
                     
                     if(data.prediction === 0) {
-                        gradeText = "0 daraja (Norma / Sog'lom)";
-                        document.querySelector('.diagnosis-card .severity').className = 'severity';
+                        gradeText = d.gr0;
+                        document.querySelector('.diagnosis-card .severity').className = 'severity success';
                         document.querySelector('.diagnosis-card .severity').style.backgroundColor = '#dcfce7';
                         document.querySelector('.diagnosis-card .severity').style.color = '#166534';
                         
-                        let bmiAdvice = ptBmi > 25 ? `Tana vaznini yuqoriligi (${ptBmi} BMI) kelajakda xavf omili bo'lishi mumkin.` : `Tana vazn idealligicha qolmoqda (${ptBmi} BMI).`;
-                        fuzzyHtml = `Bemor: <b>${patientFullName}</b> (${ptAge} yosh) BMI ko‘rsatkichi: <b>${ptBmi}</b>. tahlil qilindi. Hozirgi vaqtda yoshga xos <strong>fiziologik o'zgarishlarsiz, bo‘g‘im to'liq sog'lom</strong> deb baholandi. ${bmiAdvice}`;
-                        noteHtml = `Bemor ${patientFullName} ko'rigi o'tkazildi. Patologiya aniqlanmadi. Profilaktik kuzatuv tavsiya etiladi.`;
+                        fuzzyHtml = `<b>${patientFullName}</b> (${ptAge}) BMI: <b>${ptBmi}</b>. ${window.currentLang === 'en' ? 'No physiological changes found, joint is completely healthy.' : (window.currentLang === 'ru' ? 'Физиологических изменений не выявлено, сустав полностью здоров.' : 'Hozirgi vaqtda yoshga xos bo‘g‘im to\'liq sog\'lom.')}`;
+                        noteHtml = window.currentLang === 'en' ? `Patient evaluated. Pathology not detected.` : (window.currentLang === 'ru' ? 'Осмотр проведен. Патологий не выявлено.' : `Bemor ko'rigi o'tkazildi. Patologiya aniqlanmadi.`);
 
                         chartData = [2.5, 2.5, 2.5, 2.5, 2.5, 2.5];
-                        trendHtml = `<i class="fa-solid fa-arrow-trend-up"></i><span>Bo'g'im tirqishida o'zgarish yo'q. Me'yorda.</span>`;
-                        document.querySelector('.trend-indicator').className = 'trend-indicator';
-                        document.querySelector('.trend-indicator').style.backgroundColor = '#dcfce7';
-                        document.querySelector('.trend-indicator').style.color = '#166534';
-
-                        treatmentHtml = `
-                            <li><strong>Profilaktika:</strong> Sog'lom turmush tarzini davom ettirish.</li>
-                            <li><strong>Medikamentoz:</strong> Dori-darmon talab etilmaydi.</li>
-                            <li><span class="highlight" style="background-color:#dcfce7; color:#166534">Holat barqaror. Hech qanday aralashuv shart emas.</span></li>
-                        `;
+                        trendHtml = `<i class="fa-solid fa-arrow-trend-up"></i><span>${window.currentLang === 'en'?'Normal joint space.':'Bo\'g\'im tirqishida o\'zgarish yo\'q. Me\'yorda.'}</span>`;
+                        treatmentHtml = `<li>${window.currentLang==='en'?'Vitamins':'Umumiy profilaktika, vitamin D'}</li>`;
                         activityHtml = `
                             <div class="activity allowed">
-                                <h5><i class="fa-solid fa-check-circle"></i> Mumkin</h5>
-                                <p>Barcha turdagi sport, faol harakatlar, yugurish, raqs, suzish.</p>
+                                <h5><i class="fa-solid fa-check-circle"></i> ${d.allowed}</h5>
+                                <p>${window.currentLang==='en'?'Running, swimming':'Faol sport, piyoda yurish, yugurish'}</p>
                             </div>
                             <div class="activity forbidden">
-                                <h5><i class="fa-solid fa-ban"></i> Taqiqlangan</h5>
-                                <p>Haddan tashqari yuqori professional jismoniy yuklamalardan (shtanga) ehtiyot bo'lish tavsiya etiladi.</p>
+                                <h5><i class="fa-solid fa-ban"></i> ${d.forbidden}</h5>
+                                <p>${window.currentLang==='en'?'None':'Alohida taqiq yo\'q'}</p>
                             </div>
                         `;
-
                     } else if(data.prediction === 1) {
-                        gradeText = "I darajali osteoartroz (Shubhali)";
+                        gradeText = d.gr1;
                         document.querySelector('.diagnosis-card .severity').className = 'severity';
                         document.querySelector('.diagnosis-card .severity').style.backgroundColor = '#fef3c7';
                         document.querySelector('.diagnosis-card .severity').style.color = '#b45309';
 
-                        let bmiFactor = ptBmi > 25 ? `asosan <strong>BMI ko'rsatkichiga (ortiqcha yuk - ${ptBmi} BMI)</strong>` : `boshqa individual omillarga`;
-                        fuzzyHtml = `Bemor <b>${patientFullName}</b> (${ptAge} yosh) tahlil qilindi. Patologiya faqat yosh omiliga emas, balki ${bmiFactor} bog'liq ravishda paydo bo'la boshlagan. Prognoz ehtimoli - ijobiy qaytarish mumkin.`;
-                        noteHtml = `Bemor ${patientFullName}. Subxondral sklerozning dastlabki belgilari. Ortiqcha vaznni korreksiya qilish va xondroprotektorlar buyurildi.`;
+                        fuzzyHtml = `<b>${patientFullName}</b> (${ptAge}) BMI: <b>${ptBmi}</b>. ${window.currentLang === 'en' ? 'Early signs of sclerosis. Prognosis is positive.' : (window.currentLang === 'ru' ? 'Ранние признаки склероза. Прогноз положительный.' : 'Subxondral sklerozning dastlabki belgilari. Muvaffaqiyatli qaytarish mumkin.')}`;
+                        noteHtml = window.currentLang === 'en' ? `Mild load correction assigned.` : (window.currentLang === 'ru' ? 'Назначена коррекция веса.' : `Ortiqcha vaznni korreksiya qilish va xondroprotektorlar buyurildi.`);
 
                         chartData = [2.5, 2.45, 2.4, 2.4, 2.35, 2.3];
-                        trendHtml = `<i class="fa-solid fa-arrow-trend-down"></i><span>Dastlabki minimal torayish (-0.2 mm).</span>`;
-                        document.querySelector('.trend-indicator').className = 'trend-indicator';
-                        document.querySelector('.trend-indicator').style.backgroundColor = '#fef3c7';
-                        document.querySelector('.trend-indicator').style.color = '#b45309';
-
-                        treatmentHtml = `
-                            <li><strong>Zudlik bilan:</strong> Tana vaznini nazorat qilish va yengil gimnastika.</li>
-                            <li><strong>Medikamentoz:</strong> Zarurat tug'ilganda faqat mahalliy mazlar (NYAQV). Xondroprotektorlar kursi.</li>
-                            <li><span class="highlight" style="background-color:#fef3c7; color:#b45309">Dastlabki profilaktika kerak.</span></li>
-                        `;
+                        trendHtml = `<i class="fa-solid fa-arrow-trend-down"></i><span>${window.currentLang==='en'?'Minimal narrowing (-0.2mm)':'Dastlabki minimal torayish (-0.2 mm).'}</span>`;
+                        treatmentHtml = `<li>${window.currentLang==='en'?'Weight management':'Vazn nazorati va profilaktika'}</li>`;
                         activityHtml = `
                             <div class="activity allowed">
-                                <h5><i class="fa-solid fa-check-circle"></i> Mumkin</h5>
-                                <p>Suzish, yengil yugurish jaming, veloped, pilates, fitness.</p>
+                                <h5><i class="fa-solid fa-check-circle"></i> ${d.allowed}</h5>
+                                <p>${window.currentLang==='en'?'Gymnastics':'Yengil gimnastika'}</p>
                             </div>
                             <div class="activity forbidden">
-                                <h5><i class="fa-solid fa-ban"></i> Taqiqlangan</h5>
-                                <p>Professional sakrash va juda og'ir atletika.</p>
+                                <h5><i class="fa-solid fa-ban"></i> ${d.forbidden}</h5>
+                                <p>${window.currentLang==='en'?'Heavy weights':'Og\'ir atletika, sakrash'}</p>
                             </div>
                         `;
-
                     } else if(data.prediction === 2) {
-                        gradeText = "II darajali osteoartroz (Boshlang'ich/Yengil)";
+                        gradeText = d.gr2;
                         document.querySelector('.diagnosis-card .severity').className = 'severity medium';
                         
-                        let ageFactor = ptAge < 45 ? `yosh normasi atrofida no-parallel (erta progressiya)` : `yosh normasi atrofida parallel`;
-                        fuzzyHtml = `Bemor <b>${patientFullName}</b> (${ptAge} yosh), BMI: <b>${ptBmi}</b>. Bo‘g‘im tirqishi holati (haqiqiy torayish) Fuzzy Logic orqali tahlil qilindi. Kasallik darajasi <strong>${ageFactor}</strong> ketyapti. Asosiy provokator omillar nazorat ostiga olinmasa progressiya yuz beradi.`;
-                        noteHtml = `Bemor ${patientFullName}, Grade II. Osteofitlar va bo'g'im torayishi tasdiqlandi. Fizioterapiya va yengil tizza bog'lami (Nakorlennik) taqish yozildi.`;
+                        fuzzyHtml = `<b>${patientFullName}</b> (${ptAge}) BMI: <b>${ptBmi}</b>. ${window.currentLang === 'en' ? 'Progression observed. Risk factors must be controlled.' : (window.currentLang === 'ru' ? 'Наблюдается прогрессия. Необходимо контролировать факторы риска.' : 'Kasallik darajasi shakllangan. Asosiy provokator omillar nazorat qilinmasa progressiya yuz beradi.')}`;
+                        noteHtml = window.currentLang === 'en' ? `Grade II confirmed. Physiotherapy assigned.` : (window.currentLang === 'ru' ? 'Степень II подтверждена. Назначена физиотерапия.' : `Grade II. Osteofitlar va bo'g'im torayishi tasdiqlandi. Fizioterapiya yozildi.`);
 
                         chartData = [2.4, 2.3, 2.2, 2.1, 2.0, 1.9];
-                        trendHtml = `<i class="fa-solid fa-arrow-trend-down"></i><span>Sezilarli torayish tendensiyasi (-0.5 mm).</span>`;
-                        document.querySelector('.trend-indicator').className = 'trend-indicator medium';
-                        document.querySelector('.trend-indicator').style.backgroundColor = '#fef3c7';
-                        document.querySelector('.trend-indicator').style.color = '#b45309';
-
-                        treatmentHtml = `
-                            <li><strong>Rejim:</strong> Jismoniy zo'riqishni kamaytirish, tizza bog'ichlari taqish.</li>
-                            <li><strong>Medikamentoz:</strong> NYAQV (og'riq qaytalanishida), uzoq muddatli xondroprotektorlar.</li>
-                            <li><strong>Fiziolgiya:</strong> Fizioterapiya (elektroforez, lazer).</li>
-                        `;
+                        trendHtml = `<i class="fa-solid fa-arrow-trend-down"></i><span>${window.currentLang==='en'?'Significant narrowing (-0.5 mm).':'Sezilarli torayish tendensiyasi (-0.5 mm).'}</span>`;
+                        treatmentHtml = `<li>${window.currentLang==='en'?'Chondroprotectors':'Xondroprotektorlar bloki'}</li><li>${window.currentLang==='en'?'Knee brace':'Tizza bog\'lami taqish'}</li>`;
                         activityHtml = `
                             <div class="activity allowed">
-                                <h5><i class="fa-solid fa-check-circle"></i> Mumkin</h5>
-                                <p>Hovuzda suzish, tekis joyda yurish, statik mashqlar.</p>
+                                <h5><i class="fa-solid fa-check-circle"></i> ${d.allowed}</h5>
+                                <p>${window.currentLang==='en'?'Swimming':'Suzish, velosiped'}</p>
                             </div>
                             <div class="activity forbidden">
-                                <h5><i class="fa-solid fa-ban"></i> Taqiqlangan</h5>
-                                <p>Asfaltda qattiq yugurish, og'ir sport turlari, tik qiyalikdan tushish.</p>
+                                <h5><i class="fa-solid fa-ban"></i> ${d.forbidden}</h5>
+                                <p>${window.currentLang==='en'?'Squats, jumps':'Cho\'qqayish, tiz cho\'kish'}</p>
                             </div>
                         `;
-
                     } else if(data.prediction === 3) {
-                        gradeText = "III darajali osteoartroz (O'rta bosqich)";
+                        gradeText = d.gr3;
                         document.querySelector('.diagnosis-card .severity').className = 'severity medium';
                         
-                        let progText = ptAge > 60 ? `mutanosib ravishda rivojlanayotgani` : `erta va tezkor progressiyalanuvchi ekanligi`;
-                        fuzzyHtml = `Bemor <b>${patientFullName}</b> (${ptAge} yosh) va BMI: <b>${ptBmi}</b> tahlil qilindi. Patologiya bemor yoshiga nisbatan <strong>${progText}</strong> aniqlandi. Asosiy provokator omil - tana vazni va yosh omilining yig'indisi.`;
-                        noteHtml = `Bemorda (${patientFullName}) yaqqol jarayon. Zudlik bilan vazn tashlash, intra-artikulyar inyeksiya (PRP / gialuron) buyurildi. Kelgusi qadam artroplastika ehtimoli mavjud.`;
+                        fuzzyHtml = `<b>${patientFullName}</b> (${ptAge}) BMI: <b>${ptBmi}</b>. ${window.currentLang === 'en' ? 'Pathology is advanced. Main provocator is weight burden.' : (window.currentLang === 'ru' ? 'Патология средней тяжести. Основной провокатор - вес.' : 'Patologiya mutanosib aniqlanib, asosiy provokator omil - tana vaznining yukidir.')}`;
+                        noteHtml = window.currentLang === 'en' ? `Advanced stage. Articular injections prescribed.` : (window.currentLang === 'ru' ? 'Выраженный процесс. Назначены инъекции.' : `Yaqqol jarayon. Intra-artikulyar inyeksiya (PRP) buyurildi.`);
 
                         chartData = [2.2, 2.15, 2.1, 1.95, 1.85, 1.8];
-                        trendHtml = `<i class="fa-solid fa-arrow-trend-down"></i><span>O'tgan 6 oyga nisbatan -0.4 mm torayish. Osteofitlar +12% o'sgan.</span>`;
-                        document.querySelector('.trend-indicator').className = 'trend-indicator negative';
-                        document.querySelector('.trend-indicator').style.cssText = ''; // Reset to class defaults
-
-                        treatmentHtml = `
-                            <li><strong>Zudlik bilan:</strong> Tana vaznini qat'iy korreksiya qilish (dieta/endokrinolog).</li>
-                            <li><strong>Medikamentoz:</strong> NYAQV va xondroprotektorlar muntazam qo'llash.</li>
-                            <li><strong>Inyeksiya:</strong> Bo'g'im ichiga gialuron kislotasi yoki PRP terapiya (shifokor ko'rsatmasi bilan).</li>
-                            <li><span class="highlight">Xirurgik aralashuvga hozircha mutlaq ko'rsatma yo'q.</span></li>
-                        `;
+                        trendHtml = `<i class="fa-solid fa-arrow-trend-down"></i><span class="negative">${window.currentLang==='en'?'Fast joint space narrowing.':'O\'tgan 6 oyga nisbatan qattiq yemirilish.'}</span>`;
+                        treatmentHtml = `<li>${window.currentLang==='en'?'PRP / Hyaluron Injection':'Gialuron kislota / PRP inyeksiya'}</li><li>${window.currentLang==='en'?'NSAIDs limit':'NSAV vositalari bloki'}</li>`;
                         activityHtml = `
                             <div class="activity allowed">
-                                <h5><i class="fa-solid fa-check-circle"></i> Mumkin</h5>
-                                <p>Faqat hovuzda suzish, yotgan holda velotrenajyor, izometrik mashqlar.</p>
+                                <h5><i class="fa-solid fa-check-circle"></i> ${d.allowed}</h5>
+                                <p>${window.currentLang==='en'?'Special stretches':'Maxsus kinetik-terapiya'}</p>
                             </div>
                             <div class="activity forbidden">
-                                <h5><i class="fa-solid fa-ban"></i> Taqiqlangan</h5>
-                                <p>Yugurish, sakrash, chuqur o'tirib-turish, og'ir ko'tarish mutlaqo mumkin emas.</p>
+                                <h5><i class="fa-solid fa-ban"></i> ${d.forbidden}</h5>
+                                <p>${window.currentLang==='en'?'Stairs, running':'Zinadan chiqish, uzoq turish'}</p>
                             </div>
                         `;
-
-                    } else {
-                        gradeText = "IV darajali osteoartroz (Og'ir bosqich)";
+                    } else if(data.prediction === 4) {
+                        gradeText = d.gr4;
                         document.querySelector('.diagnosis-card .severity').className = 'severity';
                         document.querySelector('.diagnosis-card .severity').style.backgroundColor = '#fee2e2';
                         document.querySelector('.diagnosis-card .severity').style.color = '#991b1b';
 
-                        let ageCrit = ptAge < 55 ? `${ptAge} yosh bu asorat uchun juda erta` : `${ptAge} yosh uchun ham juda og'ir daraja`;
-                        let bmiCrit = ptBmi > 30 ? `va ortiqcha vazn jarayonni teskari bo'lmas darajaga yetkazgan.` : `hisoblanadi.`;
-                        fuzzyHtml = `Bemor <b>${patientFullName}</b> (${ptAge} yosh) inobatga olindi. Tizim tasvirlardan <strong>to'liq tog'ay yopilishini (deformatsiya va ankiloz xavfini)</strong> hisoblab chiqdi. ${ageCrit} ${bmiCrit}`;
-                        noteHtml = `Bemorda yana bir konservativ choralar qoldirilmadi. ${patientFullName} ga Total Tizza Artroplastika (Endoprotezlash) jarrohligi rejalashtirildi.`;
+                        fuzzyHtml = `<b>${patientFullName}</b> (${ptAge}) BMI: ${ptBmi}. ${window.currentLang === 'en' ? 'Severe stage. Full cartilage loss and deformation risk.' : (window.currentLang === 'ru' ? 'Тяжелая степень. Полное закрытие хряща.' : 'To\'liq tog\'ay yopilishi (deformatsiya va ankiloz xavfi) qayd etildi. Vaziyat juda og\'ir.')}`;
+                        noteHtml = window.currentLang === 'en' ? `Surgery recommended: Total Knee Arthroplasty.` : (window.currentLang === 'ru' ? 'Рекомендована операция: Эндопротезирование.' : `Konservativ choralar qolmadi. Total Tizza Artroplastika (Endoprotezlash) rejalashtirildi.`);
 
                         chartData = [1.8, 1.5, 1.2, 0.9, 0.5, 0.2];
-                        trendHtml = `<i class="fa-solid fa-arrow-trend-down"></i><span>Bo'g'im tirqishi qariyb to'liq yopilgan. Jiddiy yemirilish!</span>`;
-                        document.querySelector('.trend-indicator').className = 'trend-indicator negative';
-                        document.querySelector('.trend-indicator').style.cssText = '';
-
-                        treatmentHtml = `
-                            <li><strong>Zudlik bilan:</strong> Travmatolog/Ortoped jarroh konsultatsiyasi.</li>
-                            <li><strong>Medikamentoz:</strong> Kuchli og'riqsizlantiruvchilar.</li>
-                            <li><span class="highlight" style="background-color:#fee2e2; color:#991b1b">Total Endoprotezlash (artroplastika) jarrohligi talab etilishi mumkin.</span></li>
-                        `;
+                        trendHtml = `<i class="fa-solid fa-arrow-trend-down"></i><span class="negative">${window.currentLang==='en'?'Complete closure of joint gap!':'Bo\'g\'im tirqishi qariyb to\'liq yopilgan. Jiddiy yemirilish!'}</span>`;
+                        treatmentHtml = `<li>${window.currentLang==='en'?'Surgery planning':'Artroplastikaga tayyorgarlik'}</li><li>${window.currentLang==='en'?'Analgesics':'Xirurgik aralashuvgacha blokada'}</li>`;
                         activityHtml = `
                             <div class="activity allowed">
-                                <h5><i class="fa-solid fa-check-circle"></i> Mumkin</h5>
-                                <p>Shtapellar yordamida yurish, faqat maxsus nazorati ostida YD Mashqlari.</p>
+                                <h5><i class="fa-solid fa-check-circle"></i> ${d.allowed}</h5>
+                                <p>${window.currentLang==='en'?'Rest, crutches':'Faqat tayoqcha bilan yengil harakat'}</p>
                             </div>
                             <div class="activity forbidden">
-                                <h5><i class="fa-solid fa-ban"></i> Taqiqlangan</h5>
-                                <p>Oyoqqa aksial yuk berish, uzoq tik turish, har qanday erkin harakatlar.</p>
+                                <h5><i class="fa-solid fa-ban"></i> ${d.forbidden}</h5>
+                                <p>${window.currentLang==='en'?'Walking without support':'Tayanchsiz har qanday harakat'}</p>
                             </div>
                         `;
                     }
 
                     document.getElementById('klGradeText').textContent = gradeText;
-                    document.querySelector('.diagnosis-card .description').innerHTML = `<strong>Tizim xulosasi:</strong> Sun'iy intellekt modeli siz yuklagan tasvirda <i>${data.detail}</i> alomatlarini aniqladi.`;
+                    document.querySelector('.diagnosis-card .description').innerHTML = `<strong>${d.systemConclusion}</strong> ${gradeText}`;
                     
                     // Update Chart Data
                     dynamicsChart.data.datasets[0].data = chartData;
@@ -588,7 +605,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Update Doctor's Note
                     const noteElem = document.getElementById('doctorNoteText');
                     if(noteElem) {
-                        noteElem.innerHTML = `Doktor xulosasi: ${noteHtml}`;
+                        noteElem.innerHTML = `<strong>${d.docNote}:</strong> ${noteHtml}`;
                     }
                 }
                 
