@@ -135,24 +135,46 @@ const translations = {
 
 window.currentLang = 'uz';
 
-document.addEventListener('DOMContentLoaded', function() {
+const apiUrlBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+    ? 'http://localhost:8000/api' 
+    : '/api';
+
+let patientsDB = [];
+let appSettings = {doctor_name: "Dr. Alisher V.", specialty: "Ortoped-Travmatolog", theme: "dark", lang: "uz", avatar: ""};
+
+document.addEventListener('DOMContentLoaded', async function() {
     
     // Load Stats and Database
-    let patientsDB = JSON.parse(localStorage.getItem('patientsDB')) || [];
-    let totalPatients = patientsDB.length;
+    try {
+        let res = await fetch(`${apiUrlBase}/patients`);
+        if (res.ok) {
+            patientsDB = await res.json();
+        }
+    } catch(e) {
+        console.warn("Could not load patients from DB");
+    }
     
+    let totalPatients = patientsDB.length;
     const totalPatientsEl = document.getElementById('totalPatientsCount');
     if (totalPatientsEl) totalPatientsEl.textContent = totalPatients;
 
     // Load Doctor Profile
-    const savedAvatar = localStorage.getItem('doctorAvatar');
-    if(savedAvatar) document.getElementById('doctorAvatarImg').src = savedAvatar;
+    try {
+        let res = await fetch(`${apiUrlBase}/settings`);
+        if (res.ok) {
+            let data = await res.json();
+            if (data && data.doctor_name) {
+                appSettings = data;
+            }
+        }
+    } catch(e) {
+        console.warn("Could not load settings from DB");
+    }
+
+    if(appSettings.avatar) document.getElementById('doctorAvatarImg').src = appSettings.avatar;
     
-    const savedDocName = localStorage.getItem('doctorName') || "Dr. Alisher V.";
-    const savedDocSpec = localStorage.getItem('doctorSpecialty') || "Ortoped-Travmatolog";
-    
-    document.getElementById('docNameDisplay').innerHTML = savedDocName + ` <i class="fa-solid fa-pen-to-square" style="font-size: 14px; opacity: 0.5;"></i>`;
-    document.getElementById('docSpecialtyDisplay').textContent = savedDocSpec;
+    document.getElementById('docNameDisplay').innerHTML = appSettings.doctor_name + ` <i class="fa-solid fa-pen-to-square" style="font-size: 14px; opacity: 0.5;"></i>`;
+    document.getElementById('docSpecialtyDisplay').textContent = appSettings.specialty;
 
     // Avatar Upload Logic
     const avatarContainer = document.getElementById('doctorAvatarContainer');
@@ -168,10 +190,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const file = e.target.files[0];
             if(file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = async function(e) {
                     const result = e.target.result;
                     document.getElementById('doctorAvatarImg').src = result;
-                    localStorage.setItem('doctorAvatar', result);
+                    appSettings.avatar = result;
+                    try {
+                        await fetch(`${apiUrlBase}/settings`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(appSettings)
+                        });
+                    } catch(err) {}
                 }
                 reader.readAsDataURL(file);
             }
@@ -202,14 +231,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if(openSettingsBtn) {
         openSettingsBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            // load current theme & lang & doc
-            const currentTheme = localStorage.getItem('theme') || 'light';
-            const currentLang = localStorage.getItem('lang') || 'uz';
-            document.getElementById('themeSelect').value = currentTheme;
-            document.getElementById('languageSelect').value = currentLang;
-            
-            document.getElementById('docNameInput').value = localStorage.getItem('doctorName') || "Dr. Alisher V.";
-            document.getElementById('docSpecialtyInput').value = localStorage.getItem('doctorSpecialty') || "Ortoped-Travmatolog";
+            document.getElementById('themeSelect').value = appSettings.theme || 'dark';
+            document.getElementById('languageSelect').value = appSettings.lang || 'uz';
+            document.getElementById('docNameInput').value = appSettings.doctor_name;
+            document.getElementById('docSpecialtyInput').value = appSettings.specialty;
             
             settingsModal.style.display = 'block';
         });
@@ -221,17 +246,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const saveSettingsBtn = document.getElementById('saveSettingsBtn');
     if(saveSettingsBtn) {
-        saveSettingsBtn.addEventListener('click', () => {
+        saveSettingsBtn.addEventListener('click', async () => {
              const theme = document.getElementById('themeSelect').value;
              const lang = document.getElementById('languageSelect').value;
-             
              const nName = document.getElementById('docNameInput').value;
              const nSpec = document.getElementById('docSpecialtyInput').value;
              
-             localStorage.setItem('theme', theme);
-             localStorage.setItem('lang', lang);
-             localStorage.setItem('doctorName', nName);
-             localStorage.setItem('doctorSpecialty', nSpec);
+             appSettings.theme = theme;
+             appSettings.lang = lang;
+             appSettings.doctor_name = nName;
+             appSettings.specialty = nSpec;
              
              document.getElementById('docNameDisplay').innerHTML = nName + ` <i class="fa-solid fa-pen-to-square" style="font-size: 14px; opacity: 0.5;"></i>`;
              document.getElementById('docSpecialtyDisplay').textContent = nSpec;
@@ -239,13 +263,23 @@ document.addEventListener('DOMContentLoaded', function() {
              applyTheme(theme);
              applyLanguage(lang);
              
+             try {
+                await fetch(`${apiUrlBase}/settings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(appSettings)
+                });
+             } catch(err) {
+                 console.error("Failed to save settings");
+             }
+             
              settingsModal.style.display = 'none';
         });
     }
 
     // Apply Theme & Lang on load
-    applyTheme(localStorage.getItem('theme') || 'light');
-    applyLanguage(localStorage.getItem('lang') || 'uz');
+    applyTheme(appSettings.theme || 'dark');
+    applyLanguage(appSettings.lang || 'uz');
 
     function applyLanguage(lang) {
         window.currentLang = lang;
@@ -599,6 +633,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     if(noteElem) {
                         noteElem.innerHTML = `<strong>${d.docNote}:</strong> ${noteHtml}`;
                     }
+
+                    // Save patient to database
+                    const today = new Date();
+                    const formattedDate = today.toLocaleDateString('ru-RU');
+                    const newPt = {
+                        name: patientFullName,
+                        age: ptAge,
+                        bmi: ptBmi,
+                        grade: data.prediction,
+                        date: formattedDate
+                    };
+                    
+                    try {
+                        let res = await fetch(`${apiUrlBase}/patients`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(newPt)
+                        });
+                        if (res.ok) {
+                            newPt.grade_text = gradeText;
+                            patientsDB.push(newPt);
+                            const countEl = document.getElementById('totalPatientsCount');
+                            if(countEl) countEl.textContent = patientsDB.length;
+                        }
+                    } catch(e) { console.error(e); }
                 }
                 
             } catch (error) {
