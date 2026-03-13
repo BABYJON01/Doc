@@ -16,6 +16,16 @@
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
+body.dark-mode {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border: #334155;
+    --primary-light: #1e3a8a;
+}
+
+
 * {
     margin: 0;
     padding: 0;
@@ -249,6 +259,12 @@ header {
 .btn.secondary:hover {
     background-color: var(--bg-color);
 }
+
+body.dark-mode .btn.secondary {
+    background-color: transparent;
+    color: var(--text-main);
+}
+
 
 /* Grid Layout for Cards */
 .content-grid {
