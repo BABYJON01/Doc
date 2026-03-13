@@ -275,9 +275,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function applyTheme(theme) {
         if(theme === 'dark') {
-            document.body.classList.add('dark-mode');
+            document.documentElement.setAttribute('data-theme', 'dark');
         } else {
-            document.body.classList.remove('dark-mode');
+            document.documentElement.removeAttribute('data-theme');
         }
     }
 
