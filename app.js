@@ -1,9 +1,114 @@
 document.addEventListener('DOMContentLoaded', function() {
     
-    // Load Stats
-    let totalPatients = localStorage.getItem('totalPatients') || 0;
+    // Load Stats and Database
+    let patientsDB = JSON.parse(localStorage.getItem('patientsDB')) || [];
+    let totalPatients = patientsDB.length;
+    
     const totalPatientsEl = document.getElementById('totalPatientsCount');
     if (totalPatientsEl) totalPatientsEl.textContent = totalPatients;
+
+    // Load Avatar
+    const savedAvatar = localStorage.getItem('doctorAvatar');
+    if(savedAvatar) {
+        document.getElementById('doctorAvatarImg').src = savedAvatar;
+    }
+
+    // Avatar Upload Logic
+    const avatarContainer = document.getElementById('doctorAvatarContainer');
+    const avatarInput = document.getElementById('doctorAvatarInput');
+    const avatarOverlay = document.getElementById('avatarOverlay');
+    
+    if(avatarContainer && avatarInput) {
+        avatarContainer.addEventListener('mouseenter', () => avatarOverlay.style.display = 'flex');
+        avatarContainer.addEventListener('mouseleave', () => avatarOverlay.style.display = 'none');
+        avatarContainer.addEventListener('click', () => avatarInput.click());
+
+        avatarInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const result = e.target.result;
+                    document.getElementById('doctorAvatarImg').src = result;
+                    localStorage.setItem('doctorAvatar', result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Modals Initialization
+    const dbModal = document.getElementById('databaseModal');
+    const settingsModal = document.getElementById('settingsModal');
+    
+    const openDbBtn = document.getElementById('openDatabaseBtn');
+    const openSettingsBtn = document.getElementById('openSettingsBtn');
+    
+    const closeDbBtn = document.getElementById('closeDatabaseModal');
+    const closeSettingsBtn = document.getElementById('closeSettingsModal');
+
+    // Database Modal Logic
+    if(openDbBtn) {
+        openDbBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            populatePatientsTable();
+            dbModal.style.display = 'block';
+        });
+    }
+    if(closeDbBtn) closeDbBtn.addEventListener('click', () => dbModal.style.display = 'none');
+
+    // Settings Modal Logic
+    if(openSettingsBtn) {
+        openSettingsBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            // load current theme
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            document.getElementById('themeSelect').value = currentTheme;
+            settingsModal.style.display = 'block';
+        });
+    }
+    if(closeSettingsBtn) closeSettingsBtn.addEventListener('click', () => settingsModal.style.display = 'none');
+
+    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+    if(saveSettingsBtn) {
+        saveSettingsBtn.addEventListener('click', () => {
+             const theme = document.getElementById('themeSelect').value;
+             localStorage.setItem('theme', theme);
+             applyTheme(theme);
+             settingsModal.style.display = 'none';
+        });
+    }
+
+    // Apply Theme on load
+    applyTheme(localStorage.getItem('theme') || 'light');
+
+    function applyTheme(theme) {
+        if(theme === 'dark') {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+    }
+
+    function populatePatientsTable() {
+        const tbody = document.getElementById('patientsTableBody');
+        if(!tbody) return;
+        tbody.innerHTML = '';
+        if(patientsDB.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 20px;">Bemorlar bazasi bo\'sh</td></tr>';
+            return;
+        }
+        // show latest first
+        [...patientsDB].reverse().forEach((pt) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="padding: 10px; border-bottom: 1px solid var(--border);">${pt.date}</td>
+                <td style="padding: 10px; border-bottom: 1px solid var(--border); font-weight: 500;">${pt.name}</td>
+                <td style="padding: 10px; border-bottom: 1px solid var(--border);"><span class="severity ${pt.grade > 1 ? 'medium':''}">${pt.grade_text}</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
 
     // PDF Export Logic
     const pdfBtn = document.getElementById('downloadPdfBtn');
@@ -156,10 +261,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Successful response
                 resultDiv.innerHTML = `<span style="color: var(--success);"><i class="fa-solid fa-check-circle"></i> Tahlil yakunlandi: <strong>${data.detail}</strong></span><br><span style="font-size: 12px; color: var(--text-muted);">(Model manbasi: ${data.has_torch ? 'PyTorch ResNet' : 'Demonstratsiya'})</span>`;
                 
-                // Increment Stats
+                // Increment Stats & Save
                 if (data.prediction !== -1) {
-                    totalPatients++;
-                    localStorage.setItem('totalPatients', totalPatients);
+                    const newPatient = {
+                         id: Date.now(),
+                         date: new Date().toLocaleDateString('uz-UZ'),
+                         name: patientFullName,
+                         grade: data.prediction,
+                         grade_text: `Grade ${data.prediction}`
+                    };
+                    patientsDB.push(newPatient);
+                    localStorage.setItem('patientsDB', JSON.stringify(patientsDB));
+                    
+                    totalPatients = patientsDB.length;
                     if(document.getElementById('totalPatientsCount')) {
                         document.getElementById('totalPatientsCount').textContent = totalPatients;
                     }
