@@ -21,10 +21,14 @@
             </div>
             
             <div class="patient-profile">
-                <div class="avatar">
-                    <img src="https://i.pravatar.cc/150?img=32" alt="Shifokor">
+                <div class="avatar" style="cursor: pointer; position: relative;" id="doctorAvatarContainer" title="Rasmni o'zgartirish">
+                    <img id="doctorAvatarImg" src="https://i.pravatar.cc/150?img=32" alt="Shifokor">
                     <div class="status-dot"></div>
+                    <div style="position: absolute; top:0; left:0; right:0; bottom:0; border-radius: 50%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; color: white;" id="avatarOverlay">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
                 </div>
+                <input type="file" id="doctorAvatarInput" accept="image/*" style="display: none;">
                 <h3 style="display: flex; align-items: center; justify-content: center; gap: 8px;">Dr. Alisher V.</h3>
                 <p style="margin-bottom: 12px; font-size: 14px; color: var(--text-muted);">Ortoped-Travmatolog</p>
                 <div class="bmi-badge success" style="padding: 6px 16px; border-radius: 20px;">Shaxsiy Kabinet</div>
@@ -32,8 +36,8 @@
 
             <nav class="menu">
                 <a href="#" class="active"><i class="fa-solid fa-chart-pie"></i> Yangi Tahlil</a>
-                <a href="#"><i class="fa-solid fa-users"></i> Bemorlar Bazasi</a>
-                <a href="#"><i class="fa-solid fa-gear"></i> Sozlamalar</a>
+                <a href="#" id="openDatabaseBtn"><i class="fa-solid fa-users"></i> Bemorlar Bazasi</a>
+                <a href="#" id="openSettingsBtn"><i class="fa-solid fa-gear"></i> Sozlamalar</a>
             </nav>
 
             <div class="platform-stats" style="margin-top: 24px; padding: 16px; background-color: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);">
@@ -188,6 +192,57 @@
         </main>
     </div>
 
+    <!-- Patient Database Modal -->
+    <div id="databaseModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-users"></i> Bemorlar Bazasi</h2>
+                <span class="close-modal" id="closeDatabaseModal">&times;</span>
+            </div>
+            <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;" id="patientsTable">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--border);">
+                            <th style="padding: 10px;">ID / Sana</th>
+                            <th style="padding: 10px;">Bemor Ismi</th>
+                            <th style="padding: 10px;">Tashxis (Grade)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientsTableBody">
+                        <!-- Filled dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-gear"></i> Sozlamalar</h2>
+                <span class="close-modal" id="closeSettingsModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Mavzu (Theme):</label>
+                    <select id="themeSelect" class="form-control">
+                        <option value="light">Yorug' (Light)</option>
+                        <option value="dark">Qorong'u (Dark)</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Til (Language):</label>
+                    <select id="languageSelect" class="form-control">
+                        <option value="uz">O'zbek tili</option>
+                        <option value="ru">Русский</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+                <button id="saveSettingsBtn" class="btn primary" style="width: 100%; justify-content: center; margin-top: 16px;">Saqlash</button>
+            </div>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>
