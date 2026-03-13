@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Antigraviti | Tizza Bo'g'imi Tahlili</title>
+    <title>Docassist | Tizza Bo'g'imi Tahlili</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -15,26 +16,33 @@
         <aside class="sidebar">
             <div class="logo">
                 <i class="fa-solid fa-bone"></i>
-                <h2>Antigraviti</h2>
+                <h2>Docassist</h2>
                 <span class="badge">Ekspert Tizim</span>
             </div>
             
             <div class="patient-profile">
                 <div class="avatar">
-                    <img src="https://i.pravatar.cc/150?img=11" alt="Bemor">
+                    <img src="https://i.pravatar.cc/150?img=32" alt="Shifokor">
                     <div class="status-dot"></div>
                 </div>
-                <h3 style="display: flex; align-items: center; justify-content: center; gap: 8px;">Bemor: #84920-UZ <i id="editProfileBtn" class="fa-solid fa-pen" style="color: var(--primary); font-size: 16px; cursor: pointer;" title="O'zgartirish"></i></h3>
-                <p id="patientAgeDisplay" style="margin-bottom: 8px;">Yoshi: <span id="valAge">54</span> yosh</p>
-                <div id="patientBmiDisplay" class="bmi-badge danger" style="padding: 6px 16px; border-radius: 20px;">BMI: <span id="valBmi">32.4</span> (<span id="valBmiText">I darajali semizlik</span>)</div>
+                <h3 style="display: flex; align-items: center; justify-content: center; gap: 8px;">Dr. Alisher V.</h3>
+                <p style="margin-bottom: 12px; font-size: 14px; color: var(--text-muted);">Ortoped-Travmatolog</p>
+                <div class="bmi-badge success" style="padding: 6px 16px; border-radius: 20px;">Shaxsiy Kabinet</div>
             </div>
 
             <nav class="menu">
-                <a href="#" class="active"><i class="fa-solid fa-chart-pie"></i> Diagnostik Xulosa</a>
-                <a href="#"><i class="fa-solid fa-clock-rotate-left"></i> Dinamika Tarixi</a>
-                <a href="#"><i class="fa-solid fa-user-doctor"></i> Shifokor Eslatmasi</a>
+                <a href="#" class="active"><i class="fa-solid fa-chart-pie"></i> Yangi Tahlil</a>
+                <a href="#"><i class="fa-solid fa-users"></i> Bemorlar Bazasi</a>
                 <a href="#"><i class="fa-solid fa-gear"></i> Sozlamalar</a>
             </nav>
+
+            <div class="platform-stats" style="margin-top: 24px; padding: 16px; background-color: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);">
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">Barcha xizmat ko'rsatilganlar</p>
+                <h2 style="font-size: 28px; color: var(--primary); display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-user-group"></i> <span id="totalPatientsCount">0</span>
+                </h2>
+            </div>
+
 
             <div class="auth-status">
                 <i class="fa-solid fa-shield-halved"></i>
@@ -53,26 +61,47 @@
                     <p>Sun'iy intellekt (Fuzzy Logic) va tasvir diagnostikasi asosida</p>
                 </div>
                 <div class="actions">
-                    <button class="btn secondary"><i class="fa-solid fa-download"></i> PDF yuklash</button>
-                    <button class="btn primary"><i class="fa-solid fa-share-nodes"></i> Shifokorga yuborish</button>
+                    <button id="downloadPdfBtn" class="btn secondary"><i class="fa-solid fa-download"></i> PDF shaklida yuklab olish</button>
+                    <button class="btn primary"><i class="fa-solid fa-share-nodes"></i> Yuborish</button>
                 </div>
             </header>
 
             <div class="content-grid">
                 <!-- Upload X-Ray Card -->
-                <div class="card upload-card full-width" style="text-align: center; border-left: 4px solid var(--primary);">
+                <div class="card upload-card full-width" style="border-left: 4px solid var(--primary);">
                     <div class="card-body">
-                        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 32px; color: var(--primary); margin-bottom: 12px;"></i>
-                        <h3 style="margin-bottom: 12px;">Yangi Tasvir Yuklash (Rentgen / MRT)</h3>
-                        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 14px;">Kellgren-Lawrence darajasini AI orqali aniqlash uchun tasvirni yuklang.</p>
+                        <h3><i class="fa-solid fa-user-plus"></i> Yangi Bemor Ma'lumotlari</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 14px;">Bemor ro'yxatga olish va MRT/Rentgen tasvirini yuklash orqali tahlilni boshlang.</p>
                         
-                        <input type="file" id="xrayUpload" accept="image/*" style="display: none;">
-                        <button class="btn primary" style="margin: 0 auto;" onclick="document.getElementById('xrayUpload').click()">
-                            <i class="fa-solid fa-camera"></i> Tasvir Tanlash
-                        </button>
-                        
-                        <div id="uploadResult" style="margin-top: 20px; font-size: 15px; font-weight: 500;"></div>
-                        <img id="imagePreview" style="max-width: 100%; max-height: 250px; margin: 20px auto 0; border-radius: 8px; box-shadow: var(--shadow-md); display: none;">
+                        <div class="patient-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; text-align: left;">
+                            <div class="form-group">
+                                <label>Ism:</label>
+                                <input type="text" id="patientFirstName" class="form-control" placeholder="Bemor ismi">
+                            </div>
+                            <div class="form-group">
+                                <label>Familiya:</label>
+                                <input type="text" id="patientLastName" class="form-control" placeholder="Bemor familiyasi">
+                            </div>
+                            <div class="form-group">
+                                <label>Yoshi:</label>
+                                <input type="number" id="patientAgeInput" class="form-control" value="54">
+                            </div>
+                            <div class="form-group">
+                                <label>BMI (Tana vazni indeksi):</label>
+                                <input type="number" step="0.1" id="patientBmiInput" class="form-control" value="32.4">
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; padding: 20px; border: 2px dashed var(--border); border-radius: 8px;">
+                            <i class="fa-solid fa-cloud-arrow-up" style="font-size: 32px; color: var(--primary); margin-bottom: 12px;"></i>
+                            <h4 style="margin-bottom: 12px;">Tasvir Yuklash (Rentgen / MRT)</h4>
+                            <input type="file" id="xrayUpload" accept="image/*" style="display: none;">
+                            <button class="btn primary" style="margin: 0 auto;" onclick="document.getElementById('xrayUpload').click()">
+                                <i class="fa-solid fa-camera"></i> Tasvir Tanlash
+                            </button>
+                            <div id="uploadResult" style="margin-top: 20px; font-size: 15px; font-weight: 500;"></div>
+                            <img id="imagePreview" style="max-width: 100%; max-height: 250px; margin: 20px auto 0; border-radius: 8px; box-shadow: var(--shadow-md); display: none;">
+                        </div>
                     </div>
                 </div>
 
@@ -144,8 +173,8 @@
                         <h3>Mutaxassis uchun Eslatma</h3>
                     </div>
                     <div class="card-body">
-                        <code>
-                            Gonartroz Dextra (Bemor shartli ma'lumotlari yuklandi). Tizimli tahlil natijasini kutish rejimiga o'tildi...
+                        <code id="doctorNoteText">
+                            Doktor xulosasi: Tizimli tahlil natijasini kutish rejimiga o'tildi...
                         </code>
                     </div>
                 </div>
@@ -159,26 +188,6 @@
         </main>
     </div>
 
-    <!-- Edit Profile Modal -->
-    <div id="profileModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Bemor profilini qanday o'zgartirish</h2>
-                <span class="close-modal">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Yoshi:</label>
-                    <input type="number" id="inputAge" value="54" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>BMI (Tana vazni indeksi):</label>
-                    <input type="number" step="0.1" id="inputBmi" value="32.4" class="form-control">
-                </div>
-                <button id="saveProfileBtn" class="btn primary" style="width: 100%; justify-content: center; margin-top: 16px;">Saqlash</button>
-            </div>
-        </div>
-    </div>
 
     <script src="app.js"></script>
 </body>
