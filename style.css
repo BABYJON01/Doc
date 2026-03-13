@@ -16,7 +16,7 @@
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
-body.dark-mode {
+[data-theme="dark"] {
     --bg-color: #0f172a;
     --card-bg: #1e293b;
     --text-main: #f8fafc;
@@ -153,12 +153,12 @@ body {
     color: #166534;
 }
 
-body.dark-mode .bmi-badge.warning {
+[data-theme="dark"] .bmi-badge.warning {
     background-color: rgba(245, 158, 11, 0.2);
     color: #fcd34d;
 }
 
-body.dark-mode .bmi-badge.success {
+[data-theme="dark"] .bmi-badge.success {
     background-color: rgba(16, 185, 129, 0.2);
     color: #6ee7b7;
 }
@@ -197,7 +197,7 @@ body.dark-mode .bmi-badge.success {
     border: 1px solid #bbf7d0;
 }
 
-body.dark-mode .auth-status {
+[data-theme="dark"] .auth-status {
     background-color: rgba(16, 185, 129, 0.1);
     border: 1px solid rgba(16, 185, 129, 0.3);
 }
@@ -212,7 +212,7 @@ body.dark-mode .auth-status {
     color: #166534;
 }
 
-body.dark-mode .auth-status h4 {
+[data-theme="dark"] .auth-status h4 {
     color: #6ee7b7;
 }
 
@@ -221,7 +221,7 @@ body.dark-mode .auth-status h4 {
     color: #15803d;
 }
 
-body.dark-mode .auth-status p {
+[data-theme="dark"] .auth-status p {
     color: #a7f3d0;
 }
 
@@ -289,7 +289,7 @@ header {
     background-color: var(--bg-color);
 }
 
-body.dark-mode .btn.secondary {
+[data-theme="dark"] .btn.secondary {
     background-color: transparent;
     color: var(--text-main);
 }
@@ -364,17 +364,17 @@ body.dark-mode .btn.secondary {
     color: #991b1b;
 }
 
-body.dark-mode .severity.success {
+[data-theme="dark"] .severity.success {
     background-color: rgba(16, 185, 129, 0.2);
     color: #6ee7b7;
 }
 
-body.dark-mode .severity.medium {
+[data-theme="dark"] .severity.medium {
     background-color: rgba(245, 158, 11, 0.2);
     color: #fcd34d;
 }
 
-body.dark-mode .severity.danger {
+[data-theme="dark"] .severity.danger {
     background-color: rgba(239, 68, 68, 0.2);
     color: #fca5a5;
 }
@@ -435,7 +435,7 @@ body.dark-mode .severity.danger {
     color: #b91c1c;
 }
 
-body.dark-mode .trend-indicator.negative {
+[data-theme="dark"] .trend-indicator.negative {
     background-color: rgba(239, 68, 68, 0.2);
     color: #fca5a5;
 }
@@ -522,7 +522,7 @@ body.dark-mode .trend-indicator.negative {
     line-height: 1.6;
 }
 
-body.dark-mode .doctor-note code {
+[data-theme="dark"] .doctor-note code {
     background-color: #0f172a;
 }
 
@@ -650,7 +650,7 @@ body.dark-mode .doctor-note code {
     box-shadow: 0 0 0 3px var(--primary-light);
 }
 
-body.dark-mode .form-control {
+[data-theme="dark"] .form-control {
     background-color: var(--bg-color);
 }
 
