@@ -2,8 +2,81 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 import random
 import time
+import sqlite3
+from pydantic import BaseModel
+import os
 
 app = FastAPI()
+
+DB_PATH = "docassist.db"
+
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS patients
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, age INTEGER, bmi REAL, grade INTEGER, date TEXT)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS settings
+                 (id INTEGER PRIMARY KEY, doctor_name TEXT, specialty TEXT, theme TEXT, lang TEXT, avatar TEXT)''')
+    # Default settings row
+    c.execute('INSERT OR IGNORE INTO settings (id, doctor_name, specialty, theme, lang, avatar) VALUES (1, "Dr. Alisher V.", "Ortoped-Travmatolog", "light", "uz", "")')
+    conn.commit()
+    conn.close()
+
+init_db()
+
+class PatientModel(BaseModel):
+    name: str
+    age: int
+    bmi: float
+    grade: int
+    date: str
+
+class SettingsModel(BaseModel):
+    doctor_name: str
+    specialty: str
+    theme: str
+    lang: str
+    avatar: str
+
+@app.get("/api/patients")
+def get_patients():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT id, name, age, bmi, grade, date FROM patients ORDER BY id DESC")
+    rows = c.fetchall()
+    conn.close()
+    return [{"id": r[0], "name": r[1], "age": r[2], "bmi": r[3], "grade": r[4], "date": r[5]} for r in rows]
+
+@app.post("/api/patients")
+def add_patient(pt: PatientModel):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("INSERT INTO patients (name, age, bmi, grade, date) VALUES (?, ?, ?, ?, ?)",
+              (pt.name, pt.age, pt.bmi, pt.grade, pt.date))
+    conn.commit()
+    conn.close()
+    return {"status": "ok"}
+
+@app.get("/api/settings")
+def get_settings():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT doctor_name, specialty, theme, lang, avatar FROM settings WHERE id=1")
+    row = c.fetchone()
+    conn.close()
+    if row:
+        return {"doctor_name": row[0], "specialty": row[1], "theme": row[2], "lang": row[3], "avatar": row[4]}
+    return {}
+
+@app.post("/api/settings")
+def update_settings(s: SettingsModel):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("UPDATE settings SET doctor_name=?, specialty=?, theme=?, lang=?, avatar=? WHERE id=1",
+              (s.doctor_name, s.specialty, s.theme, s.lang, s.avatar))
+    conn.commit()
+    conn.close()
+    return {"status": "ok"}
 
 app.add_middleware(
     CORSMiddleware,
@@ -37,8 +110,8 @@ except ImportError:
 
 @app.post("/predict")
 async def predict_osteoarthritis(file: UploadFile = File(...)):
-    # Simulate AI processing delay
-    time.sleep(2)
+    # Simulate AI processing delay (reduced for speed)
+    time.sleep(0.5)
     
     if HAS_TORCH:
         try:
