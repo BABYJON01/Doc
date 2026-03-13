@@ -458,9 +458,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.prediction === -1) {
                     resultDiv.innerHTML = `<span style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> <strong>${d.errorInvalid}</strong></span>`;
                     document.querySelector('.diagnosis-card .severity').textContent = d.errorInvalid;
-                    document.querySelector('.diagnosis-card .severity').className = 'severity';
-                    document.querySelector('.diagnosis-card .severity').style.backgroundColor = '#theme-dependent-overriden-later';
-                    document.querySelector('.diagnosis-card .severity').style.color = '#991b1b';
+                    document.querySelector('.diagnosis-card .severity').className = 'severity danger';
                     document.getElementById('klGradeText').textContent = "---";
                     document.querySelector('.diagnosis-card .description').innerHTML = `<strong>${d.systemConclusion}</strong> ${d.errorImgNotFound}`;
                 } else {
@@ -477,8 +475,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     if(data.prediction === 0) {
                         gradeText = d.gr0;
                         document.querySelector('.diagnosis-card .severity').className = 'severity success';
-                        document.querySelector('.diagnosis-card .severity').style.backgroundColor = '#dcfce7';
-                        document.querySelector('.diagnosis-card .severity').style.color = '#166534';
                         
                         fuzzyHtml = `<b>${patientFullName}</b> (${ptAge}) BMI: <b>${ptBmi}</b>. ${window.currentLang === 'en' ? 'No physiological changes found, joint is completely healthy.' : (window.currentLang === 'ru' ? 'Физиологических изменений не выявлено, сустав полностью здоров.' : 'Hozirgi vaqtda yoshga xos bo‘g‘im to\'liq sog\'lom.')}`;
                         noteHtml = window.currentLang === 'en' ? `Patient evaluated. Pathology not detected.` : (window.currentLang === 'ru' ? 'Осмотр проведен. Патологий не выявлено.' : `Bemor ko'rigi o'tkazildi. Patologiya aniqlanmadi.`);
@@ -498,9 +494,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         `;
                     } else if(data.prediction === 1) {
                         gradeText = d.gr1;
-                        document.querySelector('.diagnosis-card .severity').className = 'severity';
-                        document.querySelector('.diagnosis-card .severity').style.backgroundColor = '#fef3c7';
-                        document.querySelector('.diagnosis-card .severity').style.color = '#b45309';
+                        document.querySelector('.diagnosis-card .severity').className = 'severity medium';
 
                         fuzzyHtml = `<b>${patientFullName}</b> (${ptAge}) BMI: <b>${ptBmi}</b>. ${window.currentLang === 'en' ? 'Early signs of sclerosis. Prognosis is positive.' : (window.currentLang === 'ru' ? 'Ранние признаки склероза. Прогноз положительный.' : 'Subxondral sklerozning dastlabki belgilari. Muvaffaqiyatli qaytarish mumkin.')}`;
                         noteHtml = window.currentLang === 'en' ? `Mild load correction assigned.` : (window.currentLang === 'ru' ? 'Назначена коррекция веса.' : `Ortiqcha vaznni korreksiya qilish va xondroprotektorlar buyurildi.`);
@@ -560,9 +554,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         `;
                     } else if(data.prediction === 4) {
                         gradeText = d.gr4;
-                        document.querySelector('.diagnosis-card .severity').className = 'severity';
-                        document.querySelector('.diagnosis-card .severity').style.backgroundColor = '#fee2e2';
-                        document.querySelector('.diagnosis-card .severity').style.color = '#991b1b';
+                        document.querySelector('.diagnosis-card .severity').className = 'severity danger';
 
                         fuzzyHtml = `<b>${patientFullName}</b> (${ptAge}) BMI: ${ptBmi}. ${window.currentLang === 'en' ? 'Severe stage. Full cartilage loss and deformation risk.' : (window.currentLang === 'ru' ? 'Тяжелая степень. Полное закрытие хряща.' : 'To\'liq tog\'ay yopilishi (deformatsiya va ankiloz xavfi) qayd etildi. Vaziyat juda og\'ir.')}`;
                         noteHtml = window.currentLang === 'en' ? `Surgery recommended: Total Knee Arthroplasty.` : (window.currentLang === 'ru' ? 'Рекомендована операция: Эндопротезирование.' : `Konservativ choralar qolmadi. Total Tizza Artroplastika (Endoprotezlash) rejalashtirildi.`);
