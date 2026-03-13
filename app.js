@@ -1,3 +1,78 @@
+const translations = {
+    uz: {
+        newAnalysis: "Yangi Tahlil",
+        database: "Bemorlar Bazasi",
+        settings: "Sozlamalar",
+        totalPatients: "Barcha xizmat ko'rsatilganlar",
+        uploadTitle: "Yangi Bemor Ma'lumotlari",
+        uploadDesc: "Bemor ro'yxatga olish va MRT/Rentgen tasvirini yuklash orqali tahlilni boshlang.",
+        firstName: "Ism:",
+        lastName: "Familiya:",
+        age: "Yoshi:",
+        bmiTitle: "BMI (Tana vazni indeksi):",
+        chooseImage: "Tasvir Tanlash",
+        analysisResult: "Diagnostik Xulosa",
+        pending: "Kutilyapti...",
+        systemConclusion: "Tizim xulosasi:",
+        pendingAnalysisText: "Tahlilni boshlash uchun avval tepadan tasvir yuklang.",
+        chartTitle: "Bo'g'im Tirqishi Dinamikasi",
+        recomTitle: "Tavsiya va Rejim",
+        allowed: "Mumkin",
+        forbidden: "Taqiqlangan",
+        docNote: "Mutaxassis uchun Eslatma",
+        pdfBtn: "PDF shaklida yuklab olish",
+        shareBtn: "Yuborish"
+    },
+    ru: {
+        newAnalysis: "Новый Анализ",
+        database: "База Пациентов",
+        settings: "Настройки",
+        totalPatients: "Всего обслужено пациентов",
+        uploadTitle: "Данные Нового Пациента",
+        uploadDesc: "Зарегистрируйте пациента и загрузите МРТ/Рентген снимок для начала анализа.",
+        firstName: "Имя:",
+        lastName: "Фамилия:",
+        age: "Возраст:",
+        bmiTitle: "ИМТ (Индекс массы тела):",
+        chooseImage: "Выбрать снимок",
+        analysisResult: "Диагностическое Заключение",
+        pending: "Ожидание...",
+        systemConclusion: "Заключение системы:",
+        pendingAnalysisText: "Загрузите изображение сверху, чтобы начать анализ.",
+        chartTitle: "Динамика суставной щели",
+        recomTitle: "Рекомендации и Режим",
+        allowed: "Разрешено",
+        forbidden: "Запрещено",
+        docNote: "Заметка для специалиста",
+        pdfBtn: "Скачать в формате PDF",
+        shareBtn: "Поделиться"
+    },
+    en: {
+        newAnalysis: "New Analysis",
+        database: "Patient Database",
+        settings: "Settings",
+        totalPatients: "Total patients served",
+        uploadTitle: "New Patient Details",
+        uploadDesc: "Register a patient and upload an MRI/X-Ray image to begin analysis.",
+        firstName: "First Name:",
+        lastName: "Last Name:",
+        age: "Age:",
+        bmiTitle: "BMI (Body Mass Index):",
+        chooseImage: "Choose Image",
+        analysisResult: "Diagnostic Conclusion",
+        pending: "Pending...",
+        systemConclusion: "System Conclusion:",
+        pendingAnalysisText: "Upload an image from above to start the analysis.",
+        chartTitle: "Joint Space Dynamics",
+        recomTitle: "Recommendations & Regime",
+        allowed: "Allowed",
+        forbidden: "Forbidden",
+        docNote: "Specialist Note",
+        pdfBtn: "Download as PDF",
+        shareBtn: "Share"
+    }
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     
     // Load Stats and Database
@@ -61,9 +136,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if(openSettingsBtn) {
         openSettingsBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            // load current theme
+            // load current theme & lang
             const currentTheme = localStorage.getItem('theme') || 'light';
+            const currentLang = localStorage.getItem('lang') || 'uz';
             document.getElementById('themeSelect').value = currentTheme;
+            document.getElementById('languageSelect').value = currentLang;
             settingsModal.style.display = 'block';
         });
     }
@@ -73,14 +150,46 @@ document.addEventListener('DOMContentLoaded', function() {
     if(saveSettingsBtn) {
         saveSettingsBtn.addEventListener('click', () => {
              const theme = document.getElementById('themeSelect').value;
+             const lang = document.getElementById('languageSelect').value;
+             
              localStorage.setItem('theme', theme);
+             localStorage.setItem('lang', lang);
+             
              applyTheme(theme);
+             applyLanguage(lang);
+             
              settingsModal.style.display = 'none';
         });
     }
 
-    // Apply Theme on load
+    // Apply Theme & Lang on load
     applyTheme(localStorage.getItem('theme') || 'light');
+    applyLanguage(localStorage.getItem('lang') || 'uz');
+
+    function applyLanguage(lang) {
+        const dict = translations[lang] || translations['uz'];
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if(dict[key]) {
+                // If it contains icons, only replace text nodes to preserve icons safely
+                // For simplicity here, if the element innerHTML has an <i> tag, we do innerHTML interpolation
+                if (el.innerHTML.includes('<i')) {
+                    const iconRegex = /(<i class=".*?"(?:><\/i>| \/>|>.*?<\/i>))/g;
+                    const matches = el.innerHTML.match(iconRegex);
+                    const iconStr = matches ? matches.join(' ') : '';
+                    el.innerHTML = `${iconStr} ${dict[key]}`;
+                } else {
+                    el.textContent = dict[key];
+                }
+            }
+        });
+        
+        // Update placeholders
+        const fnameInput = document.getElementById('patientFirstName');
+        const lnameInput = document.getElementById('patientLastName');
+        if(fnameInput) fnameInput.placeholder = lang === 'en' ? 'First Name' : (lang === 'ru' ? 'Имя' : 'Bemor ismi');
+        if(lnameInput) lnameInput.placeholder = lang === 'en' ? 'Last Name' : (lang === 'ru' ? 'Фамилия' : 'Bemor familiyasi');
+    }
 
     function applyTheme(theme) {
         if(theme === 'dark') {
