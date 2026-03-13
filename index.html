@@ -29,9 +29,9 @@
                     </div>
                 </div>
                 <input type="file" id="doctorAvatarInput" accept="image/*" style="display: none;">
-                <h3 style="display: flex; align-items: center; justify-content: center; gap: 8px;">Dr. Alisher V.</h3>
-                <p style="margin-bottom: 12px; font-size: 14px; color: var(--text-muted);">Ortoped-Travmatolog</p>
-                <div class="bmi-badge success" style="padding: 6px 16px; border-radius: 20px;">Shaxsiy Kabinet</div>
+                <h3 id="docNameDisplay" style="display: flex; align-items: center; justify-content: center; gap: 8px;">Dr. Alisher V.</h3>
+                <p id="docSpecialtyDisplay" style="margin-bottom: 12px; font-size: 14px; color: var(--text-muted);">Ortoped-Travmatolog</p>
+                <div class="bmi-badge success" data-i18n="personalCabinet" style="padding: 6px 16px; border-radius: 20px;">Shaxsiy Kabinet</div>
             </div>
 
             <nav class="menu">
@@ -61,8 +61,8 @@
         <main class="main-content">
             <header>
                 <div class="header-title">
-                    <h1>Tahlil Natijalari</h1>
-                    <p>Sun'iy intellekt (Fuzzy Logic) va tasvir diagnostikasi asosida</p>
+                    <h1 data-i18n="resultsTitle">Tahlil Natijalari</h1>
+                    <p data-i18n="resultsSubtitle">Sun'iy intellekt (Fuzzy Logic) va tasvir diagnostikasi asosida</p>
                 </div>
                 <div class="actions">
                     <button id="downloadPdfBtn" class="btn secondary" data-i18n="pdfBtn"><i class="fa-solid fa-download"></i> PDF shaklida yuklab olish</button>
@@ -119,8 +119,8 @@
                         <p class="description"><strong data-i18n="systemConclusion">Tizim xulosasi:</strong> <span data-i18n="pendingAnalysisText">Tahlilni boshlash uchun avval tepadan tasvir yuklang.</span></p>
                         
                         <div class="clinical-analysis">
-                            <h4><i class="fa-solid fa-brain"></i> AI Klinik Tahlili (Fuzzy Logic)</h4>
-                            <p>Bemorning yoshi (54), BMI ko‘rsatkichi (32.4) va bo‘g‘im tirqishi holati tahlil qilindi. <br><i>(To'liq ishlash uchun model natijasi kutilmoqda...)</i></p>
+                            <h4><i class="fa-solid fa-brain"></i> <span data-i18n="fuzzyLogicTitle">AI Klinik Tahlili (Fuzzy Logic)</span></h4>
+                            <p data-i18n="fuzzyLogicPending">Bemorning parametrlari bo'yicha batafsil xulosa tayyorlanmoqda...</p>
                         </div>
                     </div>
                 </div>
@@ -201,9 +201,9 @@
                 <table style="width: 100%; border-collapse: collapse; text-align: left;" id="patientsTable">
                     <thead>
                         <tr style="border-bottom: 2px solid var(--border);">
-                            <th style="padding: 10px;">ID / Sana</th>
-                            <th style="padding: 10px;">Bemor Ismi</th>
-                            <th style="padding: 10px;">Tashxis (Grade)</th>
+                            <th data-i18n="idDate" style="padding: 10px;">ID / Sana</th>
+                            <th data-i18n="patientNameCol" style="padding: 10px;">Bemor Ismi</th>
+                            <th data-i18n="diagnosisCol" style="padding: 10px;">Tashxis (Grade)</th>
                         </tr>
                     </thead>
                     <tbody id="patientsTableBody">
@@ -222,22 +222,27 @@
                 <span class="close-modal" id="closeSettingsModal">&times;</span>
             </div>
             <div class="modal-body">
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label data-i18n="docSettingsTitle">Shifokor Ma'lumotlari:</label>
+                    <input type="text" id="docNameInput" class="form-control" placeholder="Dr. Ism Familiya" style="margin-bottom: 10px;">
+                    <input type="text" id="docSpecialtyInput" class="form-control" placeholder="Mutaxassislik (Masalan: Ortoped)">
+                </div>
                 <div class="form-group">
-                    <label>Mavzu (Theme):</label>
+                    <label data-i18n="themeTitle">Mavzu (Theme):</label>
                     <select id="themeSelect" class="form-control">
                         <option value="light">Yorug' (Light)</option>
                         <option value="dark">Qorong'u (Dark)</option>
                     </select>
                 </div>
                 <div class="form-group" style="margin-top: 20px;">
-                    <label>Til (Language):</label>
+                    <label data-i18n="langTitle">Til (Language):</label>
                     <select id="languageSelect" class="form-control">
                         <option value="uz">O'zbek tili</option>
                         <option value="ru">Русский</option>
                         <option value="en">English</option>
                     </select>
                 </div>
-                <button id="saveSettingsBtn" class="btn primary" style="width: 100%; justify-content: center; margin-top: 16px;">Saqlash</button>
+                <button id="saveSettingsBtn" class="btn primary" style="width: 100%; justify-content: center; margin-top: 16px;" data-i18n="saveBtn">Saqlash</button>
             </div>
         </div>
     </div>
