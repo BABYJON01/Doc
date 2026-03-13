@@ -1,54 +1,33 @@
 document.addEventListener('DOMContentLoaded', function() {
     
-    let currentAge = 54;
-    let currentBmi = 32.4;
-    
-    // UI Setup for Patient Modal
-    const modal = document.getElementById("profileModal");
-    const editBtn = document.getElementById("editProfileBtn");
-    const closeBtn = document.querySelector(".close-modal");
-    const saveBtn = document.getElementById("saveProfileBtn");
+    // Load Stats
+    let totalPatients = localStorage.getItem('totalPatients') || 0;
+    const totalPatientsEl = document.getElementById('totalPatientsCount');
+    if (totalPatientsEl) totalPatientsEl.textContent = totalPatients;
 
-    if (editBtn) {
-        editBtn.onclick = function() {
-            document.getElementById("inputAge").value = currentAge;
-            document.getElementById("inputBmi").value = currentBmi;
-            modal.style.display = "block";
-        }
-    }
+    // PDF Export Logic
+    const pdfBtn = document.getElementById('downloadPdfBtn');
+    if (pdfBtn) {
+        pdfBtn.addEventListener('click', () => {
+             const element = document.querySelector('.content-grid');
+             const fName = document.getElementById('patientFirstName').value || "Bemor";
+             const lName = document.getElementById('patientLastName').value || "";
+             const opt = {
+                 margin: [10, 10, 10, 10],
+                 filename: `Docassist_Xulosa_${fName}_${lName}.pdf`.trim(),
+                 image: { type: 'jpeg', quality: 0.98 },
+                 html2canvas: { scale: 2, useCORS: true },
+                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+             };
+             
+             // Temporarily hide upload button and PDF elements for clean print
+             const uploadCard = document.querySelector('.upload-card');
+             if(uploadCard) uploadCard.style.display = 'none';
 
-    if (closeBtn) {
-        closeBtn.onclick = function() {
-            modal.style.display = "none";
-        }
-    }
-
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-
-    if (saveBtn) {
-        saveBtn.onclick = function() {
-            currentAge = document.getElementById("inputAge").value;
-            currentBmi = parseFloat(document.getElementById("inputBmi").value);
-            
-            let bmiText = "";
-            let bmiClass = "";
-            if(currentBmi < 18.5) { bmiText = "Vazn yetishmovchiligi"; bmiClass = "bmi-badge warning"; }
-            else if(currentBmi < 25) { bmiText = "Normal vazn"; bmiClass = "bmi-badge success"; }
-            else if(currentBmi < 30) { bmiText = "Ortiqcha vazn"; bmiClass = "bmi-badge warning"; }
-            else if(currentBmi < 35) { bmiText = "I darajali semizlik"; bmiClass = "bmi-badge danger"; }
-            else { bmiText = "II-III darajali semizlik"; bmiClass = "bmi-badge danger"; }
-
-            document.getElementById("valAge").textContent = currentAge;
-            document.getElementById("valBmi").textContent = currentBmi.toFixed(1);
-            document.getElementById("valBmiText").textContent = bmiText;
-            document.getElementById("patientBmiDisplay").className = bmiClass;
-
-            modal.style.display = "none";
-        }
+             html2pdf().from(element).set(opt).save().then(() => {
+                 if(uploadCard) uploadCard.style.display = 'block';
+             });
+        });
     }
 
     // Data for Dynamics Chart
@@ -145,6 +124,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             reader.readAsDataURL(file);
 
+            // Collect Patient Info directly from form
+            const fName = document.getElementById('patientFirstName').value || "Noma'lum";
+            const lName = document.getElementById('patientLastName').value || "Bemor";
+            const patientFullName = `${fName} ${lName}`;
+            const ptAge = parseInt(document.getElementById('patientAgeInput').value) || 54;
+            const ptBmi = parseFloat(document.getElementById('patientBmiInput').value) || 32.4;
+
             const resultDiv = document.getElementById('uploadResult');
             resultDiv.innerHTML = '<span style="color: var(--warning)"><i class="fa-solid fa-spinner fa-spin"></i> AI tasvirni tahlil qilmoqda...</span>';
             
@@ -170,6 +156,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Successful response
                 resultDiv.innerHTML = `<span style="color: var(--success);"><i class="fa-solid fa-check-circle"></i> Tahlil yakunlandi: <strong>${data.detail}</strong></span><br><span style="font-size: 12px; color: var(--text-muted);">(Model manbasi: ${data.has_torch ? 'PyTorch ResNet' : 'Demonstratsiya'})</span>`;
                 
+                // Increment Stats
+                if (data.prediction !== -1) {
+                    totalPatients++;
+                    localStorage.setItem('totalPatients', totalPatients);
+                    if(document.getElementById('totalPatientsCount')) {
+                        document.getElementById('totalPatientsCount').textContent = totalPatients;
+                    }
+                }
+
                 // Update Dashboard Dynamically
                 if (data.prediction === -1) {
                     resultDiv.innerHTML = `<span style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> <strong>${data.detail}</strong></span>`;
@@ -178,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.querySelector('.diagnosis-card .severity').style.backgroundColor = '#fee2e2';
                     document.querySelector('.diagnosis-card .severity').style.color = '#991b1b';
                     document.getElementById('klGradeText').textContent = "Aniqlanmadi";
-                    document.querySelector('.diagnosis-card .description').innerHTML = `<strong>Tizim xulosasi:</strong> Yuklangan faylda shifokor uchun yaroqli bo'lgan bo'g'im rentgenogrammasi yoki MRT tasvirlari topilmadi.`;
+                    document.querySelector('.diagnosis-card .description').innerHTML = `<strong>Tizim xulosasi:</strong> Yuklangan faylda shifokor uchun yaroqli bo'lgan xulosa chiqarilmadi.`;
                 } else {
                     document.querySelector('.diagnosis-card .severity').textContent = `Grade: ${data.prediction}`;
                     
@@ -188,6 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     let treatmentHtml = "";
                     let activityHtml = "";
                     let fuzzyHtml = "";
+                    let noteHtml = "";
                     
                     if(data.prediction === 0) {
                         gradeText = "0 daraja (Norma / Sog'lom)";
@@ -195,8 +191,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         document.querySelector('.diagnosis-card .severity').style.backgroundColor = '#dcfce7';
                         document.querySelector('.diagnosis-card .severity').style.color = '#166534';
                         
-                        let bmiAdvice = currentBmi > 25 ? `Tana vaznini yuqoriligi (${currentBmi} BMI) kelajakda xavf omili bo'lishi mumkin.` : `Tana vazningiz idealligicha qolmoqda (${currentBmi} BMI).`;
-                        fuzzyHtml = `Bemorning yoshi (${currentAge}) va BMI ko‘rsatkichi (${currentBmi}) tahlil qilindi.  Hozirgi vaqtda yoshga xos <strong>fiziologik o'zgarishlarsiz, bo‘g‘im to'liq sog'lom</strong> deb baholandi. ${bmiAdvice}`;
+                        let bmiAdvice = ptBmi > 25 ? `Tana vaznini yuqoriligi (${ptBmi} BMI) kelajakda xavf omili bo'lishi mumkin.` : `Tana vazn idealligicha qolmoqda (${ptBmi} BMI).`;
+                        fuzzyHtml = `Bemor: <b>${patientFullName}</b> (${ptAge} yosh) BMI ko‘rsatkichi: <b>${ptBmi}</b>. tahlil qilindi. Hozirgi vaqtda yoshga xos <strong>fiziologik o'zgarishlarsiz, bo‘g‘im to'liq sog'lom</strong> deb baholandi. ${bmiAdvice}`;
+                        noteHtml = `Bemor ${patientFullName} ko'rigi o'tkazildi. Patologiya aniqlanmadi. Profilaktik kuzatuv tavsiya etiladi.`;
 
                         chartData = [2.5, 2.5, 2.5, 2.5, 2.5, 2.5];
                         trendHtml = `<i class="fa-solid fa-arrow-trend-up"></i><span>Bo'g'im tirqishida o'zgarish yo'q. Me'yorda.</span>`;
@@ -226,8 +223,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         document.querySelector('.diagnosis-card .severity').style.backgroundColor = '#fef3c7';
                         document.querySelector('.diagnosis-card .severity').style.color = '#b45309';
 
-                        let bmiFactor = currentBmi > 25 ? `asosan <strong>BMI ko'rsatkichiga (ortiqcha yuk - ${currentBmi} BMI)</strong>` : `boshqa individual omillarga`;
-                        fuzzyHtml = `Bemorning yoshi (${currentAge}) va BMI ko‘rsatkichi (${currentBmi}) baholandi. Patologiya faqat yosh omiliga emas, balki ${bmiFactor} bog'liq ravishda paydo bo'la boshlagan. Prognoz ehtimoli - ijobiy qaytarish mumkin.`;
+                        let bmiFactor = ptBmi > 25 ? `asosan <strong>BMI ko'rsatkichiga (ortiqcha yuk - ${ptBmi} BMI)</strong>` : `boshqa individual omillarga`;
+                        fuzzyHtml = `Bemor <b>${patientFullName}</b> (${ptAge} yosh) tahlil qilindi. Patologiya faqat yosh omiliga emas, balki ${bmiFactor} bog'liq ravishda paydo bo'la boshlagan. Prognoz ehtimoli - ijobiy qaytarish mumkin.`;
+                        noteHtml = `Bemor ${patientFullName}. Subxondral sklerozning dastlabki belgilari. Ortiqcha vaznni korreksiya qilish va xondroprotektorlar buyurildi.`;
 
                         chartData = [2.5, 2.45, 2.4, 2.4, 2.35, 2.3];
                         trendHtml = `<i class="fa-solid fa-arrow-trend-down"></i><span>Dastlabki minimal torayish (-0.2 mm).</span>`;
@@ -255,8 +253,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         gradeText = "II darajali osteoartroz (Boshlang'ich/Yengil)";
                         document.querySelector('.diagnosis-card .severity').className = 'severity medium';
                         
-                        let ageFactor = currentAge < 45 ? `yosh normasi atrofida no-parallel (erta progressiya)` : `yosh normasi atrofida parallel`;
-                        fuzzyHtml = `Bemorning yoshi (${currentAge}), BMI ko‘rsatkichi (${currentBmi}) va bo‘g‘im tirqishi holati (haqiqiy torayish) Fuzzy Logic orqali tahlil qilindi. Kasallik darajasi <strong>${ageFactor}</strong> ketyapti. Asosiy provokator omillar nazorat ostiga olinmasa progressiya yuz beradi.`;
+                        let ageFactor = ptAge < 45 ? `yosh normasi atrofida no-parallel (erta progressiya)` : `yosh normasi atrofida parallel`;
+                        fuzzyHtml = `Bemor <b>${patientFullName}</b> (${ptAge} yosh), BMI: <b>${ptBmi}</b>. Bo‘g‘im tirqishi holati (haqiqiy torayish) Fuzzy Logic orqali tahlil qilindi. Kasallik darajasi <strong>${ageFactor}</strong> ketyapti. Asosiy provokator omillar nazorat ostiga olinmasa progressiya yuz beradi.`;
+                        noteHtml = `Bemor ${patientFullName}, Grade II. Osteofitlar va bo'g'im torayishi tasdiqlandi. Fizioterapiya va yengil tizza bog'lami (Nakorlennik) taqish yozildi.`;
 
                         chartData = [2.4, 2.3, 2.2, 2.1, 2.0, 1.9];
                         trendHtml = `<i class="fa-solid fa-arrow-trend-down"></i><span>Sezilarli torayish tendensiyasi (-0.5 mm).</span>`;
@@ -284,8 +283,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         gradeText = "III darajali osteoartroz (O'rta bosqich)";
                         document.querySelector('.diagnosis-card .severity').className = 'severity medium';
                         
-                        let progText = currentAge > 60 ? `mutanosib ravishda rivojlanayotgani` : `erta va tezkor progressiyalanuvchi ekanligi`;
-                        fuzzyHtml = `Bemorning yoshi (${currentAge}), BMI ko‘rsatkichi (${currentBmi}) va bo‘g‘im tirqishi holati tahlil qilindi. Patologiya bemor yoshiga nisbatan <strong>${progText}</strong> aniqlandi. Asosiy provokator omil - tana vazni va yosh omilining yig'indisi.`;
+                        let progText = ptAge > 60 ? `mutanosib ravishda rivojlanayotgani` : `erta va tezkor progressiyalanuvchi ekanligi`;
+                        fuzzyHtml = `Bemor <b>${patientFullName}</b> (${ptAge} yosh) va BMI: <b>${ptBmi}</b> tahlil qilindi. Patologiya bemor yoshiga nisbatan <strong>${progText}</strong> aniqlandi. Asosiy provokator omil - tana vazni va yosh omilining yig'indisi.`;
+                        noteHtml = `Bemorda (${patientFullName}) yaqqol jarayon. Zudlik bilan vazn tashlash, intra-artikulyar inyeksiya (PRP / gialuron) buyurildi. Kelgusi qadam artroplastika ehtimoli mavjud.`;
 
                         chartData = [2.2, 2.15, 2.1, 1.95, 1.85, 1.8];
                         trendHtml = `<i class="fa-solid fa-arrow-trend-down"></i><span>O'tgan 6 oyga nisbatan -0.4 mm torayish. Osteofitlar +12% o'sgan.</span>`;
@@ -315,9 +315,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         document.querySelector('.diagnosis-card .severity').style.backgroundColor = '#fee2e2';
                         document.querySelector('.diagnosis-card .severity').style.color = '#991b1b';
 
-                        let ageCrit = currentAge < 55 ? `${currentAge} yosh bu asorat uchun juda erta` : `${currentAge} yosh uchun ham juda og'ir daraja`;
-                        let bmiCrit = currentBmi > 30 ? `va ortiqcha vazn jarayonni teskari bo'lmas darajaga yetkazgan.` : `hisoblanadi.`;
-                        fuzzyHtml = `Bemorning yoshi (${currentAge}) inobatga olindi. Tizim tasvirlardan <strong>to'liq tog'ay yopilishini (deformatsiya va ankiloz xavfini)</strong> hisoblab chiqdi. ${ageCrit} ${bmiCrit}`;
+                        let ageCrit = ptAge < 55 ? `${ptAge} yosh bu asorat uchun juda erta` : `${ptAge} yosh uchun ham juda og'ir daraja`;
+                        let bmiCrit = ptBmi > 30 ? `va ortiqcha vazn jarayonni teskari bo'lmas darajaga yetkazgan.` : `hisoblanadi.`;
+                        fuzzyHtml = `Bemor <b>${patientFullName}</b> (${ptAge} yosh) inobatga olindi. Tizim tasvirlardan <strong>to'liq tog'ay yopilishini (deformatsiya va ankiloz xavfini)</strong> hisoblab chiqdi. ${ageCrit} ${bmiCrit}`;
+                        noteHtml = `Bemorda yana bir konservativ choralar qoldirilmadi. ${patientFullName} ga Total Tizza Artroplastika (Endoprotezlash) jarrohligi rejalashtirildi.`;
 
                         chartData = [1.8, 1.5, 1.2, 0.9, 0.5, 0.2];
                         trendHtml = `<i class="fa-solid fa-arrow-trend-down"></i><span>Bo'g'im tirqishi qariyb to'liq yopilgan. Jiddiy yemirilish!</span>`;
@@ -359,6 +360,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     const fuzzyElem = document.querySelector('.clinical-analysis p');
                     if(fuzzyElem) {
                         fuzzyElem.innerHTML = fuzzyHtml;
+                    }
+
+                    // Update Doctor's Note
+                    const noteElem = document.getElementById('doctorNoteText');
+                    if(noteElem) {
+                        noteElem.innerHTML = `Doktor xulosasi: ${noteHtml}`;
                     }
                 }
                 
