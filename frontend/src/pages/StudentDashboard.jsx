@@ -1,17 +1,19 @@
 import React from 'react';
 
-const StudentDashboard = ({ onNavigate }) => {
+const StudentDashboard = ({ onNavigate, user }) => {
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 font-sans p-6">
       {/* Header Profile & Stats */}
       <header className="flex justify-between items-center bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 mb-8 relative">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-emerald-600 flex items-center justify-center font-bold text-2xl text-white shadow-[0_0_15px_rgba(5,150,105,0.4)]">
-            <i className="fa-solid fa-user-graduate"></i>
-          </div>
+          <img
+            src={user?.photoURL || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"}
+            alt="Profile"
+            className="w-16 h-16 rounded-full border-4 border-emerald-500 shadow-[0_0_15px_rgba(5,150,105,0.4)]"
+          />
           <div>
-            <h1 className="text-2xl font-bold">Sherzod K.</h1>
-            <p className="text-slate-400">Tibbiyot Talabasi (6-kurs)</p>
+            <h1 className="text-2xl font-bold">{user?.displayName || 'Talaba'}</h1>
+            <p className="text-slate-400">{user?.email || ''}</p>
           </div>
         </div>
         

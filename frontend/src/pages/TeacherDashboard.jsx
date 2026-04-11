@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const TeacherDashboard = ({ onNavigate }) => {
+const TeacherDashboard = ({ onNavigate, user }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -44,12 +44,14 @@ const TeacherDashboard = ({ onNavigate }) => {
     <div className="min-h-screen bg-slate-900 text-slate-100 font-sans p-6">
       <header className="flex justify-between items-center bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 mb-8 border-t-4 border-t-blue-500">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center font-bold text-2xl text-white">
-            <i className="fa-solid fa-user-doctor"></i>
-          </div>
+          <img
+            src={user?.photoURL || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"}
+            alt="Profile"
+            className="w-16 h-16 rounded-full border-4 border-blue-500"
+          />
           <div>
-            <h1 className="text-2xl font-bold">DocAssist & O'qituvchi Panel</h1>
-            <p className="text-slate-400">Kasbiy malaka kurslarini boshqaruv oynasi</p>
+            <h1 className="text-2xl font-bold">{user?.displayName || "O'qituvchi"}</h1>
+            <p className="text-slate-400">{user?.email || 'Kasbiy malaka kurslarini boshqaruv oynasi'}</p>
           </div>
         </div>
         
