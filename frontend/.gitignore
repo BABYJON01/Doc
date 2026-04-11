@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.env
+docassist.db
+*.db
+node_modules/
+.vercel
