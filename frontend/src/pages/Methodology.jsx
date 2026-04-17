@@ -291,6 +291,7 @@ const Methodology = () => {
                              {sec.content}
                         </div>
                     </section>
+                ))}
 
                  {/* Random Skill App (Bilet) */}
                  <section className="bg-slate-800 rounded-3xl border border-slate-700 overflow-hidden shadow-xl mb-10">
@@ -357,7 +358,6 @@ const Methodology = () => {
                          )}
                      </div>
                  </section>
-                ))}
 
                 {/* Practical Table */}
                 <section className="bg-slate-800 rounded-3xl border border-slate-700 overflow-hidden shadow-2xl">
