@@ -1,8 +1,94 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { db } from '../firebase';
+import { collection, query, where, getDocs, limit, orderBy, collectionGroup } from 'firebase/firestore';
+import { 
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, Cell, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis
+} from 'recharts';
+import LiveQuiz from './LiveQuiz';
 
 const StudentDashboard = ({ onNavigate, user }) => {
+  const [xpHistory, setXpHistory] = useState([
+    { day: 'Dush', xp: 1200 },
+    { day: 'Sesh', xp: 1900 },
+    { day: 'Chor', xp: 1700 },
+    { day: 'Pay', xp: 2500 },
+    { day: 'Jum', xp: 2100 }
+  ]);
+  const [proficiency, setProficiency] = useState([
+    { subject: 'Kardiologiya', score: 85 },
+    { subject: 'Farmakologiya', score: 45 },
+    { subject: 'Anatomiya', score: 92 }
+  ]);
+  const [pinInput, setPinInput] = useState('');
+  const [activePin, setActivePin] = useState(null);
+  const [pinError, setPinError] = useState('');
+  const [sessions, setSessions] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user?.uid) return;
+      try {
+        // Fetch real stats from Firestore if they exist
+        const q = query(collection(db, "user_stats"), where("userId", "==", user.uid), limit(1));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          const data = querySnapshot.docs[0].data();
+          if (data.xpHistory) setXpHistory(data.xpHistory);
+          if (data.proficiency) setProficiency(data.proficiency);
+        }
+
+        // Fetch session history: find rooms where this user participated
+        try {
+          const sessionsSnap = await getDocs(
+            query(collectionGroup(db, 'players'), where('__name__', '==', user.uid))
+          );
+          // Fallback: query leaderboard for past scores
+          const lbSnap = await getDocs(
+            query(collection(db, 'leaderboard'), where('__name__', '==', user.uid))
+          );
+          // We'll store sessions as array from the rooms/{any}/players/{uid}
+          setSessions(sessionsSnap.docs.map(d => ({
+            ...d.data(),
+            pin: d.ref.parent.parent.id,
+            id: d.id,
+          })));
+        } catch (sErr) {
+          console.warn('Session history fetch error:', sErr);
+        }
+
+      } catch (err) {
+        console.error("Firebase statistika xatoligi:", err);
+      }
+    };
+    fetchData();
+  }, [user]);
+
+  const handleJoinLiveQuiz = () => {
+    const cleaned = pinInput.replace(/\s/g, '');
+    if (cleaned.length !== 6 || isNaN(cleaned)) {
+      setPinError('PIN 6 ta raqamdan iborat bo\'lishi kerak!');
+      return;
+    }
+    setPinError('');
+    setActivePin(cleaned);
+  };
+
+  // If live quiz is active, show it full screen
+  if (activePin) {
+    return (
+      <LiveQuiz
+        user={user}
+        roomPin={activePin}
+        onFinish={() => { setActivePin(null); setPinInput(''); }}
+      />
+    );
+  }
+
+
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans p-6">
+    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans p-6 mb-20">
       {/* Header Profile & Stats */}
       <header className="flex justify-between items-center bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 mb-8 relative">
         <div className="flex items-center gap-4">
@@ -39,8 +125,48 @@ const StudentDashboard = ({ onNavigate, user }) => {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
         
-        {/* Left Column - Continue Learning */}
+        {/* Left Column - Stats & Charts */}
         <div className="lg:col-span-2 space-y-6">
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             {/* XP Growth Chart */}
+             <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                   <i className="fa-solid fa-chart-line text-emerald-500"></i> Haftalik XP O'sishi
+                </h3>
+                <div className="h-64 w-full">
+                   <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={xpHistory}>
+                         <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                         <XAxis dataKey="day" stroke="#94a3b8" fontSize={12} />
+                         <YAxis stroke="#94a3b8" fontSize={12} />
+                         <Tooltip 
+                            contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
+                            itemStyle={{ color: '#10b981' }}
+                         />
+                         <Line type="monotone" dataKey="xp" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                      </LineChart>
+                   </ResponsiveContainer>
+                </div>
+             </div>
+
+             {/* Proficiency Radar */}
+             <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                   <i className="fa-solid fa-brain text-blue-500"></i> Fanlar bo'yicha mahorat
+                </h3>
+                <div className="h-64 w-full">
+                   <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart cx="50%" cy="50%" outerRadius="80%" data={proficiency}>
+                         <PolarGrid stroke="#334155" />
+                         <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                         <Radar name="Skor" dataKey="score" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.5} />
+                      </RadarChart>
+                   </ResponsiveContainer>
+                </div>
+             </div>
+          </div>
+
           <h2 className="text-xl font-bold text-white mb-4"><i className="fa-solid fa-book-medical text-blue-500 mr-2"></i> Davom ettirish</h2>
           
           <div className="bg-slate-800 rounded-2xl p-6 border-l-4 border-blue-500 shadow-md">
@@ -88,21 +214,50 @@ const StudentDashboard = ({ onNavigate, user }) => {
 
         {/* Right Column - Gamification & AI */}
         <div className="space-y-6">
-          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-            <h3 className="font-bold text-white mb-4 text-center border-b border-slate-700 pb-3">
-               <i className="fa-solid fa-robot text-teal-400 mr-2"></i> AI O'qituvchi Yordamchisi
+          {/* Live Quiz PIN Join Box */}
+          <div className="bg-gradient-to-br from-emerald-900/40 to-slate-800 rounded-2xl p-6 border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.1)] mb-6">
+            <h3 className="font-bold text-white mb-2 text-center text-lg">
+               <i className="fa-solid fa-tower-broadcast text-emerald-400 mr-2 animate-pulse"></i> Live Quiz'ga ulanish
             </h3>
-            <p className="text-sm text-slate-400 mb-4 text-center">
-              Sizga tushunarsiz bo'lgan tibbiy termin yoki kasallik patogenezini oddiy formatda so'rang.
+            <p className="text-xs text-slate-400 mb-4 text-center">
+              O'qituvchi aytgan 6 xonali maxsus PIN kodni kiriting va poygaga qo'shiling.
             </p>
-            <textarea 
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-teal-500 h-24 resize-none mb-3"
-              placeholder="Masalan: Tushuntirib bering, Atrial Fibrilatsiya o'zi asosan nimadan kelib chiqadi?"
-            ></textarea>
-            <button className="w-full bg-teal-600 hover:bg-teal-500 text-white rounded-lg py-2 font-medium transition-colors">
-              AI dan so'rash
+            <div className="flex bg-slate-900 border border-slate-700 rounded-xl overflow-hidden mb-2 shadow-inner">
+               <input 
+                 type="text" 
+                 value={pinInput}
+                 onChange={(e) => setPinInput(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                 placeholder="6 xonali PIN" 
+                 className="flex-1 bg-transparent px-4 py-3 text-center text-2xl font-black text-emerald-400 tracking-[0.2em] outline-none w-full"
+               />
+            </div>
+            {pinError && <p className="text-rose-400 text-xs text-center mb-2 font-bold">{pinError}</p>}
+            <button 
+              onClick={handleJoinLiveQuiz}
+              disabled={pinInput.length !== 6}
+              className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl py-3 font-bold transition-all shadow-lg"
+            >
+              Ulanish <i className="fa-solid fa-arrow-right ml-1"></i>
             </button>
           </div>
+
+          {/* Session History */}
+          {sessions.length > 0 && (
+            <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-lg mb-6">
+              <h3 className="font-bold text-white mb-4 text-sm uppercase tracking-widest"><i className="fa-solid fa-clock-rotate-left mr-2"></i> O'tgan sessiyalar</h3>
+              <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
+                {sessions.sort((a,b) => b.score - a.score).map((s, i) => (
+                  <div key={i} className="flex justify-between items-center p-3 bg-slate-900 rounded-lg border border-slate-700">
+                    <div>
+                      <div className="text-sm font-bold text-slate-300">PIN: {s.pin || 'Noma\'lum'}</div>
+                      <div className="text-xs text-slate-500">{s.correct || 0} ta to'g'ri javob</div>
+                    </div>
+                    <div className="text-emerald-400 font-bold">+{s.score || 0} XP</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
             <h3 className="font-bold text-white mb-4 border-b border-slate-700 pb-3 flex justify-between items-center">
@@ -119,17 +274,17 @@ const StudentDashboard = ({ onNavigate, user }) => {
             </div>
           </div>
 
-          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-lg">
             <h3 className="font-bold text-white mb-4 text-center"><i className="fa-solid fa-medal text-yellow-400 mr-2"></i> So'nggi Yutuqlar</h3>
             <div className="space-y-3">
-               <div className="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-700">
+               <div className="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-700 hover:border-yellow-500 transition-colors">
                   <div className="flex items-center gap-3">
                      <i className="fa-solid fa-shield-cat text-2xl text-yellow-500"></i>
                      <span className="text-sm font-bold text-slate-300">Diagnostika Ustasi</span>
                   </div>
                   <span className="text-xs text-emerald-400">+500 XP</span>
                </div>
-               <div className="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-700">
+               <div className="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-700 hover:border-rose-500 transition-colors">
                   <div className="flex items-center gap-3">
                      <i className="fa-solid fa-fire text-2xl text-rose-500"></i>
                      <span className="text-sm font-bold text-slate-300">7 kun uzluksiz!</span>
@@ -146,3 +301,4 @@ const StudentDashboard = ({ onNavigate, user }) => {
 };
 
 export default StudentDashboard;
+

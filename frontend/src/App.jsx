@@ -146,7 +146,8 @@ const App = () => {
                     {/* Protected routes: redirect to login if not authenticated */}
                     <Route path="/student" element={user ? <StudentDashboard onNavigate={(mode) => window.location.href = `/app?mode=${mode}`} user={user} /> : <Navigate to="/" replace />} />
                     <Route path="/teacher" element={user ? <TeacherDashboard user={user} /> : <Navigate to="/" replace />} />
-                    <Route path="/test" element={user ? <QuizTaking onFinish={() => window.location.href = '/student'} /> : <Navigate to="/" replace />} />
+                    <Route path="/test" element={user ? <QuizTaking user={user} onFinish={() => window.location.href = '/student'} /> : <Navigate to="/" replace />} />
+
 
                     {/* The original duel/solo mode entry matches /app */}
                     <Route path="/app" element={<MedZukkooApp />} />

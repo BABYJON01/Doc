@@ -1,18 +1,33 @@
 import React, { useState, useEffect } from 'react';
+import { db } from '../firebase';
+import { collection, query, orderBy, limit, onSnapshot, setDoc, doc, serverTimestamp } from 'firebase/firestore';
 
-const QuizTaking = ({ onFinish }) => {
+const QuizTaking = ({ onFinish, user }) => {
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [selectedOption, setSelectedOption] = useState(null);
     const [isAnswered, setIsAnswered] = useState(false);
     const [score, setScore] = useState(0);
     const [showResults, setShowResults] = useState(false);
-    const [leaderboard, setLeaderboard] = useState([
-        { name: "Alisher T.", score: 90, status: "tugatdi" },
-        { name: "Siz", score: 0, status: "yechmoqda..." },
-        { name: "Malika B.", score: 45, status: "yechmoqda..." },
-    ]);
+    const [leaderboard, setLeaderboard] = useState([]);
 
-    const quizData = [
+    const userName = user?.displayName || user?.email?.split('@')[0] || "Siz";
+
+    useEffect(() => {
+        // Real-time listener for the leaderboard from Firestore
+        const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10));
+        
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const players = [];
+            querySnapshot.forEach((doc) => {
+                players.push({ id: doc.id, ...doc.data() });
+            });
+            setLeaderboard(players);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    const quizData = JSON.parse(localStorage.getItem('generated_quiz')) || [
         {
             question: "Qaysi biri EKGda miokard infarktini yorqin anglatuvchi signal hisoblanadi?",
             options: ["ST elevatsiyasi", "P tishchasi yo'qolishi", "QRS ingichkaligi", "T tishchasi inverted emas"],
@@ -20,17 +35,24 @@ const QuizTaking = ({ onFinish }) => {
             explanation: "Miokard shikastlanishi darhol ST segment ko'tarilishiga olib keladi. Bu o'tkir infarktning klassik belgisidir.",
             topic: "Kardiologiya",
             image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/12_lead_ECG_of_inferior_STEMI.svg/1024px-12_lead_ECG_of_inferior_STEMI.svg.png"
-        },
-        {
-            question: "Bronxial astma xurujini to'xtatish uchun qaysi tez yordam dori vositasi birinchi navbatda qo'llaniladi?",
-            options: ["Prednizolon tabletkasi", "Salbutamol ingalyatsiyasi", "Adrenalin inyeksiyasi", "Geparin"],
-            answer: 1,
-            explanation: "Salbutamol qisqa muddatli beta-2 agonist bo'lib, bronxlarni tez kengaytiradi (rescue inhaler).",
-            topic: "Farmakologiya"
         }
     ];
 
     const currentQ = quizData[currentQuestion];
+
+    const updateScoreInFirebase = async (newScore) => {
+        if (!user?.uid) return;
+        try {
+            await setDoc(doc(db, "leaderboard", user.uid), {
+                name: userName,
+                score: newScore * 100,
+                status: "yechmoqda...",
+                updatedAt: serverTimestamp()
+            }, { merge: true });
+        } catch (e) {
+            console.error("Firebase Update Error:", e);
+        }
+    };
 
     const handleOptionSelect = (index) => {
         if (isAnswered) return;
@@ -38,10 +60,11 @@ const QuizTaking = ({ onFinish }) => {
         setIsAnswered(true);
 
         const isCorrect = index === currentQ.answer;
-        if (isCorrect) setScore(score + 1);
-
-        // Simulate Live Leaderboard update
-        setLeaderboard(prev => prev.map(p => p.name === "Siz" ? { ...p, score: isCorrect ? p.score + 50 : p.score } : p));
+        if (isCorrect) {
+            const newScore = score + 1;
+            setScore(newScore);
+            updateScoreInFirebase(newScore);
+        }
     };
 
     const handleNext = () => {
@@ -51,8 +74,16 @@ const QuizTaking = ({ onFinish }) => {
             setIsAnswered(false);
         } else {
             setShowResults(true);
+            // Submit final score status
+            if (user?.uid) {
+                setDoc(doc(db, "leaderboard", user.uid), {
+                    status: "tugatdi",
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+            }
         }
     };
+
 
     if (showResults) {
         return (
@@ -162,15 +193,19 @@ const QuizTaking = ({ onFinish }) => {
                 <h3 className="font-bold text-white mb-6 uppercase tracking-widest text-xs"><i className="fa-solid fa-tower-broadcast text-rose-500 mr-2 animate-pulse"></i> Jonli Reyting</h3>
                 
                 <div className="space-y-4">
-                    {leaderboard.sort((a,b) => b.score - a.score).map((player, idx) => (
-                        <div key={idx} className={`p-4 rounded-xl border ${player.name === "Siz" ? 'bg-slate-900 border-blue-500' : 'bg-slate-900/50 border-slate-700'} flex justify-between items-center transition-all`}>
-                            <div>
-                                <div className={`font-bold ${player.name === "Siz" ? 'text-blue-400' : 'text-slate-300'}`}>{player.name}</div>
-                                <div className="text-xs text-slate-500">{player.status}</div>
+                    {leaderboard.length > 0 ? (
+                        leaderboard.sort((a,b) => b.score - a.score).map((player, idx) => (
+                            <div key={idx} className={`p-4 rounded-xl border ${player.name.includes("Siz") ? 'bg-slate-900 border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.3)]' : 'bg-slate-900/50 border-slate-700'} flex justify-between items-center transition-all animate-[fadeIn_0.3s_ease-out]`}>
+                                <div>
+                                    <div className={`font-bold ${player.name.includes("Siz") ? 'text-blue-400' : 'text-slate-300'}`}>{player.name}</div>
+                                    <div className="text-xs text-slate-500">{player.status}</div>
+                                </div>
+                                <div className="text-xl font-black text-emerald-400">{player.score}</div>
                             </div>
-                            <div className="text-xl font-black text-emerald-400">{player.score}</div>
-                        </div>
-                    ))}
+                        ))
+                    ) : (
+                        <div className="text-center py-10 text-slate-600 italic">Reyting yuklanmoqda...</div>
+                    )}
                 </div>
 
                 <div className="mt-8 p-4 bg-slate-900 rounded-xl border border-slate-700">
@@ -188,3 +223,4 @@ const QuizTaking = ({ onFinish }) => {
 };
 
 export default QuizTaking;
+

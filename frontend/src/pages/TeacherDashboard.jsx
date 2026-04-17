@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
+import { extractTextFromFile, generateMedicalContent } from '../services/aiService';
+import LiveRoom from './LiveRoom';
 
 const TeacherDashboard = ({ onNavigate, user }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [generatedData, setGeneratedData] = useState(null);
+  const [showLiveRoom, setShowLiveRoom] = useState(false);
 
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -10,36 +14,51 @@ const TeacherDashboard = ({ onNavigate, user }) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       setIsUploading(true);
-      setProgress(20); // Dastlabki yuklanish ko'rsatkichi
+      setProgress(10); 
       setErrorMsg("");
 
-      const formData = new FormData();
-      formData.append("file", file);
-
       try {
-        const response = await fetch("http://localhost:8002/api/ai/process-file", {
-          method: "POST",
-          body: formData,
-        });
+        // 1. Client-side extraction
+        const text = await extractTextFromFile(file);
+        setProgress(40);
 
-        const data = await response.json();
+        // 2. Client-side AI Generation
+        const aiResult = await generateMedicalContent(text);
+        setProgress(80);
         
-        if (!response.ok || data.success === false || data.error) {
+        if (!aiResult.success) {
             setProgress(0);
             setIsUploading(false);
-            setErrorMsg(data.detail || data.message || "Tizim xatosi, fayl tibbiyotga oid emas!");
+            setErrorMsg(aiResult.message || "Tizim xatosi, fayl tibbiyotga oid emas!");
             return;
         }
 
+        // 3. Save to LocalStorage or Firebase (Mock for now, will connect to Firebase later)
+        console.log("AI Natija:", aiResult);
+        localStorage.setItem('generated_quiz', JSON.stringify(aiResult.quizzes));
+        setGeneratedData(aiResult);
+
         setProgress(100);
       } catch (error) {
-        console.error("Backend error:", error);
+        console.error("AI Service Error:", error);
         setProgress(0);
         setIsUploading(false);
-        setErrorMsg("Sun'iy intellekt serveri o'chirilgan yoki ulanishda xato (Backend ishga tushmagan).");
+        setErrorMsg(error.message || "Faylni tahlil qilishda xatolik yuz berdi.");
       }
     }
   };
+
+  // If live room is active, show it full-screen
+  if (showLiveRoom && generatedData) {
+    return (
+      <LiveRoom
+        user={user}
+        quizData={generatedData.quizzes}
+        onExit={() => setShowLiveRoom(false)}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 font-sans p-6">
       <header className="flex justify-between items-center bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 mb-8 border-t-4 border-t-blue-500">
@@ -144,8 +163,38 @@ const TeacherDashboard = ({ onNavigate, user }) => {
                         </p>
                         
                         {progress === 100 && (
-                            <button onClick={() => {setProgress(0); setIsUploading(false);}} className="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm text-white transition-colors">Yangi fayl yuklash</button>
+                            <div className="mt-4 flex flex-wrap gap-3">
+                                <button onClick={() => {setProgress(0); setIsUploading(false); setGeneratedData(null);}} className="px-4 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-lg text-sm text-white transition-colors">
+                                    <i className="fa-solid fa-rotate-left mr-2"></i>Yangi fayl yuklash
+                                </button>
+                                <button onClick={() => setShowLiveRoom(true)} className="px-5 py-2 bg-rose-600 hover:bg-rose-500 rounded-lg text-sm text-white font-bold transition-colors shadow-lg shadow-rose-900/40">
+                                    <i className="fa-solid fa-tower-broadcast mr-2 animate-pulse"></i>Live Quiz Boshlash (Auditoriya)
+                                </button>
+                            </div>
                         )}
+                    </div>
+                )}
+
+                {/* Display Generated Results Preview */}
+                {progress === 100 && generatedData && (
+                    <div className="bg-slate-900 rounded-lg p-6 border border-emerald-500 mt-4 max-h-[500px] overflow-y-auto">
+                        <h4 className="text-emerald-400 font-bold mb-4 font-xl border-b border-slate-700 pb-2">
+                           Yaratilgan interaktiv resurslar ({generatedData.quizzes?.length} ta Test, {generatedData.flashcards?.length} ta Xotira kartasi)
+                        </h4>
+                        
+                        {generatedData.quizzes && generatedData.quizzes.map((quiz, idx) => (
+                            <div key={idx} className="bg-slate-800 p-4 rounded-lg border border-slate-700 mb-3">
+                                <p className="text-white font-bold mb-2">{idx + 1}. {quiz.question}</p>
+                                <ul className="space-y-1 mb-2">
+                                    {quiz.options.map((opt, i) => (
+                                        <li key={i} className={`text-sm py-1 px-2 rounded ${i === quiz.answer ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50' : 'text-slate-300'}`}>
+                                            {String.fromCharCode(65 + i)}) {opt}
+                                        </li>
+                                    ))}
+                                </ul>
+                                <p className="text-xs text-indigo-400 mt-2 bg-indigo-500/10 p-2 rounded"><strong>Tushuntirish:</strong> {quiz.explanation}</p>
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>
