@@ -1,8 +1,124 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Methodology = () => {
     const navigate = useNavigate();
+
+    const practicalSkills = [
+        {
+            title: "1. Bilak sohasi jaroxatida: Norvonsimon shina",
+            steps: [
+                "Shina jarohatlangan qo‘lning tashqi yuzasi bo‘ylab qo‘yiladi",
+                "Ulkaning o‘rta uchligidan kaft-barmoq bo‘g‘imigacha fiksatsiya qilinadi",
+                "Qo‘l tirsak bo‘g‘imidan 90 daraja burchak ostida bukiladi",
+                "Bilak supinatsiya bilan pronatsiya holati oralig‘ida turadi",
+                "Kaft ichiga valik qo‘yiladi va kosinka yordamida bo‘yinga bog‘lanadi"
+            ]
+        },
+        {
+            title: "2. Boldir suyaklari jaroxatida transport immobilizatsiyasi",
+            steps: [
+                "Standart shinalar (Kramer, Diterixs) tayyorlanadi",
+                "Dala sharoitida og‘riqsizlantirish (analgetik) kiritiladi",
+                "Tizza va to'piq bo'g'imlarini qamrab oluvchi to'liq o'lcham olinadi (sog'lom oyoqdan)",
+                "Poyabzal ustidan qo'yilib, bint orqali mahkamlanadi",
+                "Barmoqlardagi sirkulyatsiya (kapillyar javob) tekshiriladi"
+            ]
+        },
+        {
+            title: "3. Vishnevskiy bo‘yicha vagosimpatik blokada",
+            steps: [
+                "Bemor chalqanchasiga yotqizilib kuraklar orasiga valik qo‘yiladi",
+                "Bosh blokada qilinadigan joyga qarama-qarshi tomonga maksimal buriladi",
+                "Chap qo‘l ko‘rsatkich barmog‘i bilan m.sternocleidomastoideus orqa qirrasi bosiladi",
+                "Igna barmoq yuqori sohasidan kiritilib, umurtqalar tomon yo'naltiriladi",
+                "0,25% novokain 30-50 ml hajmda sekin kiritiladi"
+            ]
+        },
+        {
+            title: "4. Qovurg‘alararo blokada",
+            steps: [
+                "Bemorni zarur pozitsiyada (o'tirgan) ushlash",
+                "Novokainni qovurg‘aning yuqori qirg‘og‘iga uzatish",
+                "Sukkusiya (asorat)ni va qon tomir teshilishini aniqlash",
+                "Havo yoxud qon kirmasligi uchun qat'iy aseptika tayyorlash",
+                "Nafas olingandagi og'riq yo'qolganini baholash"
+            ]
+        },
+        {
+            title: "5. Shans yoqasini qo‘yish",
+            steps: [
+                "To'g'ri ko'rsatma tekshiriladi (bo'yin jarohati mavjudligi)",
+                "Shans yoqasi ensa do‘mbog‘iga qat'iy tayanishi lozim",
+                "Ikkala so‘rg‘ichsimon o‘simtaga taqalishi nazorat asosi",
+                "Pastdan ko‘krak qafasiga yaxshilab tayanadi",
+                "Asab tugunlari qisilib qolishini oldini olib me'yoriy o'raladi"
+            ]
+        },
+        {
+            title: "6. Son suyagi sinishida Diterixs shinasini qo‘yish",
+            steps: [
+                "Shinaning uzun (tashqi) qismi qo‘ltiq ostidan tashqi to'piqqacha qo'yiladi",
+                "Qisqa (ichki) qismi chov burmasidan oyoq panja ostigacha o'rnatiladi",
+                "Poyabzal kiygizilgan panjaga uchigacha bog'lanadi",
+                "Aylanma mexanizm va tayanch yordamida oyoq engil tortiladi",
+                "Barcha qism yumshoq bint bilan tanaga ustun holida o‘raladi"
+            ]
+        },
+        {
+            title: "7. Yelka suyagi sinishida Kramer shinasini qo‘yish",
+            steps: [
+                "Kramer shinasiga qalinroq paxta qo‘yib bintlanadi va unga shakl beriladi",
+                "Singan joyiga Sol. Novocaini 1% - 50,0ml yuboriladi",
+                "Yelka tanaga yaqinlashtirilib, tirsak 90 daraja yig'iladi",
+                "Shina sog'lom kurak bo'g'imidan singan barmoqlar uchigacha qoplab kelishi shart",
+                "Kosinka bog'ichi bilan bo'yindan osib qo'yiladi"
+            ]
+        },
+        {
+            title: "8. Chanoq suyagi singanda transport immobilizatsiyasi",
+            steps: [
+                "Bemor mutlaqo qattiq taxta-shchitga chalqancha yotqiziladi",
+                "Tizza va chanoq-son bo‘g‘imlari yarim bukilgan holda tutiladi",
+                "Tizza ostiga yumshoq qalin valik qo'yiladi (Volkovichning 'baqa' pozasi)",
+                "Tovonlar birlashtirilib, tizzalar orasi yengil ochiladi",
+                "Toz qismi qattiq keng kamar (prostina) bilan fiksatsiyalanadi"
+            ]
+        },
+        {
+            title: "9. Arterial qon ketishda Jgut qo‘yish",
+            steps: [
+                "Zudlik bilan jgut ostiga mato (kiyim) yopiladi (ochiq teriga hargiz mumkin emas)",
+                "Bilakdan qon ketsa yelka o'rtasiga, Boldirdan ketsa son tubiga qo'yiladi",
+                "Jgut pulsatsiyalovchi qon favvorasi to'xtaguncha asbobda qisiladi",
+                "Aniq vaqt (soat/minut) yozilgan xat biriktiriladi (qish-1, yoz-2 soat max)",
+                "Amaliyotchi uni shina tagiga berkitmay har doim ko'rinarli joyga joylaydi"
+            ]
+        },
+        {
+            title: "10. Shkolnikov bo'yicha chanoq ichi anesteziyasi",
+            steps: [
+                "Bemorni Volkovich (baqa) pozitsiyasi orqali yotqizish",
+                "Spina iliaca anterior superior (Old ostki o'simta) dan 2 sm ichkarini antiseptika qilish",
+                "Teri ustini 0.5% novokain bilan igna sanchib infiltratsiya hosil qilish",
+                "12-15 sm bo'lgan uzun ignani chanoq ichki yuzasi bo'ylab kiritish",
+                "0.25% li novokaindan 150ml gacha ichki fassiya ostiga asta yuborish"
+            ]
+        }
+    ];
+
+    const [randomSkill, setRandomSkill] = useState(null);
+    const [isSpinning, setIsSpinning] = useState(false);
+
+    const handleDrawTicket = () => {
+        setIsSpinning(true);
+        setRandomSkill(null);
+        setTimeout(() => {
+            const index = Math.floor(Math.random() * practicalSkills.length);
+            setRandomSkill(practicalSkills[index]);
+            setIsSpinning(false);
+        }, 1500); // 1.5s spinning simulation
+    };
 
     const sections = [
         {
@@ -136,6 +252,72 @@ const Methodology = () => {
                              {sec.content}
                         </div>
                     </section>
+
+                 {/* Random Skill App (Bilet) */}
+                 <section className="bg-slate-800 rounded-3xl border border-slate-700 overflow-hidden shadow-xl mb-10">
+                     <div className="bg-gradient-to-r from-blue-900/40 to-slate-900 p-6 border-b border-slate-700 flex justify-between items-center">
+                         <div>
+                             <h3 className="text-xl font-bold flex items-center gap-3">
+                                <i className="fa-solid fa-ticket text-indigo-400"></i>
+                                Imtihon Simulyatori: Tasodifiy Ko'nikma
+                             </h3>
+                             <p className="text-sm text-slate-400 mt-1">"Bilet tortish" orqali 10 ta amaliy ko'nikmadan bittasini aralash holda tanlang va o'zlashtiring.</p>
+                         </div>
+                     </div>
+                     <div className="p-8 flex flex-col items-center justify-center min-h-[300px] border-t-2 border-indigo-500/20">
+                         {!randomSkill && !isSpinning && (
+                             <div className="text-center">
+                                 <i className="fa-solid fa-dice-d20 text-6xl text-slate-600 mb-6 drop-shadow-lg"></i>
+                                 <h4 className="text-xl text-slate-300 font-bold mb-6">Tayyormisiz?</h4>
+                                 <button 
+                                     onClick={handleDrawTicket} 
+                                     className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-8 rounded-full shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all hover:scale-105"
+                                 >
+                                     <i className="fa-solid fa-hand-pointer mr-2"></i> Bilet Tortish
+                                 </button>
+                             </div>
+                         )}
+
+                         {isSpinning && (
+                             <div className="text-center animate-pulse">
+                                 <div className="text-blue-500 w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                 <p className="text-slate-400 font-bold tracking-widest uppercase">Biletlar aralashmoqda...</p>
+                             </div>
+                         )}
+
+                         {randomSkill && !isSpinning && (
+                             <div className="w-full max-w-3xl animate-[fadeIn_0.5s_ease-out]">
+                                 <div className="bg-slate-900 border border-emerald-500/50 rounded-2xl p-6 shadow-[0_0_30px_rgba(16,185,129,0.1)] relative">
+                                     <span className="absolute -top-4 left-6 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">Tanlangan Ko'nikma</span>
+                                     
+                                     <h4 className="text-2xl font-bold text-white mb-6 border-b border-slate-700 pb-4 mt-2 text-center md:text-left">
+                                         {randomSkill.title}
+                                     </h4>
+                                     
+                                     <div className="space-y-4">
+                                         {randomSkill.steps.map((step, idx) => (
+                                             <div key={idx} className="flex gap-4 items-start bg-slate-800/80 p-3 rounded-xl border border-slate-700/50 hover:bg-slate-700 transition-colors">
+                                                 <div className="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 font-black flex items-center justify-center shrink-0">
+                                                     {idx + 1}
+                                                 </div>
+                                                 <p className="text-slate-300 pt-1 text-sm md:text-base">{step}</p>
+                                             </div>
+                                         ))}
+                                     </div>
+
+                                     <div className="mt-8 flex justify-center border-t border-slate-800 pt-6">
+                                         <button 
+                                             onClick={handleDrawTicket} 
+                                             className="bg-slate-700 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-xl transition-all flex items-center gap-2"
+                                         >
+                                             <i className="fa-solid fa-rotate-right"></i> Boshqa bilet tortish
+                                         </button>
+                                     </div>
+                                 </div>
+                             </div>
+                         )}
+                     </div>
+                 </section>
                 ))}
 
                 {/* Practical Table */}
@@ -176,10 +358,25 @@ const Methodology = () => {
                                      <td className="py-4 px-4 text-slate-300">Tizza bo‘g‘imi shikastlanishlari: menisklar, boldir va oshiq bo‘g‘imi jarohatlari.</td>
                                      <td className="py-4 px-4 text-center text-slate-400">4 s</td>
                                  </tr>
+                                 <tr className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+                                     <td className="py-4 px-4 text-emerald-400 text-center">5</td>
+                                     <td className="py-4 px-4 text-slate-300">Politravma diagnostikasi. Travmatik shok profilaktikasi va davolash algoritmlari.</td>
+                                     <td className="py-4 px-4 text-center text-slate-400">4 s</td>
+                                 </tr>
+                                 <tr className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+                                     <td className="py-4 px-4 text-emerald-400 text-center">6</td>
+                                     <td className="py-4 px-4 text-slate-300">Son tug‘ma chiqishlari, bo‘yin mushakli qiyshiqligi. Maymoqlik etiologiyasi, klinikasi va diagnostikasi.</td>
+                                     <td className="py-4 px-4 text-center text-slate-400">4 s</td>
+                                 </tr>
+                                 <tr className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+                                     <td className="py-4 px-4 text-emerald-400 text-center">7</td>
+                                     <td className="py-4 px-4 text-slate-300">Skolioz: klinikasi, tasnifi va davolashi. Oyoq o‘qi deformatsiyalari xususiyatlari.</td>
+                                     <td className="py-4 px-4 text-center text-slate-400">4 s</td>
+                                 </tr>
                                  <tr className="hover:bg-slate-700/30 transition-colors">
-                                     <td className="py-4 px-4 text-emerald-400 text-center">...</td>
-                                     <td className="py-4 px-4 text-slate-500 italic">Qolgan 4 ta mavzu ham amaliy kurs asosida 4 soatdan o'tiladi (Jadval uzluksizligi).</td>
-                                     <td className="py-4 px-4 text-center text-slate-400">-</td>
+                                     <td className="py-4 px-4 text-emerald-400 text-center">8</td>
+                                     <td className="py-4 px-4 text-slate-300">Travmatologik va ortopedik bemorlarni reabilitatsiyasi. Amputatsiyaga ko‘rsatmalar va zamonaviy protezlash.</td>
+                                     <td className="py-4 px-4 text-center text-slate-400">4 s</td>
                                  </tr>
                              </tbody>
                          </table>
