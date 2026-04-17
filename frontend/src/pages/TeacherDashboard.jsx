@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { extractTextFromFile, generateMedicalContent } from '../services/aiService';
 import LiveRoom from './LiveRoom';
+import { useApp } from '../context/AppContext';
 
 const TeacherDashboard = ({ onNavigate, user }) => {
   const [isUploading, setIsUploading] = useState(false);
@@ -107,42 +108,41 @@ const TeacherDashboard = ({ onNavigate, user }) => {
         
         <div className="flex gap-4 items-center">
             <button onClick={() => window.location.href = '/'} className="px-4 py-2 bg-slate-700 hover:bg-rose-600 text-white rounded-lg font-bold text-sm transition-colors">
-               <i className="fa-solid fa-right-from-bracket mr-2"></i> Chiqish
+               <i className="fa-solid fa-right-from-bracket mr-2"></i> {t.logout}
             </button>
             <button className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg font-bold text-sm transition-colors text-white">
-               <i className="fa-solid fa-plus mr-2"></i> Yangi Dars
+               <i className="fa-solid fa-plus mr-2"></i> {lang === 'ru' ? 'Новый урок' : 'Yangi Dars'}
             </button>
         </div>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 max-w-7xl mx-auto">
          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <div className="text-slate-400 text-sm font-bold uppercase mb-1">Mening Kurslarim</div>
+            <div className="text-slate-400 text-sm font-bold uppercase mb-1">{lang === 'ru' ? 'Мои курсы' : 'Mening Kurslarim'}</div>
             <div className="text-3xl font-black text-white">12</div>
          </div>
          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <div className="text-slate-400 text-sm font-bold uppercase mb-1">Faol Talabalar</div>
+            <div className="text-slate-400 text-sm font-bold uppercase mb-1">{lang === 'ru' ? 'Активные студенты' : 'Faol Talabalar'}</div>
             <div className="text-3xl font-black text-blue-400">1,240</div>
          </div>
          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <div className="text-slate-400 text-sm font-bold uppercase mb-1">Klinik Case'lar (Hotspot)</div>
+            <div className="text-slate-400 text-sm font-bold uppercase mb-1">{lang === 'ru' ? 'Клинические кейсы' : "Klinik Case'lar (Hotspot)"}</div>
             <div className="text-3xl font-black text-indigo-400">45</div>
          </div>
          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <div className="text-slate-400 text-sm font-bold uppercase mb-1">Talaba O'zlashtirishi</div>
+            <div className="text-slate-400 text-sm font-bold uppercase mb-1">{lang === 'ru' ? 'Успеваемость студентов' : "Talaba O'zlashtirishi"}</div>
             <div className="text-3xl font-black text-emerald-400">82%</div>
          </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-            <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-3">Kurs & Interaktiv Case'lar Yaratish</h3>
+            <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-3">{lang === 'ru' ? 'Создание курса и интерактивных кейсов' : "Kurs & Interaktiv Case'lar Yaratish"}</h3>
             <div className="space-y-4">
-                
                 {/* Topic Selection UI */}
                 {!isUploading && progress === 0 && (
                     <div className="mb-6">
-                        <h4 className="text-sm text-slate-400 font-bold uppercase mb-3"><i className="fa-solid fa-list-check mr-2 text-indigo-400"></i>O'quv Reja: Mavzu bo'yicha Ai-Imtihon yaratish</h4>
+                        <h4 className="text-sm text-slate-400 font-bold uppercase mb-3"><i className="fa-solid fa-list-check mr-2 text-indigo-400"></i>{lang === 'ru' ? "Учебный план: Создание AI-экзамена по теме" : "O'quv Reja: Mavzu bo'yicha Ai-Imtihon yaratish"}</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {medicalTopics.map((topic, idx) => (
                                 <button key={idx} onClick={() => handleGenerateFromTopic(topic)} className="text-left bg-slate-900 border border-slate-700 hover:border-indigo-500 hover:bg-slate-800 p-3 rounded-xl transition-all group flex items-start gap-3 shadow-lg">
@@ -173,10 +173,11 @@ const TeacherDashboard = ({ onNavigate, user }) => {
                             <i className={`fa-regular fa-file-pdf text-4xl ${errorMsg ? 'text-slate-500' : 'text-rose-500'} group-hover:scale-110 transition-transform`}></i>
                             <i className={`fa-regular fa-file-powerpoint text-4xl ${errorMsg ? 'text-slate-500' : 'text-orange-500'} group-hover:scale-110 transition-transform`}></i>
                         </div>
-                        <div className="text-white font-bold text-lg mb-1">Dars materialini yuklang (Drag & Drop yoki bosing)</div>
+                        <div className="text-white font-bold text-lg mb-1">{lang === 'ru' ? 'Загрузите учебный материал (Drag & Drop или нажмите)' : 'Dars materialini yuklang (Drag & Drop yoki bosing)'}</div>
                         <div className="text-slate-400 text-sm text-center mb-4">
-                            .DOCX, .PDF yoki .PPTX formatidagi fayllarni shu yerga tashlang yoki ustiga bosing.<br/>
-                            Sun'iy intellekt matnni ajratib avtomatik Test va Flashcardlar yaratadi.
+                            {lang === 'ru'
+                              ? 'Перетащите файл .DOCX, .PDF или .PPTX сюда или нажмите. ИИ автоматически создаст тесты и флеш-карточки.'
+                              : '.DOCX, .PDF yoki .PPTX formatidagi fayllarni shu yerga tashlang yoki ustiga bosing.\nSun\'iy intellekt matnni ajratib avtomatik Test va Flashcardlar yaratadi.'}
                         </div>
 
                         {errorMsg && (
@@ -216,7 +217,7 @@ const TeacherDashboard = ({ onNavigate, user }) => {
                                     <i className="fa-solid fa-rotate-left mr-2"></i>Yangi fayl yuklash
                                 </button>
                                 <button onClick={() => setShowLiveRoom(true)} className="px-5 py-2 bg-rose-600 hover:bg-rose-500 rounded-lg text-sm text-white font-bold transition-colors shadow-lg shadow-rose-900/40">
-                                    <i className="fa-solid fa-tower-broadcast mr-2 animate-pulse"></i>Live Quiz Boshlash (Auditoriya)
+                                    <i className="fa-solid fa-tower-broadcast mr-2 animate-pulse"></i>{lang === 'ru' ? 'Начать Live Quiz (Аудитория)' : 'Live Quiz Boshlash (Auditoriya)'}
                                 </button>
                             </div>
                         )}
@@ -312,11 +313,11 @@ const TeacherDashboard = ({ onNavigate, user }) => {
          </div>
 
          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-            <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-3">Talabalar Statistikasi</h3>
+            <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-3">{lang === 'ru' ? 'Статистика студентов' : 'Talabalar Statistikasi'}</h3>
             
             <div className="flex flex-col items-center justify-center h-48 opacity-50">
                <i className="fa-solid fa-chart-line text-5xl text-slate-500 mb-4"></i>
-               <p className="text-slate-400">Bu yerda Chart.js orqali talabalarning davomati va test natijalari chiqadi.</p>
+               <p className="text-slate-400">{lang === 'ru' ? 'Здесь будут отображаться посещаемость студентов и результаты тестов через Chart.js.' : "Bu yerda Chart.js orqali talabalarning davomati va test natijalari chiqadi."}</p>
             </div>
          </div>
       </div>
