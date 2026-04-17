@@ -207,6 +207,45 @@ const Methodology = () => {
                     </div>
                 </div>
             )
+        },
+        {
+            title: "Rentgenogramma Tahlili (X-Ray)",
+            icon: "fa-solid fa-x-ray text-violet-500",
+            content: (
+                <div className="space-y-8">
+                    {/* Case 1 */}
+                    <div className="bg-slate-900 rounded-2xl border border-slate-700 overflow-hidden shadow-lg items-stretch">
+                        <div className="md:flex h-full">
+                            <div className="md:w-1/2 p-4 bg-black flex items-center justify-center">
+                                <img src="/assets/xray_clavicula.png" alt="X-Ray Clavicula" className="max-w-full max-h-72 object-contain rounded-xl shadow-2xl border border-slate-700/50 hover:scale-105 transition-transform cursor-zoom-in" />
+                            </div>
+                            <div className="md:w-1/2 p-6 flex flex-col justify-center border-t md:border-t-0 md:border-l border-slate-700/50">
+                                <h4 className="text-xl font-bold text-violet-400 mb-2">1. Umrov suyagi sinishi xarakteri</h4>
+                                <p className="text-slate-300 text-sm mb-5">"Keltirilgan rentgenogramma tasviriga qarab, ushbu suyakdagi o'zgarishni qanday klinik ta'riflaysiz?"</p>
+                                <div className="bg-emerald-900/40 p-4 rounded-xl border border-emerald-500/30 group">
+                                    <strong className="text-emerald-400 block text-xs uppercase tracking-widest mb-1 group-hover:text-white transition-colors">To'g'ri tashxis:</strong>
+                                    <span className="text-sm font-medium text-slate-200">Suyak bo'laklari bo'ylama o'qi bo'yicha siljib singan (dislokatsiya)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Case 2 */}
+                    <div className="bg-slate-900 rounded-2xl border border-slate-700 overflow-hidden shadow-lg items-stretch flex flex-col-reverse md:flex-row">
+                        <div className="md:w-1/2 p-6 flex flex-col justify-center border-t md:border-t-0 md:border-r border-slate-700/50">
+                            <h4 className="text-xl font-bold text-violet-400 mb-2">2. Boldir suyaklari ochiq jarohati</h4>
+                            <p className="text-slate-300 text-sm mb-5">"Astra-rentgenologik tasvirda 'os tibia' va 'os fibula' (katta va kichik boldir) suyaklarining qattiq burchakli sinishi ko'rsatilgan. Qo'llanilishga eng zarur ortopedik taktika nima?"</p>
+                            <div className="bg-emerald-900/40 p-4 rounded-xl border border-emerald-500/30 group">
+                                <strong className="text-emerald-400 block text-xs uppercase tracking-widest mb-1 group-hover:text-white transition-colors">To'g'ri tashxis:</strong>
+                                <span className="text-sm font-medium text-slate-200">Ilizarov tipidagi kompressiyali-distraksion apparati orqali fiksatsiya qilish.</span>
+                            </div>
+                        </div>
+                        <div className="md:w-1/2 p-4 bg-black flex items-center justify-center">
+                            <img src="/assets/xray_tibia.png" alt="X-Ray Tibia" className="max-w-full max-h-72 object-contain rounded-xl shadow-2xl border border-slate-700/50 hover:scale-105 transition-transform cursor-zoom-in" />
+                        </div>
+                    </div>
+                </div>
+            )
         }
     ];
 
