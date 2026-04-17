@@ -118,6 +118,41 @@ export const methodologicalQuiz = [
       question: "Agar qon bosimi ketma-ket har ikkala qo'lda farqli natija bersa, qaysi biri klinik jihatdan asos qilib olinadi?",
       options: ["O'ng qo'ldagisi", "Chap qo'ldagisi", "Eng past natija", "Eng yuqori natija"],
       correctAnswer: "Eng yuqori natija"
+    },
+    {
+      id: 16,
+      type: "nazariy",
+      question: "Qaysi suyaklar sinishida Volkovichning usuli ya'ni 'baqa' pozitsiyasi (tovonlar biriktirilib, yengil ko'tarilgan) qat'iy talab qilinadi?",
+      options: ["Son suyagi (os femoris) sinishida", "Umurtqa pog'onasi sinishida", "Chanoq suyagi sinishida", "O'lpon suyagi sinishida"],
+      correctAnswer: "Chanoq suyagi sinishida"
+    },
+    {
+      id: 17,
+      type: "mantiqiy",
+      question: "Vishnevskiy bo'yicha vagosimpatik blokada o'tkazishdan asosiy asosiy ko'zlangan davolash maqsadi nima?",
+      options: ["Qon ketishini tezda to'xtatish", "Plevropulmonal shokni (Travmatik shok) oldini olish va davolash", "Bo'yin umurtqasini qotirib qo'yish", "Gemotoma yo'qolishini ta'minlash"],
+      correctAnswer: "Plevropulmonal shokni (Travmatik shok) oldini olish va davolash"
+    },
+    {
+      id: 18,
+      type: "nazariy",
+      question: "Yoz faslida (issiq iqlimda) qon to'xtatuvchi Jgutning eng ko'p turishi ruxsat etilgan xavfsiz vaqt chegarasi qancha?",
+      options: ["30 daqiqa", "1 soat", "1.5 soat", "2 soat"],
+      correctAnswer: "2 soat"
+    },
+    {
+      id: 19,
+      type: "nazariy",
+      question: "Suyak sinishlarini davolash bosqichidagi 'Repozitsiya' terminalogiysining ma'nosi nima?",
+      options: ["Gips bog'lami qo'yish", "Og'riqsizlantirish ukolini yuborish", "Singan suyak bo'laklarini anatomik to'g'ri o'rniga joylashtirish", "Yaraga aseptika ishlov berish"],
+      correctAnswer: "Singan suyak bo'laklarini anatomik to'g'ri o'rniga joylashtirish"
+    },
+    {
+      id: 20,
+      type: "mantiqiy",
+      question: "Amaliyotda aslo yalang'och teri ustiga bevosita rezina Jgut bog'lanmaydi, doim mato yoki kiyim ustidan tortiladi. Sababi nima?",
+      options: ["Qon tomir o'rnidan ko'chib aylanib qolmasligi uchun", "Yalang'och terini kuchli siqib, to'qimalar ishqalanishi va ikkilamchi ezilish (nekroz) hosil qilish xavfi borligi uchun", "Jgut sirg'anib tushib ketmasligi uchun", "Jarrohlik qoidalarida gigiyenani saqlash uchun"],
+      correctAnswer: "Yalang'och terini kuchli siqib, to'qimalar ishqalanishi va ikkilamchi ezilish (nekroz) hosil qilish xavfi borligi uchun"
     }
   ];
   
