@@ -47,7 +47,8 @@ import { collection, query, orderBy, limit, onSnapshot, setDoc, doc, serverTimes
 
 // Refactored LoginSelector with Firebase Auth
 const LoginSelector = ({ user }) => {
-    const { t } = useApp();
+    const { t, theme } = useApp();
+
     const [recentUsers, setRecentUsers] = React.useState([]);
 
     React.useEffect(() => {
@@ -165,12 +166,15 @@ const LoginSelector = ({ user }) => {
                      </>
                  ) : (
                      <div>
-                         <div className="bg-slate-800 p-8 rounded-2xl border border-slate-700 max-w-2xl mx-auto shadow-2xl mb-8 flex items-center justify-between">
+                         <div
+                           className="p-8 rounded-2xl max-w-2xl mx-auto shadow-2xl mb-8 flex items-center justify-between"
+                           style={{ background: theme==='dark' ? '#1e293b' : '#fff', border: `1px solid ${theme==='dark' ? '#334155' : '#e2e8f0'}` }}
+                         >
                             <div className="flex items-center gap-6">
                                 <img src={user.photoURL || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"} alt="User Profile" className="w-20 h-20 rounded-full border-4 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]" />
                                 <div className="text-left">
-                                    <h2 className="text-2xl font-bold">{user.displayName || "Foydalanuvchi"}</h2>
-                                    <p className="text-slate-400">{user.email}</p>
+                                    <h2 className="text-2xl font-bold" style={{ color: theme==='dark' ? '#fff' : '#0f172a' }}>{user.displayName || "Foydalanuvchi"}</h2>
+                                    <p style={{ color: theme==='dark' ? '#94a3b8' : '#64748b' }}>{user.email}</p>
                                 </div>
                             </div>
                             <button onClick={handleLogout} className="px-6 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg transition-colors shadow-lg shadow-rose-900/50">
@@ -178,17 +182,28 @@ const LoginSelector = ({ user }) => {
                             </button>
                          </div>
 
-                         <h3 className="text-xl font-bold text-slate-300 mb-6 uppercase tracking-widest border-b border-slate-700 pb-2">{t.selectRole}</h3>
+                         <h3
+                           className="text-xl font-bold mb-6 uppercase tracking-widest border-b pb-2"
+                           style={{ color: theme==='dark' ? '#cbd5e1' : '#1e293b', borderColor: theme==='dark' ? '#334155' : '#e2e8f0' }}
+                         >{t.selectRole}</h3>
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                             <button onClick={() => window.location.href = '/student'} className="glass-card p-10 block border-t-4 border-emerald-500 hover:shadow-emerald-500/10 text-left transition-all">
+                             <button
+                               onClick={() => window.location.href = '/student'}
+                               className="p-10 block border-t-4 border-emerald-500 text-left transition-all rounded-2xl shadow-xl hover:shadow-emerald-500/20 hover:-translate-y-1 duration-300"
+                               style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff', border: `1px solid ${theme==='dark' ? 'rgba(51,65,85,0.5)' : '#e2e8f0'}`, borderTop: '4px solid #10b981' }}
+                             >
                                  <i className="fa-solid fa-user-graduate text-5xl text-emerald-500 mb-6 block"></i>
-                                 <h2 className="text-xl font-bold mb-2">{t.studentPanel}</h2>
-                                 <p className="text-slate-400 text-sm">{t.studentDesc}</p>
+                                 <h2 className="text-xl font-bold mb-2" style={{ color: theme==='dark' ? '#fff' : '#0f172a' }}>{t.studentPanel}</h2>
+                                 <p className="text-sm" style={{ color: theme==='dark' ? '#94a3b8' : '#475569' }}>{t.studentDesc}</p>
                              </button>
-                             <button onClick={() => window.location.href = '/teacher'} className="glass-card p-10 block border-t-4 border-blue-500 hover:shadow-blue-500/10 text-left transition-all">
+                             <button
+                               onClick={() => window.location.href = '/teacher'}
+                               className="p-10 block border-t-4 border-blue-500 text-left transition-all rounded-2xl shadow-xl hover:shadow-blue-500/20 hover:-translate-y-1 duration-300"
+                               style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff', border: `1px solid ${theme==='dark' ? 'rgba(51,65,85,0.5)' : '#e2e8f0'}`, borderTop: '4px solid #3b82f6' }}
+                             >
                                  <i className="fa-solid fa-chalkboard-teacher text-5xl text-blue-500 mb-6 block"></i>
-                                 <h2 className="text-xl font-bold mb-2">{t.teacherPanel}</h2>
-                                 <p className="text-slate-400 text-sm">{t.teacherDesc}</p>
+                                 <h2 className="text-xl font-bold mb-2" style={{ color: theme==='dark' ? '#fff' : '#0f172a' }}>{t.teacherPanel}</h2>
+                                 <p className="text-sm" style={{ color: theme==='dark' ? '#94a3b8' : '#475569' }}>{t.teacherDesc}</p>
                              </button>
                          </div>
                      </div>

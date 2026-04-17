@@ -6,8 +6,11 @@ import {
   BarChart, Bar, Cell, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis
 } from 'recharts';
 import LiveQuiz from './LiveQuiz';
+import { useApp } from '../context/AppContext';
 
 const StudentDashboard = ({ onNavigate, user }) => {
+  const { t, lang } = useApp();
+
   const [xpHistory, setXpHistory] = useState([
     { day: 'Dush', xp: 1200 },
     { day: 'Sesh', xp: 1900 },
