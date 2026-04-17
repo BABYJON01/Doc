@@ -4,6 +4,7 @@ import LiveRoom from './LiveRoom';
 import { useApp } from '../context/AppContext';
 
 const TeacherDashboard = ({ onNavigate, user }) => {
+  const { t, lang } = useApp();
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [generatedData, setGeneratedData] = useState(null);
@@ -11,7 +12,7 @@ const TeacherDashboard = ({ onNavigate, user }) => {
 
   const [errorMsg, setErrorMsg] = useState("");
 
-  const medicalTopics = [
+  const medicalTopicsUz = [
       "Tayanch-harakat apparati sinishlari, Transport immobilizatsiya, Gips texnikasi",
       "Ko'krak qafasi va yelka kamari shikastlanishlari. Yelka suyagi chiqishlari",
       "Chanoq va umurtqa pog‘onasi shikastlanishlari. Shkolnikov anesteziyasi",
@@ -21,6 +22,18 @@ const TeacherDashboard = ({ onNavigate, user }) => {
       "Bosh miya yopiq va ochiq jarohatlari",
       "Qon ketish turlari va qon to'xtatish (Jgut qo'yish) usullari"
   ];
+  const medicalTopicsRu = [
+      "Perelomy oporno-dvigatel., immobilizatsiya, gips texnikasi",
+      "Travmy grudnoj kletki. Vyvikhi plecha",
+      "Travmy taza i pozvonochnika. Anesteziya po Shkolnikovu",
+      "Politravma i travmy s shokom. Reanimatsiya",
+      "Gnojnye zabolevaniya kostej i sustavov (Osteomielit)",
+      "Ozhogovaya bolezn' i obmorozhenie. Klinicheskaya pomosh'",
+      "Zakrytye i otkrytye travmy golovnogo mozga",
+      "Vidy krovotechenij i metody ostanovki (nalozhenie zhguta)"
+  ];
+  const medicalTopics = lang === 'ru' ? medicalTopicsRu : medicalTopicsUz;
+
 
   const handleGenerateFromTopic = async (topicName) => {
       setIsUploading(true);
