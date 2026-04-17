@@ -107,15 +107,15 @@ const LoginSelector = ({ user }) => {
                             <div className="mb-6 flex items-center gap-4">
                                 <img src="/assets/tma_logo.png" alt="TMA Logo" className="w-20 h-auto drop-shadow-[0_0_15px_rgba(59,130,246,0.6)] animate-pulse" />
                                 <div className="inline-block px-4 py-1.5 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-                                    Toshkent Tibbiyot Akademiyasi <br/> O'quv Bazasi
+                                    {t.platformBadge}
                                 </div>
                             </div>
                             <h1 className="text-5xl lg:text-7xl font-black mb-6 leading-tight tracking-tight">
                                 <span className="bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent drop-shadow-sm">Med-Zukkoo</span><br/>
-                                <span className="text-white drop-shadow-md">Platformasi</span>
+                                <span className="text-white drop-shadow-md">{t.platformTitle}</span>
                             </h1>
                             <p className="text-slate-400 text-lg sm:text-xl mb-10 leading-relaxed max-w-lg font-light">
-                                Sun'iy intellektga asoslangan kelajak tibbiyot o'quv bazasi. Interaktiv klinik holatlar, tashxislash va xirurgiya simulyatorlari.
+                                {t.platformDesc}
                             </p>
                             <div className="flex items-center gap-4 text-sm text-slate-400 font-medium bg-slate-900/50 p-4 rounded-2xl border border-slate-800/50 inline-flex">
                                 <div className="flex -space-x-3">
