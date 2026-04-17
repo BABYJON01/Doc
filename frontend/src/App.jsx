@@ -64,20 +64,64 @@ const LoginSelector = ({ user }) => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6 text-white font-sans">
-            <div className="max-w-2xl w-full text-center">
-                 <h1 className="text-4xl font-bold mb-4 uppercase tracking-widest"><i className="fa-solid fa-hospital text-blue-500 mr-3"></i> Tizimga Kirish</h1>
-                 <p className="text-slate-400 mb-10">Google akkauntingiz orqali xavfsiz autorizatsiyadan o'ting</p>
-                 
+        <div className="min-h-screen bg-slate-950 relative overflow-hidden flex items-center justify-center p-6 text-white font-sans">
+            
+            {/* Background Ambient Effects */}
+            <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 blur-[120px] rounded-full pointer-events-none"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-600/10 blur-[120px] rounded-full pointer-events-none"></div>
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 mix-blend-overlay pointer-events-none"></div>
+
+            <div className="max-w-6xl w-full flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20 relative z-10">
                  {!user ? (
-                     <div className="bg-slate-800 p-10 rounded-2xl border border-slate-700 max-w-sm mx-auto shadow-2xl">
-                         <i className="fa-brands fa-google text-6xl text-slate-300 mb-6 block"></i>
-                         <h2 className="text-xl font-bold mb-6">Tibbiyot Bazasiga Kirish</h2>
-                         <button onClick={handleGoogleLogin} className="w-full py-4 px-6 bg-white hover:bg-slate-100 text-slate-800 rounded-xl font-bold text-lg transition-colors flex items-center justify-center shadow-lg">
-                             <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6 mr-3" alt="Google Logo"/>
-                             Google orqali kirish
-                         </button>
-                     </div>
+                     <>
+                        {/* Hero Text Construction */}
+                        <div className="md:w-1/2 text-left animate-[fadeInLeft_0.8s_ease-out]">
+                            <div className="inline-block px-4 py-1.5 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-full text-xs font-bold uppercase tracking-widest mb-6 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+                                <i className="fa-solid fa-sparkles mr-2"></i> AI Medical Education
+                            </div>
+                            <h1 className="text-5xl lg:text-7xl font-black mb-6 leading-tight tracking-tight">
+                                <span className="bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent drop-shadow-sm">Med-Zukkoo</span><br/>
+                                <span className="text-white drop-shadow-md">Platformasi</span>
+                            </h1>
+                            <p className="text-slate-400 text-lg sm:text-xl mb-10 leading-relaxed max-w-lg font-light">
+                                Sun'iy intellektga asoslangan kelajak tibbiyot o'quv bazasi. Interaktiv klinik holatlar, tashxislash va xirurgiya simulyatorlari.
+                            </p>
+                            <div className="flex items-center gap-4 text-sm text-slate-400 font-medium bg-slate-900/50 p-4 rounded-2xl border border-slate-800/50 inline-flex">
+                                <div className="flex -space-x-3">
+                                    <img className="w-10 h-10 rounded-full border-2 border-slate-900" src="https://i.pravatar.cc/100?img=11" alt="Student"/>
+                                    <img className="w-10 h-10 rounded-full border-2 border-slate-900" src="https://i.pravatar.cc/100?img=12" alt="Student"/>
+                                    <img className="w-10 h-10 rounded-full border-2 border-slate-900" src="https://i.pravatar.cc/100?img=13" alt="Student"/>
+                                    <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-emerald-600 flex items-center justify-center text-[11px] font-bold text-white shadow-lg">+2.4k</div>
+                                </div>
+                                <p>Faol talabalar biz bilan<br/><span className="text-emerald-400 text-xs">Ayni damda onlayn o'rganmoqda</span></p>
+                            </div>
+                        </div>
+
+                        {/* Login Card UI */}
+                        <div className="md:w-1/2 w-full max-w-md animate-[fadeInRight_0.8s_ease-out_0.2s_both]">
+                            <div className="bg-slate-900/60 backdrop-blur-2xl p-8 sm:p-10 rounded-3xl border border-slate-700/50 shadow-[0_20px_50px_rgba(0,0,0,0.5)] shadow-blue-900/20 relative overflow-hidden group">
+                                {/* Glass shine hover effect */}
+                                <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+                                
+                                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-blue-500/30 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                                    <i className="fa-solid fa-staff-snake text-3xl text-white"></i>
+                                </div>
+                                
+                                <h2 className="text-3xl font-bold mb-2 tracking-tight text-white">Xush kelibsiz</h2>
+                                <p className="text-slate-400 text-sm mb-10 font-medium">Boshlash uchun Google akkauntingiz orqali xavfsiz tizimga kiring.</p>
+                                
+                                <button onClick={handleGoogleLogin} className="w-full py-4 px-6 bg-white hover:bg-slate-100 transform hover:-translate-y-1 text-slate-800 rounded-xl font-black text-sm transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl hover:shadow-white/10 uppercase tracking-widest relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-slate-200 opacity-0 hover:opacity-20 transition-opacity duration-300"></div>
+                                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6 mr-3 relative z-10" alt="Google Logo"/>
+                                    <span className="relative z-10">Google orqali davom etish</span>
+                                </button>
+
+                                <div className="mt-8 text-center text-xs text-slate-500 font-medium">
+                                    Davom etish orqali siz platformaning <br/><a href="#" className="text-blue-400 hover:text-blue-300 hover:underline transition-colors">Maxfiylik Siyosati</a> ga rozi bo'lasiz.
+                                </div>
+                            </div>
+                        </div>
+                     </>
                  ) : (
                      <div>
                          <div className="bg-slate-800 p-8 rounded-2xl border border-slate-700 max-w-2xl mx-auto shadow-2xl mb-8 flex items-center justify-between">
