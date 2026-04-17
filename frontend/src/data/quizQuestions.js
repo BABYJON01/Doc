@@ -172,3 +172,24 @@ export const caseStudies = [
         answer: "1) Jarohatdan yuqoriga (songa) zudlik bilan JGUT qo'yish (A. femoralis bosish). 2) Og'riqsizlantirish (Travmatik shok profilaktikasi). 3) Ochiq yaraga aseptik bog'lam qo'yish. 4) Transport shinasi (Kramer yoki platalar) bilan panja, to'piq va tizza bo'g'imlarini qamrab shinani o'rnatish."
     }
 ];
+
+export const xrayCases = [
+  {
+    id: 1,
+    title: "Umrov suyagi (Clavicula) sinishi xarakteri",
+    image: "/assets/xray_clavicula.png",
+    question: "Keltirilgan rentgenogramma tasviriga qarab, ushbu suyakdagi o'zgarishni qanday klinik ta'riflaysiz?",
+    options: ["Suyakning o'qi bo'ylab siljishsiz oddiy sinishi", "Suyak qismi to'liq maydalanib, qon tomirni ezib qo'ygan", "Suyak bo'laklari bo'ylama o'qi bo'yicha siljib singan (dislokatsiya)", "Bu yerda sinish alomatlari mavjud emas"],
+    correctAnswer: "Suyak bo'laklari bo'ylama o'qi bo'yicha siljib singan (dislokatsiya)",
+    explanation: "Rentgenda suyakning ikki uchlari aniq tarzda bo'ylama tortishish kuchi va zarba hisobiga ajralib, siljib qolganligi namoyon bo'lmoqda."
+  },
+  {
+    id: 2,
+    title: "Boldir suyaklari murakkab jarohati",
+    image: "/assets/xray_tibia.png",
+    question: "Astra-rentgenologik tasvirda 'os tibia' va 'os fibula' (katta va kichik boldir) suyaklarining qattiq burchakli sinishi ko'rsatilgan. Bunday ochiq sinish asoratida zudlik bilan qo'llanilishi eng zarur bo'lgan ortopedik apparatura/taktika nima?",
+    options: ["Qattiq gipsokartonli sirkulyar gips o'rnatish", "Ilizarov tipidagi kompressiyali-distraksion apparati", "Faqatgina Kramer shinasi yetarli bo'ladi", "Ichki plastik jarrohliklarsiz, uy sharoitida bitirish"],
+    correctAnswer: "Ilizarov tipidagi kompressiyali-distraksion apparati",
+    explanation: "Bunday og'ir va qo'shaloq (tibia va fibula) burchakli sinishlarda, ayniqsa yumshoq to'qima mexanik yo'qolishida suyak bo'laklarini ushlab turish va cho'zish uchun yagona optimal yo'l bu kompressiyali-distraksion jarrohlikdir."
+  }
+];
