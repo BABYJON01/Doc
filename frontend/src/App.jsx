@@ -40,11 +40,26 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-import { auth, googleProvider } from './firebase';
+import { auth, googleProvider, db } from './firebase';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import { collection, query, orderBy, limit, onSnapshot, setDoc, doc, serverTimestamp } from 'firebase/firestore';
 
 // Refactored LoginSelector with Firebase Auth
 const LoginSelector = ({ user }) => {
+    const [recentUsers, setRecentUsers] = React.useState([]);
+
+    React.useEffect(() => {
+        const q = query(collection(db, "latest_users"), orderBy("lastLogin", "desc"), limit(3));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const users = [];
+            snapshot.forEach(docSnap => users.push(docSnap.data()));
+            setRecentUsers(users);
+        }, (error) => {
+            console.warn("Recent users fetching error:", error);
+        });
+        return () => unsubscribe();
+    }, []);
+
     const handleGoogleLogin = async () => {
         try {
             await signInWithPopup(auth, googleProvider);
@@ -93,12 +108,22 @@ const LoginSelector = ({ user }) => {
                             </p>
                             <div className="flex items-center gap-4 text-sm text-slate-400 font-medium bg-slate-900/50 p-4 rounded-2xl border border-slate-800/50 inline-flex">
                                 <div className="flex -space-x-3">
-                                    <img className="w-10 h-10 rounded-full border-2 border-slate-900" src="https://i.pravatar.cc/100?img=11" alt="Student"/>
-                                    <img className="w-10 h-10 rounded-full border-2 border-slate-900" src="https://i.pravatar.cc/100?img=12" alt="Student"/>
-                                    <img className="w-10 h-10 rounded-full border-2 border-slate-900" src="https://i.pravatar.cc/100?img=13" alt="Student"/>
+                                    {recentUsers.length > 0 ? (
+                                        recentUsers.map((u, i) => (
+                                            <img key={i} className="w-10 h-10 object-cover rounded-full border-2 border-slate-900 drop-shadow-md" src={u.photoURL} alt={u.displayName} title={u.displayName}/>
+                                        ))
+                                    ) : (
+                                        <>
+                                            <img className="w-10 h-10 rounded-full border-2 border-slate-900" src="https://i.pravatar.cc/100?img=11" alt="Student"/>
+                                            <img className="w-10 h-10 rounded-full border-2 border-slate-900" src="https://i.pravatar.cc/100?img=12" alt="Student"/>
+                                            <img className="w-10 h-10 rounded-full border-2 border-slate-900" src="https://i.pravatar.cc/100?img=13" alt="Student"/>
+                                        </>
+                                    )}
                                     <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-emerald-600 flex items-center justify-center text-[11px] font-bold text-white shadow-lg">+2.4k</div>
                                 </div>
-                                <p>Faol talabalar biz bilan<br/><span className="text-emerald-400 text-xs">Ayni damda onlayn o'rganmoqda</span></p>
+                                <p>Oxirgi kirgan talabalar<br/><span className="text-emerald-400 text-xs truncate max-w-[150px] inline-block">
+                                    {recentUsers.length > 0 ? recentUsers.map(u => u.displayName.split(' ')[0]).join(', ') : "Ayni damda onlayn o'rganmoqda"}
+                                </span></p>
                             </div>
                         </div>
 
