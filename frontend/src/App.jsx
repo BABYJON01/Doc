@@ -62,7 +62,15 @@ const LoginSelector = ({ user }) => {
 
     const handleGoogleLogin = async () => {
         try {
-            await signInWithPopup(auth, googleProvider);
+            const result = await signInWithPopup(auth, googleProvider);
+            if (result.user) {
+                // Update latest user for the live widget
+                await setDoc(doc(db, "latest_users", result.user.uid), {
+                    displayName: result.user.displayName || "Talaba",
+                    photoURL: result.user.photoURL || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg",
+                    lastLogin: serverTimestamp()
+                }, { merge: true });
+            }
             // After successful popup, the Auth Listener will automatically update 'user' state
         } catch (error) {
             console.error("Google Sign-In Error:", error);
