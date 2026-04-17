@@ -11,10 +11,14 @@ const TeacherDashboard = ({ onNavigate, user }) => {
   const [errorMsg, setErrorMsg] = useState("");
 
   const medicalTopics = [
-      "Tayanch-harakat apparati sinishlari va chiqishlari",
-      "Ko'krak qafasi va yelka kamari shikastlanishlari",
+      "Tayanch-harakat apparati sinishlari, Transport immobilizatsiya, Gips texnikasi",
+      "Ko'krak qafasi va yelka kamari shikastlanishlari. Yelka suyagi chiqishlari",
+      "Chanoq va umurtqa pog‘onasi shikastlanishlari. Shkolnikov anesteziyasi",
+      "Politravma va shok bilan kechuvchi jarohatlar. Reanimatsion yordam",
       "Suyak va bo'g'im yiringli xastaliklari (Osteomiyelit)",
-      "Bosh miya yopiq va ochiq jarohatlari"
+      "Kuyish kasalligi va sovuq urishi. Klinik yordam tamoyillari",
+      "Bosh miya yopiq va ochiq jarohatlari",
+      "Qon ketish turlari va qon to'xtatish (Jgut qo'yish) usullari"
   ];
 
   const handleGenerateFromTopic = async (topicName) => {
