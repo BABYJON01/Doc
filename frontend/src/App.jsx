@@ -90,11 +90,12 @@ const LoginSelector = ({ user }) => {
         <div className="min-h-screen bg-slate-950 relative overflow-hidden flex items-center justify-center p-6 text-white font-sans">
             
             {/* Background Image / Building */}
-            <div className="absolute inset-0 bg-[url('/assets/tma_bg.jpg')] bg-cover bg-center bg-no-repeat opacity-30 pointer-events-none z-0"></div>
-            {/* Background Ambient Effects */}
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-900/90 to-slate-950/95 pointer-events-none z-0"></div>
-            <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 blur-[120px] rounded-full pointer-events-none z-0"></div>
-            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-600/10 blur-[120px] rounded-full pointer-events-none z-0"></div>
+            <div className="absolute inset-0 bg-[url('/assets/tma_bg.jpg')] bg-cover bg-center bg-no-repeat opacity-100 pointer-events-none z-0"></div>
+            
+            {/* Background Gradient & Ambient Effects */}
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/80 to-slate-900/40 pointer-events-none z-0"></div>
+            <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/30 blur-[150px] rounded-full pointer-events-none z-0"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-600/20 blur-[150px] rounded-full pointer-events-none z-0"></div>
 
             <div className="max-w-6xl w-full flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20 relative z-10">
                  {!user ? (
