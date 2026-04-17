@@ -172,11 +172,11 @@ const StudentDashboard = ({ onNavigate, user }) => {
           <div className="bg-slate-800 rounded-2xl p-6 border-l-4 border-blue-500 shadow-md">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <span className="text-xs font-bold text-blue-400 bg-blue-900/30 px-2 py-1 rounded uppercase tracking-wide">Kardiologiya</span>
-                <h3 className="text-lg font-bold text-white mt-2">EKG Asoslari va Qochqinlar</h3>
+                <span className="text-xs font-bold text-blue-400 bg-blue-900/30 px-2 py-1 rounded uppercase tracking-wide">Ortopediya va Travmatologiya</span>
+                <h3 className="text-lg font-bold text-white mt-2">Tayanch-harakat apparati qattiq sinishlari</h3>
               </div>
               <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-slate-300">
-                <i className="fa-solid fa-heart-pulse"></i>
+                <i className="fa-solid fa-bone"></i>
               </div>
             </div>
             
