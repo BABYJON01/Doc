@@ -197,6 +197,19 @@ const StudentDashboard = ({ onNavigate, user }) => {
             </div>
           </div>
 
+          {/* New Methodology Component Link */}
+          <div className="bg-gradient-to-r from-blue-900/40 to-indigo-900/40 rounded-2xl p-6 border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.1)] mt-8 flex justify-between items-center group cursor-pointer hover:border-blue-400 transition-all" onClick={() => window.location.href = '/methodology'}>
+            <div>
+               <h3 className="text-xl font-bold text-white mb-1 flex items-center gap-2">
+                 <i className="fa-solid fa-book-medical text-blue-400 group-hover:animate-bounce"></i> Metodik O'quv Materiallari
+               </h3>
+               <p className="text-sm text-blue-200/70">Arterial bosim o'lchash, Immobilizatsiya va Case-Study qo'llanmalari. (Bosib kiring)</p>
+            </div>
+            <div className="w-12 h-12 min-w-[3rem] rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+               <i className="fa-solid fa-arrow-right text-xl -rotate-45 group-hover:rotate-0 transition-transform"></i>
+            </div>
+          </div>
+
           <h2 className="text-xl font-bold text-white mt-8 mb-4"><i className="fa-solid fa-microscope text-emerald-500 mr-2"></i> Klinik Trening (Gamification)</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button onClick={() => onNavigate('duel')} className="bg-slate-800 p-5 rounded-2xl border border-slate-700 hover:border-indigo-500 transition-colors text-left flex flex-col group">

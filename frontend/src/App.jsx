@@ -4,6 +4,7 @@ import MedZukkooApp from './components/MedZukkooApp';
 import StudentDashboard from './pages/StudentDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
 import QuizTaking from './pages/QuizTaking';
+import Methodology from './pages/Methodology';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -147,6 +148,7 @@ const App = () => {
                     <Route path="/student" element={user ? <StudentDashboard onNavigate={(mode) => window.location.href = `/app?mode=${mode}`} user={user} /> : <Navigate to="/" replace />} />
                     <Route path="/teacher" element={user ? <TeacherDashboard user={user} /> : <Navigate to="/" replace />} />
                     <Route path="/test" element={user ? <QuizTaking user={user} onFinish={() => window.location.href = '/student'} /> : <Navigate to="/" replace />} />
+                    <Route path="/methodology" element={user ? <Methodology /> : <Navigate to="/" replace />} />
 
 
                     {/* The original duel/solo mode entry matches /app */}
