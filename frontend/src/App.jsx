@@ -66,18 +66,23 @@ const LoginSelector = ({ user }) => {
     return (
         <div className="min-h-screen bg-slate-950 relative overflow-hidden flex items-center justify-center p-6 text-white font-sans">
             
+            {/* Background Image / Building */}
+            <div className="absolute inset-0 bg-[url('/assets/tma_bg.jpg')] bg-cover bg-center bg-no-repeat opacity-30 pointer-events-none z-0"></div>
             {/* Background Ambient Effects */}
-            <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 blur-[120px] rounded-full pointer-events-none"></div>
-            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-600/10 blur-[120px] rounded-full pointer-events-none"></div>
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 mix-blend-overlay pointer-events-none"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-900/90 to-slate-950/95 pointer-events-none z-0"></div>
+            <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 blur-[120px] rounded-full pointer-events-none z-0"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-600/10 blur-[120px] rounded-full pointer-events-none z-0"></div>
 
             <div className="max-w-6xl w-full flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20 relative z-10">
                  {!user ? (
                      <>
                         {/* Hero Text Construction */}
                         <div className="md:w-1/2 text-left animate-[fadeInLeft_0.8s_ease-out]">
-                            <div className="inline-block px-4 py-1.5 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-full text-xs font-bold uppercase tracking-widest mb-6 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-                                <i className="fa-solid fa-sparkles mr-2"></i> AI Medical Education
+                            <div className="mb-6 flex items-center gap-4">
+                                <img src="/assets/tma_logo.png" alt="TMA Logo" className="w-20 h-auto drop-shadow-[0_0_15px_rgba(59,130,246,0.6)] animate-pulse" />
+                                <div className="inline-block px-4 py-1.5 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+                                    Toshkent Tibbiyot Akademiyasi <br/> O'quv Bazasi
+                                </div>
                             </div>
                             <h1 className="text-5xl lg:text-7xl font-black mb-6 leading-tight tracking-tight">
                                 <span className="bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent drop-shadow-sm">Med-Zukkoo</span><br/>
@@ -103,8 +108,8 @@ const LoginSelector = ({ user }) => {
                                 {/* Glass shine hover effect */}
                                 <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
                                 
-                                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-blue-500/30 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                                    <i className="fa-solid fa-staff-snake text-3xl text-white"></i>
+                                <div className="w-16 h-16 bg-slate-800/80 border border-slate-600 rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-emerald-500/20 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                                    <i className="fa-solid fa-user-doctor text-3xl text-emerald-400"></i>
                                 </div>
                                 
                                 <h2 className="text-3xl font-bold mb-2 tracking-tight text-white">Xush kelibsiz</h2>
