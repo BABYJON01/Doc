@@ -10,6 +10,33 @@ const TeacherDashboard = ({ onNavigate, user }) => {
 
   const [errorMsg, setErrorMsg] = useState("");
 
+  const medicalTopics = [
+      "Tayanch-harakat apparati sinishlari va chiqishlari",
+      "Ko'krak qafasi va yelka kamari shikastlanishlari",
+      "Suyak va bo'g'im yiringli xastaliklari (Osteomiyelit)",
+      "Bosh miya yopiq va ochiq jarohatlari"
+  ];
+
+  const handleGenerateFromTopic = async (topicName) => {
+      setIsUploading(true);
+      setProgress(20);
+      setErrorMsg("");
+      try {
+          const aiResult = await generateMedicalContent(topicName, true);
+          setProgress(80);
+          if (!aiResult.success) {
+              setProgress(0); setIsUploading(false);
+              setErrorMsg("AI qabul qilmadi: " + (aiResult.message || ""));
+              return;
+          }
+          setGeneratedData(aiResult);
+          setProgress(100);
+      } catch (e) {
+          setProgress(0); setIsUploading(false);
+          setErrorMsg(e.message || "AI tahlilida xato!");
+      }
+  };
+
   const handleUpload = async (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
@@ -35,7 +62,7 @@ const TeacherDashboard = ({ onNavigate, user }) => {
 
         // 3. Save to LocalStorage or Firebase (Mock for now, will connect to Firebase later)
         console.log("AI Natija:", aiResult);
-        localStorage.setItem('generated_quiz', JSON.stringify(aiResult.quizzes));
+        localStorage.setItem('generated_quiz', JSON.stringify(aiResult.tests || aiResult.quizzes));
         setGeneratedData(aiResult);
 
         setProgress(100);
@@ -53,7 +80,7 @@ const TeacherDashboard = ({ onNavigate, user }) => {
     return (
       <LiveRoom
         user={user}
-        quizData={generatedData.quizzes}
+        quizData={generatedData.tests || generatedData.quizzes}
         onExit={() => setShowLiveRoom(false)}
       />
     );
@@ -108,6 +135,23 @@ const TeacherDashboard = ({ onNavigate, user }) => {
             <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-3">Kurs & Interaktiv Case'lar Yaratish</h3>
             <div className="space-y-4">
                 
+                {/* Topic Selection UI */}
+                {!isUploading && progress === 0 && (
+                    <div className="mb-6">
+                        <h4 className="text-sm text-slate-400 font-bold uppercase mb-3"><i className="fa-solid fa-list-check mr-2 text-indigo-400"></i>O'quv Reja: Mavzu bo'yicha Ai-Imtihon yaratish</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {medicalTopics.map((topic, idx) => (
+                                <button key={idx} onClick={() => handleGenerateFromTopic(topic)} className="text-left bg-slate-900 border border-slate-700 hover:border-indigo-500 hover:bg-slate-800 p-3 rounded-xl transition-all group flex items-start gap-3 shadow-lg">
+                                    <div className="w-8 h-8 rounded-full bg-slate-800 group-hover:bg-indigo-500 text-slate-400 group-hover:text-white flex items-center justify-center shrink-0 border border-slate-600 transition-colors">
+                                        <i className="fa-solid fa-wand-magic-sparkles"></i>
+                                    </div>
+                                    <span className="text-sm text-slate-300 group-hover:text-white font-medium pt-1 leading-snug">{topic}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Drag and Drop Container */}
                 {!isUploading && progress === 0 && (
                     <div 
@@ -177,24 +221,87 @@ const TeacherDashboard = ({ onNavigate, user }) => {
 
                 {/* Display Generated Results Preview */}
                 {progress === 100 && generatedData && (
-                    <div className="bg-slate-900 rounded-lg p-6 border border-emerald-500 mt-4 max-h-[500px] overflow-y-auto">
-                        <h4 className="text-emerald-400 font-bold mb-4 font-xl border-b border-slate-700 pb-2">
-                           Yaratilgan interaktiv resurslar ({generatedData.quizzes?.length} ta Test, {generatedData.flashcards?.length} ta Xotira kartasi)
+                    <div className="bg-slate-900 rounded-xl p-6 border-2 border-emerald-500 mt-4 max-h-[600px] overflow-y-auto custom-scrollbar">
+                        <h4 className="text-emerald-400 font-black mb-4 text-xl border-b border-slate-700 pb-4">
+                           ✅ 15/2/2/1 Imtihon Bloki Tayyor!
                         </h4>
                         
-                        {generatedData.quizzes && generatedData.quizzes.map((quiz, idx) => (
-                            <div key={idx} className="bg-slate-800 p-4 rounded-lg border border-slate-700 mb-3">
-                                <p className="text-white font-bold mb-2">{idx + 1}. {quiz.question}</p>
-                                <ul className="space-y-1 mb-2">
-                                    {quiz.options.map((opt, i) => (
-                                        <li key={i} className={`text-sm py-1 px-2 rounded ${i === quiz.answer ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50' : 'text-slate-300'}`}>
-                                            {String.fromCharCode(65 + i)}) {opt}
-                                        </li>
-                                    ))}
-                                </ul>
-                                <p className="text-xs text-indigo-400 mt-2 bg-indigo-500/10 p-2 rounded"><strong>Tushuntirish:</strong> {quiz.explanation}</p>
-                            </div>
-                        ))}
+                        <div className="space-y-8">
+                            {/* TESTS */}
+                            {generatedData.tests && (
+                                <div>
+                                    <h5 className="text-lg font-bold text-white mb-3 flex items-center"><span className="bg-blue-600 text-xs px-2 py-1 rounded mr-2">15 ta</span> Nazariy Testlar</h5>
+                                    <div className="space-y-3">
+                                        {generatedData.tests.map((quiz, idx) => (
+                                            <div key={idx} className="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                                                <p className="text-white font-bold mb-2 text-sm">{idx + 1}. {quiz.question}</p>
+                                                <ul className="space-y-1 mb-2">
+                                                    {quiz.options.map((opt, i) => (
+                                                        <li key={i} className={`text-xs py-1 px-2 rounded ${i === quiz.answer ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50' : 'text-slate-300'}`}>
+                                                            {String.fromCharCode(65 + i)}) {opt}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* CASES */}
+                            {generatedData.cases && (
+                                <div>
+                                    <h5 className="text-lg font-bold text-white mb-3 flex items-center"><span className="bg-rose-600 text-xs px-2 py-1 rounded mr-2">2 ta</span> Vaziyatli Masalalar</h5>
+                                    <div className="space-y-3">
+                                        {generatedData.cases.map((c, idx) => (
+                                            <div key={idx} className="bg-slate-800 p-4 rounded-lg border-l-4 border-l-rose-500">
+                                                <p className="text-rose-400 font-bold text-sm mb-1">{c.title}</p>
+                                                <p className="text-slate-300 text-xs italic mb-2">"{c.scenario}"</p>
+                                                <p className="text-slate-200 text-sm font-bold mb-2">S: {c.question}</p>
+                                                <p className="text-emerald-400 text-xs bg-emerald-900/40 p-2 rounded">J: {c.answer}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* X-RAYS */}
+                            {generatedData.xrays && (
+                                <div>
+                                    <h5 className="text-lg font-bold text-white mb-3 flex items-center"><span className="bg-violet-600 text-xs px-2 py-1 rounded mr-2">2 ta</span> Rentgenogramma</h5>
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {generatedData.xrays.map((x, idx) => (
+                                            <div key={idx} className="bg-slate-800 p-4 rounded-lg border border-slate-700 flex gap-4">
+                                                <div className="w-16 h-16 bg-slate-700 rounded flex items-center justify-center shrink-0 border border-dashed border-slate-500 text-slate-500 text-xs text-center p-1 cursor-pointer hover:bg-slate-600 transition-colors">
+                                                    <i className="fa-solid fa-cloud-arrow-up text-lg block mb-1"></i>
+                                                    Rasm yuklash
+                                                </div>
+                                                <div>
+                                                    <p className="text-violet-400 font-bold text-sm mb-1">{x.title}</p>
+                                                    <p className="text-slate-300 text-xs mb-2">{x.question}</p>
+                                                    <p className="text-emerald-400 text-xs bg-emerald-900/40 p-1 px-2 rounded inline-block">To'g'ri tashxis: {x.options && x.options[x.answer] ? x.options[x.answer] : x.answer}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* PRACTICAL */}
+                            {generatedData.practical && (
+                                <div>
+                                    <h5 className="text-lg font-bold text-white mb-3 flex items-center"><span className="bg-amber-600 text-xs px-2 py-1 rounded mr-2">1 ta</span> Amaliyot</h5>
+                                    <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                                        <p className="text-amber-400 font-bold text-sm mb-3">{generatedData.practical.title}</p>
+                                        <ul className="list-decimal list-inside text-xs text-slate-300 space-y-1">
+                                            {generatedData.practical.steps.map((s, idx) => (
+                                                <li key={idx}>{s}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>
