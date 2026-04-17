@@ -74,6 +74,18 @@ const QuizTaking = ({ onFinish, user }) => {
             setIsAnswered(false);
         } else {
             setShowResults(true);
+            
+            // Record to local profile history
+            const history = JSON.parse(localStorage.getItem('student_history')) || [];
+            history.unshift({
+                topic: currentQ.topic || "Mavzulashtirilgan Diagnostika",
+                score: score,
+                total: quizData.length,
+                percent: Math.round((score / quizData.length) * 100),
+                date: new Date().toLocaleDateString("en-GB")
+            });
+            localStorage.setItem('student_history', JSON.stringify(history));
+
             // Submit final score status
             if (user?.uid) {
                 setDoc(doc(db, "leaderboard", user.uid), {

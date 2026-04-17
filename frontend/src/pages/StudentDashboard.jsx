@@ -24,8 +24,13 @@ const StudentDashboard = ({ onNavigate, user }) => {
   const [activePin, setActivePin] = useState(null);
   const [pinError, setPinError] = useState('');
   const [sessions, setSessions] = useState([]);
+  const [studentHistory, setStudentHistory] = useState([]);
 
   useEffect(() => {
+    // Load local test history
+    const history = JSON.parse(localStorage.getItem('student_history')) || [];
+    setStudentHistory(history);
+
     const fetchData = async () => {
       if (!user?.uid) return;
       try {
@@ -167,34 +172,39 @@ const StudentDashboard = ({ onNavigate, user }) => {
              </div>
           </div>
 
-          <h2 className="text-xl font-bold text-white mb-4"><i className="fa-solid fa-book-medical text-blue-500 mr-2"></i> Davom ettirish</h2>
+          <h2 className="text-xl font-bold text-white mb-4"><i className="fa-solid fa-graduation-cap text-emerald-500 mr-2"></i> Mening Natijalarim (Portfolio)</h2>
           
-          <div className="bg-slate-800 rounded-2xl p-6 border-l-4 border-blue-500 shadow-md">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <span className="text-xs font-bold text-blue-400 bg-blue-900/30 px-2 py-1 rounded uppercase tracking-wide">Ortopediya va Travmatologiya</span>
-                <h3 className="text-lg font-bold text-white mt-2">Tayanch-harakat apparati qattiq sinishlari</h3>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-slate-300">
-                <i className="fa-solid fa-bone"></i>
-              </div>
-            </div>
-            
-            <div className="mb-4">
-              <div className="flex justify-between text-xs text-slate-400 mb-1">
-                <span>O'zlashtirish</span>
-                <span>65%</span>
-              </div>
-              <div className="w-full bg-slate-700 rounded-full h-2">
-                <div className="bg-blue-500 h-2 rounded-full" style={{ width: '65%' }}></div>
-              </div>
-            </div>
-            
-            <div className="flex gap-3">
-              <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium text-sm transition-colors flex-1 text-center">
-                <i className="fa-regular fa-circle-play mr-2"></i> Darsni davom ettirish
-              </button>
-            </div>
+          <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2 mb-8">
+            {studentHistory.length > 0 ? (
+                studentHistory.map((history, idx) => (
+                    <div key={idx} className="bg-slate-800 rounded-2xl p-5 border-l-4 border-emerald-500 shadow-md">
+                        <div className="flex justify-between items-start mb-3">
+                            <div>
+                                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded uppercase tracking-widest">{history.date}</span>
+                                <h3 className="text-base font-bold text-white mt-1 leading-tight">{history.topic}</h3>
+                            </div>
+                            <div className="text-right">
+                                <div className="text-xl font-black text-emerald-400">{history.score}<span className="text-slate-500 text-sm font-bold">/{history.total}</span></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div className="flex justify-between text-[10px] text-slate-400 mb-1 font-bold uppercase tracking-widest">
+                                <span>O'zlashtirish</span>
+                                <span>{history.percent}%</span>
+                            </div>
+                            <div className="w-full bg-slate-700 rounded-full h-2">
+                                <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${history.percent}%` }}></div>
+                            </div>
+                        </div>
+                    </div>
+                ))
+            ) : (
+                <div className="bg-slate-800/50 rounded-2xl p-8 border border-dashed border-slate-700 text-center text-slate-500">
+                    <i className="fa-solid fa-file-medical mb-3 text-3xl opacity-50 block"></i>
+                    <p className="font-medium text-sm">Hali hech qanday imtihon topshirmadingiz.</p>
+                </div>
+            )}
           </div>
 
           {/* New Methodology Component Link */}
