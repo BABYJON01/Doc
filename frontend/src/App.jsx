@@ -90,7 +90,7 @@ const LoginSelector = ({ user }) => {
         <div className="min-h-screen bg-slate-950 relative overflow-hidden flex items-center justify-center p-6 text-white font-sans">
             
             {/* Background Image / Building */}
-            <div className="absolute inset-0 bg-[url('/assets/tma_bg.jpg')] bg-cover bg-center bg-no-repeat opacity-30 pointer-events-none z-0"></div>
+            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=2600&auto=format&fit=crop')] bg-cover bg-center bg-no-repeat opacity-30 pointer-events-none z-0"></div>
             {/* Background Ambient Effects */}
             <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-900/90 to-slate-950/95 pointer-events-none z-0"></div>
             <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 blur-[120px] rounded-full pointer-events-none z-0"></div>
