@@ -5,6 +5,7 @@ import StudentDashboard from './pages/StudentDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
 import QuizTaking from './pages/QuizTaking';
 import Methodology from './pages/Methodology';
+import { AppProvider, AppToolbar, useApp } from './context/AppContext';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -46,6 +47,7 @@ import { collection, query, orderBy, limit, onSnapshot, setDoc, doc, serverTimes
 
 // Refactored LoginSelector with Firebase Auth
 const LoginSelector = ({ user }) => {
+    const { t } = useApp();
     const [recentUsers, setRecentUsers] = React.useState([]);
 
     React.useEffect(() => {
@@ -130,8 +132,8 @@ const LoginSelector = ({ user }) => {
                                     )}
                                     <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-emerald-600 flex items-center justify-center text-[11px] font-bold text-white shadow-lg">+2.4k</div>
                                 </div>
-                                <p>Oxirgi kirgan talabalar<br/><span className="text-emerald-400 text-xs truncate max-w-[150px] inline-block">
-                                    {recentUsers.length > 0 ? recentUsers.map(u => u.displayName.split(' ')[0]).join(', ') : "Ayni damda onlayn o'rganmoqda"}
+                                <p>{t.recentUsers}<br/><span className="text-emerald-400 text-xs truncate max-w-[150px] inline-block">
+                                    {recentUsers.length > 0 ? recentUsers.map(u => u.displayName.split(' ')[0]).join(', ') : t.onlineNow}
                                 </span></p>
                             </div>
                         </div>
@@ -146,17 +148,17 @@ const LoginSelector = ({ user }) => {
                                     <i className="fa-solid fa-user-doctor text-3xl text-emerald-400"></i>
                                 </div>
                                 
-                                <h2 className="text-3xl font-bold mb-2 tracking-tight text-white">Xush kelibsiz</h2>
-                                <p className="text-slate-400 text-sm mb-10 font-medium">Boshlash uchun Google akkauntingiz orqali xavfsiz tizimga kiring.</p>
+                                <h2 className="text-3xl font-bold mb-2 tracking-tight text-white">{t.loginTitle}</h2>
+                                <p className="text-slate-400 light:text-slate-600 text-sm mb-10 font-medium">{t.loginSubtitle}</p>
                                 
                                 <button onClick={handleGoogleLogin} className="w-full py-4 px-6 bg-white hover:bg-slate-100 transform hover:-translate-y-1 text-slate-800 rounded-xl font-black text-sm transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl hover:shadow-white/10 uppercase tracking-widest relative overflow-hidden">
                                     <div className="absolute inset-0 bg-slate-200 opacity-0 hover:opacity-20 transition-opacity duration-300"></div>
                                     <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6 mr-3 relative z-10" alt="Google Logo"/>
-                                    <span className="relative z-10">Google orqali davom etish</span>
+                                    <span className="relative z-10">{t.loginButton}</span>
                                 </button>
 
                                 <div className="mt-8 text-center text-xs text-slate-500 font-medium">
-                                    Davom etish orqali siz platformaning <br/><a href="#" className="text-blue-400 hover:text-blue-300 hover:underline transition-colors">Maxfiylik Siyosati</a> ga rozi bo'lasiz.
+                                    {t.loginPrivacy} <br/><a href="#" className="text-blue-400 hover:text-blue-300 hover:underline transition-colors">{t.loginPrivacyLink}</a> {t.loginPrivacyEnd}
                                 </div>
                             </div>
                         </div>
@@ -172,21 +174,21 @@ const LoginSelector = ({ user }) => {
                                 </div>
                             </div>
                             <button onClick={handleLogout} className="px-6 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg transition-colors shadow-lg shadow-rose-900/50">
-                                <i className="fa-solid fa-right-from-bracket mr-2"></i> Chiqish
+                                <i className="fa-solid fa-right-from-bracket mr-2"></i> {t.logout}
                             </button>
                          </div>
 
-                         <h3 className="text-xl font-bold text-slate-300 mb-6 uppercase tracking-widest border-b border-slate-700 pb-2">O'z rolingizni tanlang</h3>
+                         <h3 className="text-xl font-bold text-slate-300 mb-6 uppercase tracking-widest border-b border-slate-700 pb-2">{t.selectRole}</h3>
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                              <button onClick={() => window.location.href = '/student'} className="glass-card p-10 block border-t-4 border-emerald-500 hover:shadow-emerald-500/10 text-left transition-all">
                                  <i className="fa-solid fa-user-graduate text-5xl text-emerald-500 mb-6 block"></i>
-                                 <h2 className="text-xl font-bold mb-2">Talaba Ekraniga O'tish</h2>
-                                 <p className="text-sm text-slate-400">Interaktiv o'qish, testlar va XP malaka.</p>
+                                 <h2 className="text-xl font-bold mb-2">{t.studentPanel}</h2>
+                                 <p className="text-slate-400 text-sm">{t.studentDesc}</p>
                              </button>
                              <button onClick={() => window.location.href = '/teacher'} className="glass-card p-10 block border-t-4 border-blue-500 hover:shadow-blue-500/10 text-left transition-all">
-                                 <i className="fa-solid fa-user-doctor text-5xl text-blue-500 mb-6 block"></i>
-                                 <h2 className="text-xl font-bold mb-2">O'qituvchi Paneliga O'tish</h2>
-                                 <p className="text-sm text-slate-400">Kurslar, Case'lar yaratish va nazorat.</p>
+                                 <i className="fa-solid fa-chalkboard-teacher text-5xl text-blue-500 mb-6 block"></i>
+                                 <h2 className="text-xl font-bold mb-2">{t.teacherPanel}</h2>
+                                 <p className="text-slate-400 text-sm">{t.teacherDesc}</p>
                              </button>
                          </div>
                      </div>
@@ -223,22 +225,25 @@ const App = () => {
 
     return (
         <ErrorBoundary>
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/" element={<LoginSelector user={user} />} />
+            <AppProvider>
+                <AppToolbar />
+                <BrowserRouter>
+                    <Routes>
+                        <Route path="/" element={<LoginSelector user={user} />} />
 
-                    {/* Protected routes: redirect to login if not authenticated */}
-                    <Route path="/student" element={user ? <StudentDashboard onNavigate={(mode) => window.location.href = `/app?mode=${mode}`} user={user} /> : <Navigate to="/" replace />} />
-                    <Route path="/teacher" element={user ? <TeacherDashboard user={user} /> : <Navigate to="/" replace />} />
-                    <Route path="/test" element={user ? <QuizTaking user={user} onFinish={() => window.location.href = '/student'} /> : <Navigate to="/" replace />} />
-                    <Route path="/methodology" element={user ? <Methodology /> : <Navigate to="/" replace />} />
+                        {/* Protected routes: redirect to login if not authenticated */}
+                        <Route path="/student" element={user ? <StudentDashboard onNavigate={(mode) => window.location.href = `/app?mode=${mode}`} user={user} /> : <Navigate to="/" replace />} />
+                        <Route path="/teacher" element={user ? <TeacherDashboard user={user} /> : <Navigate to="/" replace />} />
+                        <Route path="/test" element={user ? <QuizTaking user={user} onFinish={() => window.location.href = '/student'} /> : <Navigate to="/" replace />} />
+                        <Route path="/methodology" element={user ? <Methodology /> : <Navigate to="/" replace />} />
 
 
-                    {/* The original duel/solo mode entry matches /app */}
-                    <Route path="/app" element={<MedZukkooApp />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-            </BrowserRouter>
+                        {/* The original duel/solo mode entry matches /app */}
+                        <Route path="/app" element={<MedZukkooApp />} />
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                </BrowserRouter>
+            </AppProvider>
         </ErrorBoundary>
     );
 };

@@ -7,9 +7,27 @@
 @layer base {
   body {
     @apply font-['Outfit',sans-serif] bg-slate-900 text-slate-100 antialiased overflow-x-hidden;
-    /* Soft dark mode background */
     background: radial-gradient(circle at top left, #1e293b 0%, #0f172a 100%);
     min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  /* ===== LIGHT MODE ===== */
+  html.light body {
+    @apply bg-slate-50 text-slate-900;
+    background: radial-gradient(circle at top left, #e2e8f0 0%, #f8fafc 100%);
+  }
+
+  html.light .glass-card {
+    @apply bg-white/80 border-slate-200 shadow-slate-200;
+  }
+
+  html.light .glass-card:hover {
+    @apply bg-white border-blue-400/50;
+  }
+
+  html.light .glass-panel {
+    @apply bg-black/5 border-black/10;
   }
 }
 
