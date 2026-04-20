@@ -5,6 +5,8 @@ import { useApp } from '../context/AppContext';
 
 const TeacherDashboard = ({ onNavigate, user }) => {
   const { t, lang } = useApp();
+  const isAdmin = user?.email === 'rahmonjonwarrior@gmail.com';
+
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [generatedData, setGeneratedData] = useState(null);
@@ -138,17 +140,19 @@ const TeacherDashboard = ({ onNavigate, user }) => {
             </span>
           </button>
 
-          {/* Quick switch: Student Panel */}
-          <button
-            onClick={() => window.location.href = '/student'}
-            title={lang === 'uz' ? "Talaba paneliga o'tish" : lang === 'ru' ? 'Перейти в кабинет студента' : 'Switch to Student Panel'}
-            className="flex items-center gap-2 px-3 py-2 bg-indigo-600/20 hover:bg-indigo-600 border border-indigo-500/40 hover:border-indigo-400 text-indigo-400 hover:text-white rounded-xl font-bold text-xs transition-all duration-200"
-          >
-            <i className="fa-solid fa-user-graduate text-sm"></i>
-            <span className="hidden sm:inline">
-              {lang === 'uz' ? 'Talaba' : lang === 'ru' ? 'Студент' : 'Student'}
-            </span>
-          </button>
+          {/* Quick switch: Student Panel (Admin only) */}
+          {isAdmin && (
+            <button
+              onClick={() => window.location.href = '/student'}
+              title={lang === 'uz' ? "Talaba paneliga o'tish" : lang === 'ru' ? 'Перейти в кабинет студента' : 'Switch to Student Panel'}
+              className="flex items-center gap-2 px-3 py-2 bg-indigo-600/20 hover:bg-indigo-600 border border-indigo-500/40 hover:border-indigo-400 text-indigo-400 hover:text-white rounded-xl font-bold text-xs transition-all duration-200"
+            >
+              <i className="fa-solid fa-user-graduate text-sm"></i>
+              <span className="hidden sm:inline">
+                {lang === 'uz' ? 'Talaba' : lang === 'ru' ? 'Студент' : 'Student'}
+              </span>
+            </button>
+          )}
 
           {/* Logout — icon only */}
           <button

@@ -36,6 +36,7 @@ const proficiencyData = {
 
 const StudentDashboard = ({ onNavigate, user }) => {
   const { t, lang } = useApp();
+  const isAdmin = user?.email === 'rahmonjonwarrior@gmail.com';
 
   const days = dayLabels[lang] || dayLabels.uz;
   const [xpHistory] = useState([
@@ -152,15 +153,17 @@ const StudentDashboard = ({ onNavigate, user }) => {
             <div className="w-px h-8 bg-slate-700" />
           </div>
 
-          {/* Quick switch → Teacher */}
-          <button
-            onClick={() => window.location.href = '/teacher'}
-            title={t.switchToTeacher}
-            className="flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600 border border-blue-500/40 hover:border-blue-400 text-blue-400 hover:text-white rounded-xl font-bold text-xs transition-all duration-200"
-          >
-            <i className="fa-solid fa-chalkboard-teacher text-sm"></i>
-            <span className="hidden sm:inline">{t.switchToTeacher}</span>
-          </button>
+          {/* Quick switch → Teacher (Admin only) */}
+          {isAdmin && (
+            <button
+              onClick={() => window.location.href = '/teacher'}
+              title={t.switchToTeacher}
+              className="flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600 border border-blue-500/40 hover:border-blue-400 text-blue-400 hover:text-white rounded-xl font-bold text-xs transition-all duration-200"
+            >
+              <i className="fa-solid fa-chalkboard-teacher text-sm"></i>
+              <span className="hidden sm:inline">{t.switchToTeacher}</span>
+            </button>
+          )}
 
           {/* Logout icon only */}
           <button
