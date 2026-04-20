@@ -5,6 +5,7 @@ const AppContext = createContext(null);
 // ==================== TRANSLATIONS ====================
 export const translations = {
   uz: {
+    // ── Auth ──────────────────────────────────────────
     loginTitle: "Xush kelibsiz",
     loginSubtitle: "Boshlash uchun Google akkauntingiz orqali xavfsiz tizimga kiring.",
     loginButton: "Google orqali davom etish",
@@ -13,7 +14,7 @@ export const translations = {
     loginPrivacyEnd: "ga rozi bo'lasiz.",
     recentUsers: "Oxirgi kirgan talabalar",
     onlineNow: "Ayni damda onlayn o'rganmoqda",
-    platformDesc: "Sun'iy intellektga asoslangan kelajak tibbiyot o'quv bazasi. Interaktiv klinik holatlar, tashxislash va xirurgiya simulyatorlari.",
+    platformDesc: "Sun'iy intellektga asoslangan kelajak tibbiyot o'quv bazasi. Travmatologiya, klinik holatlar, tasviriy diagnostika va xirurgiya simulyatorlari.",
     platformBadge: "Toshkent Tibbiyot Akademiyasi O'quv Bazasi",
     platformTitle: "Platformasi",
     selectRole: "O'z rolingizni tanlang",
@@ -23,11 +24,53 @@ export const translations = {
     teacherDesc: "AI orqali imtihon yaratish, statistika va nazorat",
     logout: "Chiqish",
     loading: "Yuklanmoqda...",
+
+    // ── Student Dashboard ─────────────────────────────
     myResults: "Mening Natijalarim (Portfolio)",
     noResults: "Hali hech qanday imtihon topshirmadingiz.",
     mastery: "O'zlashtirish",
     dashboard: "Bosh sahifa",
     back: "Orqaga",
+    switchToTeacher: "O'qituvchi",
+    switchToStudent: "Talaba",
+    levelLabel: "Daraja",
+
+    // Charts
+    weeklyXP: "Haftalik XP O'sishi",
+    subjectMastery: "Fanlar bo'yicha mahorat",
+
+    // Portfolio
+    portfolioTitle: "Mening Natijalarim (Portfolio)",
+
+    // Methodology
+    methodologyTitle: "Travmatologiya qo'llanmalari",
+    methodologyDesc: "Suyak sinishlari, Immobilizatsiya, Transport ko'tarish va Klinik Case-Study materiallari. (Bosib kiring)",
+
+    // Clinical Training
+    clinicalTitle: "Klinik Trening (Gamification)",
+    duelMode: "Konsilium Rejimi (Duel)",
+    duelDesc: "Real vaqtda raqiblar bilan travma tasviriy diagnostikasi.",
+    newCases: "Yangi Travma Case'lari",
+    newCasesDesc: "Mustaqil kunlik travma klinik keyslarni yechish (+50 XP).",
+
+    // Flashcards
+    flashcardsTitle: "AI Flashcards (Xotira)",
+    flashcardsNew: "Yangi",
+    flashcardsCount: "32 ta karta",
+    flashcardsTopicTitle: "Travmatologiya Asoslari",
+    flashcardsTopicDesc: "\"Tayanch-harakat apparati sinishlari va immobilizatsiya\" mavzusi bo'yicha AI tuzgan xotira kartalari.",
+    flashcardsStart: "Takrorlashni Boshlash",
+
+    // Achievements
+    achievementsTitle: "So'nggi Yutuqlar",
+    achievement1: "Travma Diagnostikasi Ustasi",
+    achievement2: "7 kun uzluksiz!",
+
+    // Sessions
+    pastSessions: "O'tgan sessiyalar",
+    correctAnswers: "ta to'g'ri javob",
+    unknownPin: "Noma'lum",
+
     // Live Quiz
     liveQuizTitle: "Live Quiz'ga ulanish",
     liveQuizDesc: "O'qituvchi aytgan 6 xonali maxsus PIN kodni kiriting va poygaga qo'shiling.",
@@ -58,7 +101,9 @@ export const translations = {
     youLabel: "Siz",
     points: "ball",
   },
+
   ru: {
+    // ── Auth ──────────────────────────────────────────
     loginTitle: "Добро пожаловать",
     loginSubtitle: "Войдите через аккаунт Google для безопасного доступа к платформе.",
     loginButton: "Продолжить через Google",
@@ -67,7 +112,7 @@ export const translations = {
     loginPrivacyEnd: "платформы.",
     recentUsers: "Последние вошедшие студенты",
     onlineNow: "Сейчас обучаются онлайн",
-    platformDesc: "Медицинская образовательная база на основе ИИ. Интерактивные клинические случаи, диагностика и симуляторы хирургии.",
+    platformDesc: "Медицинская образовательная база на основе ИИ. Травматология, клинические случаи, лучевая диагностика и симуляторы хирургии.",
     platformBadge: "Ташкентская медицинская академия — Учебная база",
     platformTitle: "Платформа",
     selectRole: "Выберите свою роль",
@@ -77,11 +122,53 @@ export const translations = {
     teacherDesc: "Генерация экзаменов через ИИ, статистика и контроль",
     logout: "Выйти",
     loading: "Загрузка...",
+
+    // ── Student Dashboard ─────────────────────────────
     myResults: "Мои Результаты (Портфолио)",
     noResults: "Вы ещё не прошли ни одного экзамена.",
     mastery: "Освоение",
     dashboard: "Главная",
     back: "Назад",
+    switchToTeacher: "Преподаватель",
+    switchToStudent: "Студент",
+    levelLabel: "Уровень",
+
+    // Charts
+    weeklyXP: "Недельный рост XP",
+    subjectMastery: "Успеваемость по дисциплинам",
+
+    // Portfolio
+    portfolioTitle: "Мои Результаты (Портфолио)",
+
+    // Methodology
+    methodologyTitle: "Пособия по травматологии",
+    methodologyDesc: "Переломы костей, иммобилизация, транспортировка и клинические разборы. (Нажмите для входа)",
+
+    // Clinical Training
+    clinicalTitle: "Клинический тренинг (геймификация)",
+    duelMode: "Режим Консилиума (Дуэль)",
+    duelDesc: "Лучевая диагностика травм в реальном времени против соперника.",
+    newCases: "Новые травма-кейсы",
+    newCasesDesc: "Ежедневные клинические разборы травматологии самостоятельно (+50 XP).",
+
+    // Flashcards
+    flashcardsTitle: "AI Флэш-карточки (Память)",
+    flashcardsNew: "Новое",
+    flashcardsCount: "32 карточки",
+    flashcardsTopicTitle: "Основы травматологии",
+    flashcardsTopicDesc: "ИИ-карточки по теме «Переломы ОДА, транспортная иммобилизация и гипсовая техника».",
+    flashcardsStart: "Начать повторение",
+
+    // Achievements
+    achievementsTitle: "Последние достижения",
+    achievement1: "Мастер диагностики травм",
+    achievement2: "7 дней без перерыва!",
+
+    // Sessions
+    pastSessions: "Прошедшие сессии",
+    correctAnswers: "правильных ответов",
+    unknownPin: "Неизвестно",
+
     // Live Quiz
     liveQuizTitle: "Подключиться к Live Quiz",
     liveQuizDesc: "Введите 6-значный PIN от преподавателя и присоединитесь к гонке.",
@@ -112,7 +199,9 @@ export const translations = {
     youLabel: "Вы",
     points: "очков",
   },
+
   en: {
+    // ── Auth ──────────────────────────────────────────
     loginTitle: "Welcome Back",
     loginSubtitle: "Sign in securely with your Google account to access the platform.",
     loginButton: "Continue with Google",
@@ -121,7 +210,7 @@ export const translations = {
     loginPrivacyEnd: ".",
     recentUsers: "Recently joined students",
     onlineNow: "Currently learning online",
-    platformDesc: "AI-powered medical education hub. Interactive clinical cases, diagnostics, and surgery simulators.",
+    platformDesc: "AI-powered medical education hub. Traumatology, interactive clinical cases, imaging diagnostics and surgery simulators.",
     platformBadge: "Tashkent Medical Academy — Learning Hub",
     platformTitle: "Platform",
     selectRole: "Choose your role",
@@ -131,11 +220,53 @@ export const translations = {
     teacherDesc: "AI-powered exam creation, statistics & monitoring",
     logout: "Sign Out",
     loading: "Loading...",
+
+    // ── Student Dashboard ─────────────────────────────
     myResults: "My Results (Portfolio)",
     noResults: "You haven't taken any exams yet.",
     mastery: "Mastery",
     dashboard: "Home",
     back: "Back",
+    switchToTeacher: "Teacher",
+    switchToStudent: "Student",
+    levelLabel: "Level",
+
+    // Charts
+    weeklyXP: "Weekly XP Growth",
+    subjectMastery: "Proficiency by Subject",
+
+    // Portfolio
+    portfolioTitle: "My Results (Portfolio)",
+
+    // Methodology
+    methodologyTitle: "Traumatology Study Guides",
+    methodologyDesc: "Bone fractures, immobilization, patient transport & clinical case studies. (Click to enter)",
+
+    // Clinical Training
+    clinicalTitle: "Clinical Training (Gamification)",
+    duelMode: "Consilium Mode (Duel)",
+    duelDesc: "Real-time trauma imaging diagnostics against opponents.",
+    newCases: "New Trauma Cases",
+    newCasesDesc: "Solve daily traumatology clinical cases independently (+50 XP).",
+
+    // Flashcards
+    flashcardsTitle: "AI Flashcards (Memory)",
+    flashcardsNew: "New",
+    flashcardsCount: "32 cards",
+    flashcardsTopicTitle: "Fundamentals of Traumatology",
+    flashcardsTopicDesc: "AI-generated flashcards on \"Musculoskeletal fractures, transport immobilization & plaster casting\".",
+    flashcardsStart: "Start Review",
+
+    // Achievements
+    achievementsTitle: "Recent Achievements",
+    achievement1: "Trauma Diagnostics Master",
+    achievement2: "7-day streak!",
+
+    // Sessions
+    pastSessions: "Past Sessions",
+    correctAnswers: "correct answers",
+    unknownPin: "Unknown",
+
     // Live Quiz
     liveQuizTitle: "Join Live Quiz",
     liveQuizDesc: "Enter the 6-digit PIN from your teacher and join the race.",
