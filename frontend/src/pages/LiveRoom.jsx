@@ -64,6 +64,7 @@ const LiveRoom = ({ user, quizData, onExit }) => {
     const [players, setPlayers] = useState([]);
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [copied, setCopied] = useState(false);
+    const [initError, setInitError] = useState("");
 
     // Initialize room directly
     useEffect(() => {
@@ -84,7 +85,8 @@ const LiveRoom = ({ user, quizData, onExit }) => {
                     setRoomStatus('lobby');
                 } catch (error) {
                     console.error("Firebase Room Create Error:", error);
-                    alert("Xatolik: " + error.message);
+                    setInitError(error.message || "Unknown error creating room");
+                    setRoomStatus('error');
                 }
             };
             initRoom();
@@ -144,6 +146,19 @@ const LiveRoom = ({ user, quizData, onExit }) => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
+
+    if (roomStatus === 'error') {
+        return (
+            <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
+                <div className="text-6xl mb-4">⚠️</div>
+                <h2 className="text-rose-500 font-bold text-xl mb-2">Live Quiz ochishda xatolik yuz berdi</h2>
+                <p className="text-slate-400 mb-6 bg-slate-800 p-4 rounded-lg font-mono text-sm">{initError}</p>
+                <button onClick={onExit} className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-colors">
+                    Orqaga qaytish
+                </button>
+            </div>
+        );
+    }
 
     if (roomStatus === 'initializing') {
         return <div className="min-h-screen bg-slate-900 flex items-center justify-center"><div className="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full" /></div>;
