@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, initializeFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -20,9 +20,20 @@ if (!firebaseConfig.apiKey) {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-
 // Initialize Services
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+
+// Use initializeFirestore instead of getFirestore to force long polling
+let firestoreDb;
+try {
+    firestoreDb = initializeFirestore(app, {
+        experimentalForceLongPolling: true
+    });
+} catch (e) {
+    // If it was already initialized, fallback
+    firestoreDb = getFirestore(app);
+}
+
+export const db = firestoreDb;
 export const googleProvider = new GoogleAuthProvider();
 
