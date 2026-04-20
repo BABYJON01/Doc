@@ -60,9 +60,9 @@ export const generateMedicalContent = async (inputData, isTopic = false) => {
 
         let promptContent = "";
         if (isTopic) {
-            promptContent = `Qat'iy raushda faqatgina ushbu tibbiy mavzuga e'tibor qarating: "${inputData}". O'zingizning chuqur tibbiy bilimlaringizdan foydalanib ushbu mavzu bo'yicha Imtihon to'plamini yarating.`;
+            promptContent = `Qat'iy ravishda faqatgina ushbu tibbiy mavzuga e'tibor qarating: "${inputData}". O'zingizning chuqur tibbiy bilimlaringizdan foydalanib ushbu mavzu bo'yicha imtihon to'plamini yarating. Diqqat: Savollar takrorlanmasin.`;
         } else {
-            promptContent = `Qat'iy raushda faqatgina ushbu yuklangan matnga e'tibor qarating: "${inputData.slice(0, 4000)}". Agar bu matn umuman tibbiyotga bog'liq bo'lmasa, return {"success": false, "message": "Not medical context"}. Agar bog'liq bo'lsa, xuddi shu matn asosida Imtihon to'plamini yarating.`;
+            promptContent = `Qat'iy ravishda faqatgina ushbu yuklangan matnga e'tibor qarating: "${inputData.slice(0, 4000)}". Agar bu matn umuman tibbiyotga bog'liq bo'lmasa, return {"success": false, "message": "Not medical context"}. Agar bog'liq bo'lsa, xuddi shu matn asosida imtihon to'plamini yarating. Diqqat: Barcha savollar mutlaqo turlicha va xilma-xil bo'lishi shart!`;
         }
 
         const chatCompletion = await client.chat.completions.create({
@@ -73,7 +73,7 @@ export const generateMedicalContent = async (inputData, isTopic = false) => {
                     content: `You are an expert Clinical Medicine AI evaluator.
                     Your task is to generate a Medical Exam Bundle strictly in JSON format.
                     The bundle MUST exactly follow the 15/2/2/1 structural format:
-                    - EXACTLY 15 multiple-choice questions (tests)
+                    - EXACTLY 15 multiple-choice questions (tests). IMPORTANT: EVERY SINGLE QUESTION MUST BE 100% UNIQUE. DO NOT REPEAT ANY CONCEPT OR QUESTION TEXT!
                     - EXACTLY 2 situational clinical case studies (cases)
                     - EXACTLY 2 X-ray diagnostic scenarios (xrays)
                     - EXACTLY 1 practical manual skill step-by-step procedure (practical)
@@ -92,9 +92,9 @@ export const generateMedicalContent = async (inputData, isTopic = false) => {
                     content: promptContent
                 }
             ],
-            model: "llama-3.1-8b-instant",
+            model: "llama-3.3-70b-versatile",
             response_format: { type: "json_object" },
-            temperature: 0.3
+            temperature: 0.6
         });
 
         const response = JSON.parse(chatCompletion.choices[0].message.content);

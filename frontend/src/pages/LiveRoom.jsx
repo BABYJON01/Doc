@@ -59,11 +59,37 @@ const Podium = ({ players }) => {
 const LiveRoom = ({ user, quizData, onExit }) => {
     const { t, lang } = useApp();
     const [pin, setPin] = useState(null);
-    const [mode, setMode] = useState(null);
-    const [roomStatus, setRoomStatus] = useState('choosing');
+    const [mode, setMode] = useState('classic');
+    const [roomStatus, setRoomStatus] = useState('initializing');
     const [players, setPlayers] = useState([]);
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [copied, setCopied] = useState(false);
+
+    // Initialize room directly
+    useEffect(() => {
+        if (roomStatus === 'initializing') {
+            const initRoom = async () => {
+                try {
+                    const newPin = generatePin();
+                    setPin(newPin);
+                    await setDoc(doc(db, 'rooms', newPin), {
+                        teacherId: user?.uid || 'unknown',
+                        teacherName: user?.displayName || user?.email || "O'qituvchi",
+                        status: 'lobby',
+                        mode: 'classic',
+                        quizData: quizData || [],
+                        currentQuestion: 0,
+                        createdAt: serverTimestamp(),
+                    });
+                    setRoomStatus('lobby');
+                } catch (error) {
+                    console.error("Firebase Room Create Error:", error);
+                    alert("Xatolik: " + error.message);
+                }
+            };
+            initRoom();
+        }
+    }, [roomStatus, user, quizData]);
 
     // Listen to players
     useEffect(() => {
@@ -88,26 +114,7 @@ const LiveRoom = ({ user, quizData, onExit }) => {
         return () => unsubscribe();
     }, [pin]);
 
-    const handleChooseMode = async (selectedMode) => {
-        try {
-            const newPin = generatePin();
-            setPin(newPin);
-            setMode(selectedMode);
-            await setDoc(doc(db, 'rooms', newPin), {
-                teacherId: user?.uid || 'unknown',
-                teacherName: user?.displayName || user?.email || "O'qituvchi",
-                status: 'lobby',
-                mode: selectedMode,
-                quizData: quizData || [],
-                currentQuestion: 0,
-                createdAt: serverTimestamp(),
-            });
-            setRoomStatus('lobby');
-        } catch (error) {
-            console.error("Firebase Room Create Error:", error);
-            alert("Xatolik: " + error.message);
-        }
-    };
+
 
     const handleStartGame = async () => {
         await updateDoc(doc(db, 'rooms', pin), {
@@ -132,103 +139,14 @@ const LiveRoom = ({ user, quizData, onExit }) => {
         }
     };
 
-    const handleEndGame = async () => {
-        await updateDoc(doc(db, 'rooms', pin), {
-            status: 'finished',
-            finishedAt: serverTimestamp(),
-        });
-        setRoomStatus('finished');
-    };
-
     const copyPin = () => {
         navigator.clipboard.writeText(pin);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
 
-    // ════════════════════════════════════════════════════════
-    // CHOOSING MODE
-    if (roomStatus === 'choosing') {
-        return (
-            <div className="min-h-screen bg-slate-900 text-white font-sans p-6 flex items-center justify-center">
-                <div className="max-w-2xl w-full">
-                    <button onClick={onExit} className="mb-8 text-slate-400 hover:text-white flex items-center gap-2 text-sm transition-colors">
-                        <i className="fa-solid fa-arrow-left"></i>
-                        {lang === 'uz' ? 'Orqaga' : lang === 'ru' ? 'Назад' : 'Back'}
-                    </button>
-
-                    {/* Logo + Title */}
-                    <div className="flex items-center gap-4 mb-6">
-                        <img src="/assets/tma_logo.png" alt="TMA" className="w-12 h-12 rounded-full border-2 border-blue-400/50 shadow-[0_0_15px_rgba(59,130,246,0.3)]" />
-                        <div>
-                            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-                                <i className="fa-solid fa-tower-broadcast text-rose-500 animate-pulse"></i>
-                                {lang === 'uz' ? 'Live Test Rejimini Tanlang' : lang === 'ru' ? 'Выберите режим Live теста' : 'Choose Live Quiz Mode'}
-                            </h1>
-                            <p className="text-slate-400 text-sm mt-1">
-                                {lang === 'uz' ? 'Talabalar bilan birga real vaqtda musobaqalashish rejimini tanlang'
-                                    : lang === 'ru' ? 'Выберите режим соревнования со студентами в реальном времени'
-                                    : 'Choose a real-time competition mode with your students'}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Classic Kahoot */}
-                        <button
-                            onClick={() => handleChooseMode('classic')}
-                            className="bg-slate-800 border-2 border-slate-700 hover:border-blue-500 rounded-2xl p-8 text-left transition-all hover:shadow-[0_0_30px_rgba(59,130,246,0.2)] group"
-                        >
-                            <div className="text-5xl mb-5">🎮</div>
-                            <h2 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
-                                {lang === 'uz' ? 'Klassik Kahoot' : lang === 'ru' ? 'Классический Kahoot' : 'Classic Kahoot'}
-                            </h2>
-                            <p className="text-slate-400 text-sm leading-relaxed">
-                                {lang === 'uz'
-                                    ? 'Siz proyektor orqali savollarni katta ekranda ko\'rsatasiz. Talabalar ekranida faqat A, B, C, D tugmalar chiqadi. Keyingi savolga o\'tishni Siz boshqarasiz.'
-                                    : lang === 'ru'
-                                    ? 'Вы показываете вопросы на большом экране через проектор. На экране студентов видны только кнопки A, B, C, D. Переход к следующему вопросу контролируете вы.'
-                                    : 'You display questions on a big screen via projector. Students only see A, B, C, D buttons. You control when to advance to the next question.'}
-                            </p>
-                            <div className="mt-4 flex flex-wrap gap-2">
-                                <span className="text-xs bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full border border-blue-500/30">
-                                    {lang === 'uz' ? 'Proyektor' : lang === 'ru' ? 'Проектор' : 'Projector'}
-                                </span>
-                                <span className="text-xs bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full border border-blue-500/30">
-                                    {lang === 'uz' ? 'Sinxronizatsiya' : lang === 'ru' ? 'Синхронизация' : 'Synchronized'}
-                                </span>
-                            </div>
-                        </button>
-
-                        {/* Free Race */}
-                        <button
-                            onClick={() => handleChooseMode('race')}
-                            className="bg-slate-800 border-2 border-slate-700 hover:border-rose-500 rounded-2xl p-8 text-left transition-all hover:shadow-[0_0_30px_rgba(244,63,94,0.2)] group"
-                        >
-                            <div className="text-5xl mb-5">🚀</div>
-                            <h2 className="text-xl font-bold text-white mb-2 group-hover:text-rose-400 transition-colors">
-                                {lang === 'uz' ? 'Erkin Poyga' : lang === 'ru' ? 'Свободная гонка' : 'Speed Race'}
-                            </h2>
-                            <p className="text-slate-400 text-sm leading-relaxed">
-                                {lang === 'uz'
-                                    ? 'Siz "Start" ni bossangiz, hamma bir paytda poyga qilib test yechadi. Kim tezroq va to\'g\'ri javob bersa, reytingda yuqoriga ko\'tariladi.'
-                                    : lang === 'ru'
-                                    ? 'После нажатия «Start» все одновременно соревнуются в тесте. Кто быстрее и правильнее — тот выше в рейтинге.'
-                                    : 'Once you press Start, everyone races at the same time. Faster correct answers = higher ranking.'}
-                            </p>
-                            <div className="mt-4 flex flex-wrap gap-2">
-                                <span className="text-xs bg-rose-500/20 text-rose-400 px-3 py-1 rounded-full border border-rose-500/30">
-                                    {lang === 'uz' ? 'Tezkorlik' : lang === 'ru' ? 'Скорость' : 'Speed'}
-                                </span>
-                                <span className="text-xs bg-rose-500/20 text-rose-400 px-3 py-1 rounded-full border border-rose-500/30">
-                                    {lang === 'uz' ? 'Mustaqil poyga' : lang === 'ru' ? 'Самостоятельная гонка' : 'Independent race'}
-                                </span>
-                            </div>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
+    if (roomStatus === 'initializing') {
+        return <div className="min-h-screen bg-slate-900 flex items-center justify-center"><div className="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full" /></div>;
     }
 
     // ════════════════════════════════════════════════════════
@@ -328,7 +246,7 @@ const LiveRoom = ({ user, quizData, onExit }) => {
                                 : `Start Game (${players.length} students)`}
                         </button>
                         <button
-                            onClick={() => setRoomStatus('choosing')}
+                            onClick={onExit}
                             className="px-6 py-5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors"
                         >
                             {lang === 'uz' ? 'Bekor' : lang === 'ru' ? 'Отмена' : 'Cancel'}
