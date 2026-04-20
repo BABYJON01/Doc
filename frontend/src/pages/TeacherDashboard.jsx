@@ -107,7 +107,7 @@ const TeacherDashboard = ({ onNavigate, user }) => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans p-6">
+    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans p-6 pt-20 sm:pt-20">
       <header className="flex justify-between items-center bg-slate-800 p-4 rounded-2xl shadow-lg border border-slate-700 border-t-4 border-t-blue-500 mb-8">
         {/* LEFT: Logo + Profile */}
         <div className="flex items-center gap-3">
@@ -123,8 +123,8 @@ const TeacherDashboard = ({ onNavigate, user }) => {
           />
           <div>
             <h1 className="text-base font-bold leading-tight">{user?.displayName || "O'qituvchi"}</h1>
-            <p className="text-slate-400 text-xs">{user?.email || ''}</p>
-            <div className="text-[9px] text-blue-400 font-bold uppercase tracking-widest">
+            <p className="text-slate-400 text-[11px] font-medium tracking-wide">Toshkent Davlat Tibbiyot Universiteti</p>
+            <div className="text-[9px] text-blue-400 font-bold uppercase tracking-widest mt-0.5">
               {lang === 'uz' ? "O'QITUVCHI PANELI" : lang === 'ru' ? 'ПАНЕЛЬ ПРЕПОДАВАТЕЛЯ' : 'TEACHER PANEL'} • MED-ZUKKOO
             </div>
           </div>

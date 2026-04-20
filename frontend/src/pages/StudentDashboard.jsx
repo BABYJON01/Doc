@@ -110,7 +110,7 @@ const StudentDashboard = ({ onNavigate, user }) => {
 
   // ════════════════════════════════════════════════════════
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans p-4 sm:p-6 mb-20">
+    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans p-4 sm:p-6 pt-20 sm:pt-20 mb-20">
 
       {/* ── HEADER ──────────────────────────────────────── */}
       <header className="flex justify-between items-center bg-slate-800 p-4 rounded-2xl shadow-lg border border-slate-700 mb-8">
@@ -128,8 +128,8 @@ const StudentDashboard = ({ onNavigate, user }) => {
           />
           <div>
             <h1 className="text-base font-bold leading-tight">{user?.displayName || 'Talaba'}</h1>
-            <p className="text-slate-400 text-xs">{user?.email || ''}</p>
-            <div className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest">MED-ZUKKOO PLATFORM</div>
+            <p className="text-slate-400 text-[11px] font-medium tracking-wide">Toshkent Davlat Tibbiyot Universiteti</p>
+            <div className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest mt-0.5">MED-ZUKKOO PLATFORM</div>
           </div>
         </div>
 
