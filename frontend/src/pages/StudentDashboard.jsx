@@ -98,44 +98,69 @@ const StudentDashboard = ({ onNavigate, user }) => {
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 font-sans p-6 mb-20">
       {/* Header Profile & Stats */}
-      <header className="flex justify-between items-center bg-slate-800 p-5 rounded-2xl shadow-lg border border-slate-700 mb-8 relative">
-        <div className="flex items-center gap-4">
-          {/* TMA Logo */}
+      <header className="flex justify-between items-center bg-slate-800 p-4 rounded-2xl shadow-lg border border-slate-700 mb-8 relative">
+        {/* LEFT: Logo + Profile */}
+        <div className="flex items-center gap-3">
           <img
             src="/assets/tma_logo.png"
             alt="TMA"
-            className="w-12 h-12 rounded-full border-2 border-blue-400/50 shadow-[0_0_12px_rgba(59,130,246,0.3)] hidden sm:block"
+            className="w-11 h-11 rounded-full border-2 border-blue-400/50 shadow-[0_0_12px_rgba(59,130,246,0.3)] hidden sm:block flex-shrink-0"
           />
           <img
             src={user?.photoURL || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"}
             alt="Profile"
-            className="w-14 h-14 rounded-full border-4 border-emerald-500 shadow-[0_0_15px_rgba(5,150,105,0.4)]"
+            className="w-12 h-12 rounded-full border-3 border-emerald-500 shadow-[0_0_12px_rgba(5,150,105,0.4)] flex-shrink-0"
           />
           <div>
-            <h1 className="text-xl font-bold">{user?.displayName || 'Talaba'}</h1>
-            <p className="text-slate-400 text-sm">{user?.email || ''}</p>
-            <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mt-0.5">Med-Zukkoo Platform</div>
+            <h1 className="text-base font-bold leading-tight">{user?.displayName || 'Talaba'}</h1>
+            <p className="text-slate-400 text-xs">{user?.email || ''}</p>
+            <div className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest">MED-ZUKKOO PLATFORM</div>
           </div>
         </div>
-        
-        <div className="flex gap-4 items-center">
-          <button onClick={() => window.location.href = '/'} className="px-4 py-2 bg-slate-700 hover:bg-rose-600 text-white rounded-lg font-bold text-sm transition-colors">
-            <i className="fa-solid fa-right-from-bracket mr-2"></i>{t.logout}
+
+        {/* RIGHT: Stats + Quick nav + Logout icon */}
+        <div className="flex items-center gap-2">
+          {/* XP & Level — hidden on small screens */}
+          <div className="hidden lg:flex items-center gap-3 mr-2">
+            <div className="text-center">
+              <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">{lang === 'en' ? 'Level' : lang === 'ru' ? 'Уровень' : 'Daraja'}</p>
+              <div className="text-base font-black text-blue-400 flex items-center gap-1">
+                <i className="fa-solid fa-star text-xs"></i> 7
+              </div>
+            </div>
+            <div className="w-px h-8 bg-slate-700" />
+            <div className="text-center">
+              <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">XP</p>
+              <div className="text-base font-black text-emerald-400 flex items-center gap-1">
+                <i className="fa-solid fa-fire text-xs"></i> 14,250
+              </div>
+            </div>
+            <div className="w-px h-8 bg-slate-700" />
+          </div>
+
+          {/* Quick switch: Teacher Panel */}
+          <button
+            onClick={() => window.location.href = '/teacher'}
+            title={lang === 'uz' ? "O'qituvchi paneliga o'tish" : lang === 'ru' ? 'Перейти в панель преподавателя' : 'Switch to Teacher Panel'}
+            className="flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600 border border-blue-500/40 hover:border-blue-400 text-blue-400 hover:text-white rounded-xl font-bold text-xs transition-all duration-200 group"
+          >
+            <i className="fa-solid fa-chalkboard-teacher text-sm"></i>
+            <span className="hidden sm:inline">
+              {lang === 'uz' ? "O'qituvchi" : lang === 'ru' ? 'Преподаватель' : 'Teacher'}
+            </span>
           </button>
-          <div className="text-center hidden md:block">
-            <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">{lang === 'uz' ? 'Malaka' : lang === 'ru' ? 'Уровень' : 'Level'}</p>
-            <div className="text-xl font-black text-blue-400 flex justify-center items-center gap-1">
-              <i className="fa-solid fa-star text-sm"></i> 7
-            </div>
-          </div>
-          <div className="text-center border-l border-slate-600 pl-4 hidden md:block">
-            <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">XP</p>
-            <div className="text-xl font-black text-emerald-400 flex justify-center items-center gap-1">
-              <i className="fa-solid fa-fire text-sm"></i> 14,250
-            </div>
-          </div>
+
+          {/* Logout — icon only, at the very edge */}
+          <button
+            onClick={() => window.location.href = '/'}
+            title={t.logout}
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-700/60 hover:bg-rose-600 border border-slate-600 hover:border-rose-500 text-slate-400 hover:text-white transition-all duration-200 flex-shrink-0"
+          >
+            <i className="fa-solid fa-right-from-bracket text-sm"></i>
+          </button>
         </div>
       </header>
+
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
