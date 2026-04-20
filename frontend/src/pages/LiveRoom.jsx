@@ -71,9 +71,12 @@ const LiveRoom = ({ user, quizData, onExit }) => {
         if (roomStatus === 'initializing') {
             const initRoom = async () => {
                 try {
+                    console.log("🔥 initRoom triggered with mode:", mode);
                     const newPin = generatePin();
+                    console.log("🔥 Generated PIN:", newPin);
                     setPin(newPin);
-                    await setDoc(doc(db, 'rooms', newPin), {
+                    
+                    const payload = {
                         teacherId: user?.uid || 'unknown',
                         teacherName: user?.displayName || user?.email || "O'qituvchi",
                         status: 'lobby',
@@ -81,10 +84,25 @@ const LiveRoom = ({ user, quizData, onExit }) => {
                         quizData: quizData || [],
                         currentQuestion: 0,
                         createdAt: serverTimestamp(),
+                    };
+                    console.log("🔥 Payload to save:", payload);
+
+                    // Add a timeout just in case network hangs forever
+                    let timerId;
+                    const timeoutPromise = new Promise((_, reject) => {
+                        timerId = setTimeout(() => reject(new Error("Firebase ulanish vaqti tugadi (Timeout). Tarmoq muammosi bo'lishi mumkin.")), 8000);
                     });
+                    
+                    await Promise.race([
+                        setDoc(doc(db, 'rooms', newPin), payload),
+                        timeoutPromise
+                    ]);
+                    clearTimeout(timerId);
+                    
+                    console.log("🔥 Room successfully created in Firebase!");
                     setRoomStatus('lobby');
                 } catch (error) {
-                    console.error("Firebase Room Create Error:", error);
+                    console.error("🔥 Firebase Room Create Error:", error);
                     setInitError(error.message || "Unknown error creating room");
                     setRoomStatus('error');
                 }
