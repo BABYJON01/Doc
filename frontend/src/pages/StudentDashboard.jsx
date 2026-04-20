@@ -76,7 +76,7 @@ const StudentDashboard = ({ onNavigate, user }) => {
   const handleJoinLiveQuiz = () => {
     const cleaned = pinInput.replace(/\s/g, '');
     if (cleaned.length !== 6 || isNaN(cleaned)) {
-      setPinError('PIN 6 ta raqamdan iborat bo\'lishi kerak!');
+      setPinError(t.liveQuizPinError);
       return;
     }
     setPinError('');
@@ -98,33 +98,40 @@ const StudentDashboard = ({ onNavigate, user }) => {
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 font-sans p-6 mb-20">
       {/* Header Profile & Stats */}
-      <header className="flex justify-between items-center bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 mb-8 relative">
+      <header className="flex justify-between items-center bg-slate-800 p-5 rounded-2xl shadow-lg border border-slate-700 mb-8 relative">
         <div className="flex items-center gap-4">
+          {/* TMA Logo */}
+          <img
+            src="/assets/tma_logo.png"
+            alt="TMA"
+            className="w-12 h-12 rounded-full border-2 border-blue-400/50 shadow-[0_0_12px_rgba(59,130,246,0.3)] hidden sm:block"
+          />
           <img
             src={user?.photoURL || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"}
             alt="Profile"
-            className="w-16 h-16 rounded-full border-4 border-emerald-500 shadow-[0_0_15px_rgba(5,150,105,0.4)]"
+            className="w-14 h-14 rounded-full border-4 border-emerald-500 shadow-[0_0_15px_rgba(5,150,105,0.4)]"
           />
           <div>
-            <h1 className="text-2xl font-bold">{user?.displayName || 'Talaba'}</h1>
-            <p className="text-slate-400">{user?.email || ''}</p>
+            <h1 className="text-xl font-bold">{user?.displayName || 'Talaba'}</h1>
+            <p className="text-slate-400 text-sm">{user?.email || ''}</p>
+            <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mt-0.5">Med-Zukkoo Platform</div>
           </div>
         </div>
         
-        <div className="flex gap-6 items-center">
-          <button onClick={() => window.location.href = '/'} className="px-4 py-2 bg-slate-700 hover:bg-rose-600 text-white rounded-lg font-bold text-sm transition-colors mr-4">
-            <i className="fa-solid fa-right-from-bracket mr-2"></i> Chiqish
+        <div className="flex gap-4 items-center">
+          <button onClick={() => window.location.href = '/'} className="px-4 py-2 bg-slate-700 hover:bg-rose-600 text-white rounded-lg font-bold text-sm transition-colors">
+            <i className="fa-solid fa-right-from-bracket mr-2"></i>{t.logout}
           </button>
-          <div className="text-center">
-            <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">Malaka Darajasi</p>
-            <div className="text-2xl font-black text-blue-400 flex justify-center items-center gap-2">
-              <i className="fa-solid fa-star"></i> 7-Daraja
+          <div className="text-center hidden md:block">
+            <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">{lang === 'uz' ? 'Malaka' : lang === 'ru' ? 'Уровень' : 'Level'}</p>
+            <div className="text-xl font-black text-blue-400 flex justify-center items-center gap-1">
+              <i className="fa-solid fa-star text-sm"></i> 7
             </div>
           </div>
-          <div className="text-center border-l border-slate-600 pl-6">
-            <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">Umumiy XP</p>
-            <div className="text-2xl font-black text-emerald-400 flex justify-center items-center gap-2">
-              <i className="fa-solid fa-fire"></i> 14,250
+          <div className="text-center border-l border-slate-600 pl-4 hidden md:block">
+            <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">XP</p>
+            <div className="text-xl font-black text-emerald-400 flex justify-center items-center gap-1">
+              <i className="fa-solid fa-fire text-sm"></i> 14,250
             </div>
           </div>
         </div>
@@ -241,30 +248,52 @@ const StudentDashboard = ({ onNavigate, user }) => {
         {/* Right Column - Gamification & AI */}
         <div className="space-y-6">
           {/* Live Quiz PIN Join Box */}
-          <div className="bg-gradient-to-br from-emerald-900/40 to-slate-800 rounded-2xl p-6 border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.1)] mb-6">
-            <h3 className="font-bold text-white mb-2 text-center text-lg">
-               <i className="fa-solid fa-tower-broadcast text-emerald-400 mr-2 animate-pulse"></i> Live Quiz'ga ulanish
-            </h3>
-            <p className="text-xs text-slate-400 mb-4 text-center">
-              O'qituvchi aytgan 6 xonali maxsus PIN kodni kiriting va poygaga qo'shiling.
-            </p>
-            <div className="flex bg-slate-900 border border-slate-700 rounded-xl overflow-hidden mb-2 shadow-inner">
-               <input 
-                 type="text" 
-                 value={pinInput}
-                 onChange={(e) => setPinInput(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
-                 placeholder="6 xonali PIN" 
-                 className="flex-1 bg-transparent px-4 py-3 text-center text-2xl font-black text-emerald-400 tracking-[0.2em] outline-none w-full"
-               />
+          <div className="rounded-2xl border border-emerald-500/30 overflow-hidden shadow-[0_0_25px_rgba(16,185,129,0.15)] mb-6" style={{ background: 'linear-gradient(135deg, rgba(6,78,59,0.3) 0%, rgba(30,41,59,0.9) 100%)' }}>
+            {/* Card header with logo */}
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-emerald-500/20 bg-emerald-600/10">
+              <img src="/assets/tma_logo.png" alt="TMA" className="w-9 h-9 rounded-full border border-emerald-400/40" />
+              <div>
+                <h3 className="font-black text-white text-base flex items-center gap-2">
+                  <i className="fa-solid fa-tower-broadcast text-emerald-400 animate-pulse text-sm"></i>{t.liveQuizTitle}
+                </h3>
+                <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Med-Zukkoo Live</div>
+              </div>
             </div>
-            {pinError && <p className="text-rose-400 text-xs text-center mb-2 font-bold">{pinError}</p>}
-            <button 
-              onClick={handleJoinLiveQuiz}
-              disabled={pinInput.length !== 6}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl py-3 font-bold transition-all shadow-lg"
-            >
-              Ulanish <i className="fa-solid fa-arrow-right ml-1"></i>
-            </button>
+            <div className="p-5">
+              <p className="text-xs text-slate-400 mb-4 text-center">{t.liveQuizDesc}</p>
+              <div
+                className="flex rounded-xl overflow-hidden mb-2 shadow-inner border transition-all"
+                style={{
+                  background: 'rgba(15,23,42,0.8)',
+                  borderColor: pinInput.length === 6 ? '#10b981' : '#334155',
+                  boxShadow: pinInput.length === 6 ? '0 0 15px rgba(16,185,129,0.25)' : 'none',
+                }}
+              >
+                <input
+                  type="text"
+                  value={pinInput}
+                  onChange={(e) => setPinInput(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                  placeholder={t.liveQuizPinPlaceholder}
+                  className="flex-1 bg-transparent px-4 py-3 text-center text-2xl font-black tracking-[0.3em] outline-none w-full"
+                  style={{ color: pinInput.length === 6 ? '#10b981' : '#94a3b8' }}
+                  onKeyDown={(e) => e.key === 'Enter' && pinInput.length === 6 && handleJoinLiveQuiz()}
+                />
+              </div>
+              {/* Dot indicators */}
+              <div className="flex justify-center gap-1.5 mb-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className={`w-2 h-2 rounded-full transition-all duration-200 ${i < pinInput.length ? 'bg-emerald-400 scale-110' : 'bg-slate-700'}`} />
+                ))}
+              </div>
+              {pinError && <p className="text-rose-400 text-xs text-center mb-2 font-bold">{pinError}</p>}
+              <button
+                onClick={handleJoinLiveQuiz}
+                disabled={pinInput.length !== 6}
+                className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl py-3 font-bold transition-all shadow-lg hover:shadow-emerald-900/50 hover:scale-[1.01] active:scale-95"
+              >
+                {t.liveQuizJoin} <i className="fa-solid fa-arrow-right ml-1"></i>
+              </button>
+            </div>
           </div>
 
           {/* Session History */}

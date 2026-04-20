@@ -28,6 +28,35 @@ export const translations = {
     mastery: "O'zlashtirish",
     dashboard: "Bosh sahifa",
     back: "Orqaga",
+    // Live Quiz
+    liveQuizTitle: "Live Quiz'ga ulanish",
+    liveQuizDesc: "O'qituvchi aytgan 6 xonali maxsus PIN kodni kiriting va poygaga qo'shiling.",
+    liveQuizJoin: "Ulanish",
+    liveQuizPinPlaceholder: "6 xonali PIN",
+    liveQuizPinError: "PIN 6 ta raqamdan iborat bo'lishi kerak!",
+    waitingForTeacher: "O'qituvchi o'yinni boshlaganini kuting...",
+    yourName: "Sizning ismingiz",
+    waitingRoom: "Kutish zalida",
+    persons: "kishi",
+    questionOf: "Savol",
+    yourScore: "Ballingiz",
+    correct: "To'g'ri",
+    rank: "O'rin",
+    quizFinished: "Test Yakunlandi!",
+    resultSaved: "Sizning natijangiz saqlab qo'yildi",
+    finalRanking: "Yakuniy Reyting",
+    backToStudent: "Talaba paneliga qaytish",
+    readQuestion: "Savolni katta ekrandan o'qing va javobni tanlang",
+    waitForNext: "O'qituvchi keyingi savolga o'tishini kuting...",
+    correctAnswer: "To'g'ri! +100 ball",
+    wrongAnswer: "Xato! 0 ball",
+    liveRanking: "Jonli Reyting",
+    timeLeft: "Vaqt",
+    roomNotFound: "Xona topilmadi. PIN kodni tekshiring.",
+    gameAlreadyOver: "Bu o'yin allaqachon tugagan.",
+    connectionError: "Xonaga ulashda muammo bo'ldi.",
+    youLabel: "Siz",
+    points: "ball",
   },
   ru: {
     loginTitle: "Добро пожаловать",
@@ -53,11 +82,93 @@ export const translations = {
     mastery: "Освоение",
     dashboard: "Главная",
     back: "Назад",
+    // Live Quiz
+    liveQuizTitle: "Подключиться к Live Quiz",
+    liveQuizDesc: "Введите 6-значный PIN от преподавателя и присоединитесь к гонке.",
+    liveQuizJoin: "Подключиться",
+    liveQuizPinPlaceholder: "6-значный PIN",
+    liveQuizPinError: "PIN должен состоять из 6 цифр!",
+    waitingForTeacher: "Ожидайте начала игры от преподавателя...",
+    yourName: "Ваше имя",
+    waitingRoom: "В зале ожидания",
+    persons: "чел.",
+    questionOf: "Вопрос",
+    yourScore: "Ваши очки",
+    correct: "Правильно",
+    rank: "Место",
+    quizFinished: "Тест завершён!",
+    resultSaved: "Ваш результат сохранён",
+    finalRanking: "Итоговый рейтинг",
+    backToStudent: "Вернуться в кабинет студента",
+    readQuestion: "Читайте вопрос с большого экрана и выберите ответ",
+    waitForNext: "Ожидайте следующего вопроса от преподавателя...",
+    correctAnswer: "Верно! +100 очков",
+    wrongAnswer: "Неверно! 0 очков",
+    liveRanking: "Живой рейтинг",
+    timeLeft: "Время",
+    roomNotFound: "Комната не найдена. Проверьте PIN.",
+    gameAlreadyOver: "Эта игра уже завершена.",
+    connectionError: "Проблема подключения к комнате.",
+    youLabel: "Вы",
+    points: "очков",
+  },
+  en: {
+    loginTitle: "Welcome Back",
+    loginSubtitle: "Sign in securely with your Google account to access the platform.",
+    loginButton: "Continue with Google",
+    loginPrivacy: "By continuing, you agree to the platform's",
+    loginPrivacyLink: "Privacy Policy",
+    loginPrivacyEnd: ".",
+    recentUsers: "Recently joined students",
+    onlineNow: "Currently learning online",
+    platformDesc: "AI-powered medical education hub. Interactive clinical cases, diagnostics, and surgery simulators.",
+    platformBadge: "Tashkent Medical Academy — Learning Hub",
+    platformTitle: "Platform",
+    selectRole: "Choose your role",
+    studentPanel: "Go to Student Dashboard",
+    studentDesc: "Quizzes, lessons, leaderboard & AI recommendations",
+    teacherPanel: "Go to Teacher Panel",
+    teacherDesc: "AI-powered exam creation, statistics & monitoring",
+    logout: "Sign Out",
+    loading: "Loading...",
+    myResults: "My Results (Portfolio)",
+    noResults: "You haven't taken any exams yet.",
+    mastery: "Mastery",
+    dashboard: "Home",
+    back: "Back",
+    // Live Quiz
+    liveQuizTitle: "Join Live Quiz",
+    liveQuizDesc: "Enter the 6-digit PIN from your teacher and join the race.",
+    liveQuizJoin: "Join",
+    liveQuizPinPlaceholder: "6-digit PIN",
+    liveQuizPinError: "PIN must be exactly 6 digits!",
+    waitingForTeacher: "Waiting for your teacher to start the game...",
+    yourName: "Your name",
+    waitingRoom: "In waiting room",
+    persons: "players",
+    questionOf: "Question",
+    yourScore: "Your Score",
+    correct: "Correct",
+    rank: "Rank",
+    quizFinished: "Quiz Finished!",
+    resultSaved: "Your result has been saved",
+    finalRanking: "Final Leaderboard",
+    backToStudent: "Back to Student Dashboard",
+    readQuestion: "Read the question on the big screen and choose your answer",
+    waitForNext: "Wait for the teacher to advance to the next question...",
+    correctAnswer: "Correct! +100 points",
+    wrongAnswer: "Wrong! 0 points",
+    liveRanking: "Live Leaderboard",
+    timeLeft: "Time",
+    roomNotFound: "Room not found. Check your PIN.",
+    gameAlreadyOver: "This game has already ended.",
+    connectionError: "Problem connecting to the room.",
+    youLabel: "You",
+    points: "pts",
   }
 };
 
 export const AppProvider = ({ children }) => {
-  // Default: light. If user saved something before — use that.
   const [theme, setTheme] = useState(() => localStorage.getItem('mz_theme') || 'light');
   const [lang, setLang] = useState(() => localStorage.getItem('mz_lang') || 'uz');
 
@@ -99,9 +210,29 @@ export const AppToolbar = () => {
   const { theme, lang, toggleTheme, toggleLang } = useApp();
   const isDark = theme === 'dark';
 
+  const langs = [
+    { code: 'uz', label: 'UZ' },
+    { code: 'ru', label: 'RU' },
+    { code: 'en', label: 'EN' },
+  ];
+
   return (
     <div className="fixed top-4 right-4 z-[9999] flex items-center gap-2">
-      {/* Language switcher */}
+      {/* Logo badge */}
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border shadow-lg"
+        style={{
+          background: isDark ? 'rgba(30,41,59,0.95)' : 'rgba(255,255,255,0.95)',
+          borderColor: isDark ? 'rgba(71,85,105,0.5)' : 'rgba(203,213,225,0.7)',
+        }}
+      >
+        <img src="/assets/tma_logo.png" alt="TMA" className="w-7 h-7 object-contain rounded-full border border-blue-400/40" />
+        <span className="text-[10px] font-black tracking-widest hidden sm:block"
+          style={{ color: isDark ? '#94a3b8' : '#475569' }}>
+          MED-ZUKKOO
+        </span>
+      </div>
+
+      {/* Language switcher UZ | RU | EN */}
       <div
         className="flex items-center rounded-xl border overflow-hidden shadow-lg"
         style={{
@@ -109,27 +240,23 @@ export const AppToolbar = () => {
           borderColor: isDark ? 'rgba(71,85,105,0.6)' : 'rgba(203,213,225,0.8)',
         }}
       >
-        <button
-          onClick={() => toggleLang('uz')}
-          className="px-3 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200"
-          style={{
-            background: lang === 'uz' ? '#2563eb' : 'transparent',
-            color: lang === 'uz' ? '#fff' : (isDark ? '#94a3b8' : '#475569'),
-          }}
-        >
-          UZ
-        </button>
-        <div style={{ width: 1, height: 20, background: isDark ? '#475569' : '#cbd5e1' }}></div>
-        <button
-          onClick={() => toggleLang('ru')}
-          className="px-3 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200"
-          style={{
-            background: lang === 'ru' ? '#2563eb' : 'transparent',
-            color: lang === 'ru' ? '#fff' : (isDark ? '#94a3b8' : '#475569'),
-          }}
-        >
-          RU
-        </button>
+        {langs.map((l, idx) => (
+          <React.Fragment key={l.code}>
+            {idx > 0 && (
+              <div style={{ width: 1, height: 20, background: isDark ? '#475569' : '#cbd5e1' }} />
+            )}
+            <button
+              onClick={() => toggleLang(l.code)}
+              className="px-3 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200"
+              style={{
+                background: lang === l.code ? '#2563eb' : 'transparent',
+                color: lang === l.code ? '#fff' : (isDark ? '#94a3b8' : '#475569'),
+              }}
+            >
+              {l.label}
+            </button>
+          </React.Fragment>
+        ))}
       </div>
 
       {/* Dark / Light toggle */}
@@ -141,7 +268,7 @@ export const AppToolbar = () => {
           borderColor: isDark ? 'rgba(71,85,105,0.6)' : 'rgba(203,213,225,0.8)',
           color: isDark ? '#facc15' : '#2563eb',
         }}
-        title={isDark ? "Yorug' rejimga o'tish" : "Qorong'i rejimga o'tish"}
+        title={isDark ? "Light mode" : "Dark mode"}
       >
         <i className={isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon'}></i>
       </button>
