@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, query, where, getDocs, limit, collectionGroup } from 'firebase/firestore';
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis
-} from 'recharts';
+
 import LiveQuiz from './LiveQuiz';
 import { useApp } from '../context/AppContext';
 import DashboardLayout from '../components/DashboardLayout';
