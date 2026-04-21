@@ -415,6 +415,7 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
 
         {/* end right column */}
           </div>
+        </div>
         )}
       </div>
     </DashboardLayout>
