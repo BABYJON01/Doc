@@ -409,7 +409,7 @@ export const AppToolbar = () => {
   const location = useLocation();
   const path = location.pathname;
 
-  if (path.startsWith('/admin') || path.startsWith('/teacher')) {
+  if (path.startsWith('/admin') || path.startsWith('/teacher') || path.startsWith('/student') || path.startsWith('/test')) {
     return null;
   }
 

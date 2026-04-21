@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 
 const DashboardLayout = ({ children, role, user, onLogout }) => {
-    const { theme } = useApp();
+    const { theme, lang, toggleTheme, toggleLang } = useApp();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState([
@@ -115,8 +115,8 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                             {['uz', 'ru', 'en'].map(l => (
                                 <button
                                     key={l}
-                                    onClick={() => window.localStorage.setItem('mz_lang', l) || window.location.reload()}
-                                    className={`px-2 sm:px-3 py-1.5 text-[10px] font-bold uppercase transition-colors ${localStorage.getItem('mz_lang') === l || (!localStorage.getItem('mz_lang') && l === 'uz') ? 'bg-blue-600 text-white' : (theme === 'dark' ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-500 hover:bg-slate-200')}`}
+                                    onClick={() => toggleLang(l)}
+                                    className={`px-2 sm:px-3 py-1.5 text-[10px] font-bold uppercase transition-colors ${lang === l ? 'bg-blue-600 text-white' : (theme === 'dark' ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-500 hover:bg-slate-200')}`}
                                 >
                                     {l}
                                 </button>
@@ -125,11 +125,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
 
                         {/* Theme Toggle */}
                         <button
-                            onClick={() => {
-                                const newTheme = theme === 'dark' ? 'light' : 'dark';
-                                window.localStorage.setItem('mz_theme', newTheme);
-                                window.location.reload();
-                            }}
+                            onClick={toggleTheme}
                             className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-yellow-500 border border-slate-700' : 'bg-slate-100 hover:bg-slate-200 text-blue-600 border border-slate-200'}`}
                         >
                             <i className={`fa-solid ${theme === 'dark' ? 'fa-sun' : 'fa-moon'}`}></i>
