@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 const DashboardLayout = ({ children, role, user, onLogout }) => {
     const { theme } = useApp();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
     
     // Derived styles based on theme
     const bgClass = theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800';
@@ -27,6 +28,9 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
     const menu = role === 'admin' ? adminMenu : teacherMenu;
     
     const isActive = (path) => window.location.pathname === path;
+
+    // Close notifications when clicking outside (simple hack)
+    const toggleNotifications = () => setShowNotifications(!showNotifications);
 
     return (
         <div className={`flex h-screen overflow-hidden ${bgClass} font-sans transition-colors duration-300`}>
@@ -92,7 +96,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                         </h1>
                     </div>
                     
-                    <div className="flex items-center gap-2 sm:gap-4">
+                    <div className="flex items-center gap-2 sm:gap-4 relative">
                         {/* Language switcher */}
                         <div className={`hidden sm:flex items-center rounded-xl overflow-hidden border ${theme === 'dark' ? 'border-slate-700 bg-slate-900' : 'border-slate-200 bg-slate-100'}`}>
                             {['uz', 'ru', 'en'].map(l => (
@@ -118,10 +122,51 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                             <i className={`fa-solid ${theme === 'dark' ? 'fa-sun' : 'fa-moon'}`}></i>
                         </button>
                     
-                        <div className={`p-2 rounded-full relative cursor-pointer hidden sm:block ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' : 'bg-slate-100 hover:bg-slate-200 border border-slate-200'}`}>
-                            <i className="fa-regular fa-bell"></i>
-                            <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping"></span>
-                            <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-rose-500 rounded-full border border-slate-900"></span>
+                        {/* Notifications */}
+                        <div className="relative">
+                            <button onClick={toggleNotifications} className={`p-2 w-9 h-9 flex items-center justify-center rounded-full relative cursor-pointer hidden sm:flex ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' : 'bg-slate-100 hover:bg-slate-200 border border-slate-200'}`}>
+                                <i className="fa-regular fa-bell"></i>
+                                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping"></span>
+                                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border border-slate-900"></span>
+                            </button>
+
+                            {/* Notifications Dropdown */}
+                            {showNotifications && (
+                                <>
+                                    <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)}></div>
+                                    <div className={`absolute right-0 mt-3 w-72 rounded-2xl shadow-2xl z-50 overflow-hidden border animate-[fadeInUp_0.2s_ease-out] ${theme === 'dark' ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`}>
+                                        <div className={`p-4 border-b font-bold text-sm ${theme === 'dark' ? 'border-slate-800 text-white' : 'border-slate-100 text-slate-800'}`}>
+                                            Bildirishnomalar <span className="ml-2 bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full">Yangi</span>
+                                        </div>
+                                        <div className="max-h-64 overflow-y-auto">
+                                            <div className={`p-4 border-b flex gap-3 hover:bg-slate-500/5 transition-colors cursor-pointer ${theme === 'dark' ? 'border-slate-800 text-slate-300' : 'border-slate-100 text-slate-600'}`}>
+                                                <div className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 border border-emerald-500/20">
+                                                    <i className="fa-solid fa-file-pdf text-xs"></i>
+                                                </div>
+                                                <div>
+                                                    <p className={`text-xs font-bold leading-tight ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>Yangi ma'ruza yuklandi</p>
+                                                    <p className="text-[10px] mt-1 opacity-80">AI muvaffaqiyatli 15 ta test savolini ajratib oldi.</p>
+                                                    <p className="text-[9px] text-emerald-500 font-bold mt-1">2 daqiqa oldin</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className={`p-4 flex gap-3 hover:bg-slate-500/5 transition-colors cursor-pointer ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
+                                                <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0 border border-blue-500/20">
+                                                    <i className="fa-solid fa-users text-xs"></i>
+                                                </div>
+                                                <div>
+                                                    <p className={`text-xs font-bold leading-tight ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>Yangi guruh ulandi</p>
+                                                    <p className="text-[10px] mt-1 opacity-80">43 kishi Live Quiz oynasida sizni kutmoqda.</p>
+                                                    <p className="text-[9px] text-blue-500 font-bold mt-1">Kecha</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className={`p-3 text-center text-xs font-bold cursor-pointer transition-colors ${theme === 'dark' ? 'bg-slate-800/50 hover:bg-slate-800 text-blue-400' : 'bg-slate-50 hover:bg-slate-100 text-blue-600'}`}>
+                                            Barchasini o'qilgan deb belgilash
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
                         
                         <div className="flex items-center gap-3 pl-2 sm:pl-4 border-l border-slate-700/30">
