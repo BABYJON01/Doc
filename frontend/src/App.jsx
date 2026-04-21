@@ -280,8 +280,8 @@ const App = () => {
     return (
         <ErrorBoundary>
             <AppProvider>
-                <AppToolbar />
                 <BrowserRouter>
+                    <AppToolbar />
                     <Routes>
                         <Route path="/" element={<LoginSelector user={user} role={role} />} />
                         

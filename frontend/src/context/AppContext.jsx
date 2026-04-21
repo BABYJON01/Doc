@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const AppContext = createContext(null);
 
@@ -340,7 +341,10 @@ export const useApp = () => {
 export const AppToolbar = () => {
   const { theme, lang, toggleTheme, toggleLang } = useApp();
   const isDark = theme === 'dark';
-  const path = window.location.pathname;
+  
+  // Use location hook to re-render based on route changes properly
+  const location = useLocation();
+  const path = location.pathname;
 
   if (path.startsWith('/admin') || path.startsWith('/teacher')) {
     return null;
