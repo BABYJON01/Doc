@@ -1,14 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
+import { db } from '../firebase';
+import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 
 const DashboardLayout = ({ children, role, user, onLogout }) => {
     const { theme, lang, toggleTheme, toggleLang } = useApp();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
-    const [notifications, setNotifications] = useState([
-        { id: 1, type: 'upload', title: "Yangi ma'ruza yuklandi", desc: "AI muvaffaqiyatli 15 ta test savolini ajratib oldi.", time: "2 daqiqa oldin" },
-        { id: 2, type: 'group', title: "Yangi guruh ulandi", desc: "43 kishi Live Quiz oynasida sizni kutmoqda.", time: "Kecha" }
-    ]);
+    const [notifications, setNotifications] = useState([]);
+
+    useEffect(() => {
+        if (!user) return;
+        const q = query(collection(db, 'notifications'), orderBy('createdAt', 'desc'), limit(15));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const notifs = [];
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                // Tizimli yoki o'sha roldagi foydalanuvchilar o'qishi uchun:
+                if (!data.targetRole || data.targetRole === role || data.targetRole === 'all') {
+                    // Calculate time string locally
+                    let timeStr = 'Hozirgina';
+                    if (data.createdAt) {
+                        try {
+                            const date = data.createdAt.toDate();
+                            timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' (' + date.toLocaleDateString() + ')';
+                        } catch(e) {}
+                    }
+                    notifs.push({
+                        id: doc.id,
+                        title: data.title || '',
+                        desc: data.desc || '',
+                        type: data.type || 'info',
+                        time: timeStr
+                    });
+                }
+            });
+            setNotifications(notifs);
+        });
+        return () => unsubscribe();
+    }, [user, role]);
     
     // Derived styles based on theme
     const bgClass = theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800';
