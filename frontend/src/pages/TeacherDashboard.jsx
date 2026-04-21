@@ -111,33 +111,33 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
     <DashboardLayout role="teacher" user={user} onLogout={onLogout}>
 
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 max-w-7xl mx-auto">
+     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 max-w-7xl mx-auto">
          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <div className="text-slate-400 text-sm font-bold uppercase mb-1">{lang === 'ru' ? 'Мои курсы' : 'Mening Kurslarim'}</div>
+            <div className="text-slate-400 text-sm font-bold uppercase mb-1">{t.tcStatsCourses}</div>
             <div className="text-3xl font-black text-white">12</div>
          </div>
          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <div className="text-slate-400 text-sm font-bold uppercase mb-1">{lang === 'ru' ? 'Активные студенты' : 'Faol Talabalar'}</div>
+            <div className="text-slate-400 text-sm font-bold uppercase mb-1">{t.tcStatsStudents}</div>
             <div className="text-3xl font-black text-blue-400">1,240</div>
          </div>
          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <div className="text-slate-400 text-sm font-bold uppercase mb-1">{lang === 'ru' ? 'Клинические кейсы' : "Klinik Case'lar (Hotspot)"}</div>
+            <div className="text-slate-400 text-sm font-bold uppercase mb-1">{t.tcStatsCases}</div>
             <div className="text-3xl font-black text-indigo-400">45</div>
          </div>
          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <div className="text-slate-400 text-sm font-bold uppercase mb-1">{lang === 'ru' ? 'Успеваемость студентов' : "Talaba O'zlashtirishi"}</div>
+            <div className="text-slate-400 text-sm font-bold uppercase mb-1">{t.tcStatsMastery}</div>
             <div className="text-3xl font-black text-emerald-400">82%</div>
          </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-            <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-3">{lang === 'ru' ? 'Создание курса и интерактивных кейсов' : "Kurs & Interaktiv Case'lar Yaratish"}</h3>
+            <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-3">{t.tcSectionCreate}</h3>
             <div className="space-y-4">
                 {/* Topic Selection UI */}
                 {!isUploading && progress === 0 && (
                     <div className="mb-6">
-                        <h4 className="text-sm text-slate-400 font-bold uppercase mb-3"><i className="fa-solid fa-list-check mr-2 text-indigo-400"></i>{lang === 'ru' ? "Учебный план: Создание AI-экзамена по теме" : "O'quv Reja: Mavzu bo'yicha Ai-Imtihon yaratish"}</h4>
+                        <h4 className="text-sm text-slate-400 font-bold uppercase mb-3"><i className="fa-solid fa-list-check mr-2 text-indigo-400"></i>{t.tcSectionTopics}</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {medicalTopics.map((topic, idx) => (
                                 <button key={idx} onClick={() => handleGenerateFromTopic(topic)} className="text-left bg-slate-900 border border-slate-700 hover:border-indigo-500 hover:bg-slate-800 p-3 rounded-xl transition-all group flex items-start gap-3 shadow-lg">
@@ -168,11 +168,9 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                             <i className={`fa-regular fa-file-pdf text-4xl ${errorMsg ? 'text-slate-500' : 'text-rose-500'} group-hover:scale-110 transition-transform`}></i>
                             <i className={`fa-regular fa-file-powerpoint text-4xl ${errorMsg ? 'text-slate-500' : 'text-orange-500'} group-hover:scale-110 transition-transform`}></i>
                         </div>
-                        <div className="text-white font-bold text-lg mb-1">{lang === 'ru' ? 'Загрузите учебный материал (Drag & Drop или нажмите)' : 'Dars materialini yuklang (Drag & Drop yoki bosing)'}</div>
+                        <div className="text-white font-bold text-lg mb-1">{t.tcSectionUpload}</div>
                         <div className="text-slate-400 text-sm text-center mb-4">
-                            {lang === 'ru'
-                              ? 'Перетащите файл .DOCX, .PDF или .PPTX сюда или нажмите. ИИ автоматически создаст тесты и флеш-карточки.'
-                              : '.DOCX, .PDF yoki .PPTX formatidagi fayllarni shu yerga tashlang yoki ustiga bosing.\nSun\'iy intellekt matnni ajratib avtomatik Test va Flashcardlar yaratadi.'}
+                            {t.tcSectionUploadDesc}
                         </div>
 
                         {errorMsg && (
@@ -308,11 +306,11 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
          </div>
 
          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-            <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-3">{lang === 'ru' ? 'Статистика студентов' : 'Talabalar Statistikasi'}</h3>
+            <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-3">{t.tcSectionStatsTitle}</h3>
             
             <div className="flex flex-col items-center justify-center h-48 opacity-50">
                <i className="fa-solid fa-chart-line text-5xl text-slate-500 mb-4"></i>
-               <p className="text-slate-400">{lang === 'ru' ? 'Здесь будут отображаться посещаемость студентов и результаты тестов через Chart.js.' : "Bu yerda Chart.js orqali talabalarning davomati va test natijalari chiqadi."}</p>
+               <p className="text-slate-400">{t.tcSectionStatsDesc}</p>
             </div>
          </div>
       </div>
