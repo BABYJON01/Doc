@@ -45,28 +45,74 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
     const sidebarBg = theme === 'dark' ? 'bg-slate-900 border-r border-slate-800' : 'bg-white border-r border-slate-200 shadow-sm';
     const headerBg = theme === 'dark' ? 'bg-slate-900/80 border-b border-slate-800' : 'bg-white/80 border-b border-slate-200 shadow-sm';
     
-    const adminMenu = [
-        { name: 'Dashboard', icon: 'fa-solid fa-chart-pie', path: '/admin' },
-        { name: 'O\'qituvchilar', icon: 'fa-solid fa-chalkboard-user', path: '/admin/teachers' },
-        { name: 'Tizim Jurnali', icon: 'fa-solid fa-clipboard-list', path: '/admin/logs' },
-    ];
+    const getMenu = (type) => {
+        const menus = {
+            uz: {
+                admin: [
+                    { name: 'Dashboard', icon: 'fa-solid fa-chart-pie', path: '/admin' },
+                    { name: 'O\'qituvchilar', icon: 'fa-solid fa-chalkboard-user', path: '/admin/teachers' },
+                    { name: 'Tizim Jurnali', icon: 'fa-solid fa-clipboard-list', path: '/admin/logs' },
+                ],
+                teacher: [
+                    { name: 'Dashboard', icon: 'fa-solid fa-house', path: '/teacher' },
+                    { name: 'Ma\'ruzalar', icon: 'fa-solid fa-folder-open', path: '/teacher/lectures' },
+                    { name: 'Testlar', icon: 'fa-solid fa-list-check', path: '/teacher/tests' },
+                    { name: 'Talabalar', icon: 'fa-solid fa-users', path: '/teacher/students' },
+                    { name: 'Profil', icon: 'fa-solid fa-user-doctor', path: '/teacher/profile' },
+                ],
+                student: [
+                    { name: 'Dashboard', icon: 'fa-solid fa-house', path: '/student' },
+                    { name: 'Kurslar (Test)', icon: 'fa-solid fa-graduation-cap', path: '/student/courses' },
+                    { name: 'Yutuqlar', icon: 'fa-solid fa-ranking-star', path: '/student/portfolio' },
+                    { name: 'Live Quiz', icon: 'fa-solid fa-tower-broadcast', path: '/student/live' },
+                ]
+            },
+            ru: {
+                admin: [
+                    { name: 'Дашборд', icon: 'fa-solid fa-chart-pie', path: '/admin' },
+                    { name: 'Преподаватели', icon: 'fa-solid fa-chalkboard-user', path: '/admin/teachers' },
+                    { name: 'Журнал Системы', icon: 'fa-solid fa-clipboard-list', path: '/admin/logs' },
+                ],
+                teacher: [
+                    { name: 'Дашборд', icon: 'fa-solid fa-house', path: '/teacher' },
+                    { name: 'Лекции', icon: 'fa-solid fa-folder-open', path: '/teacher/lectures' },
+                    { name: 'Тесты', icon: 'fa-solid fa-list-check', path: '/teacher/tests' },
+                    { name: 'Студенты', icon: 'fa-solid fa-users', path: '/teacher/students' },
+                    { name: 'Профиль', icon: 'fa-solid fa-user-doctor', path: '/teacher/profile' },
+                ],
+                student: [
+                    { name: 'Дашборд', icon: 'fa-solid fa-house', path: '/student' },
+                    { name: 'Курсы (Тесты)', icon: 'fa-solid fa-graduation-cap', path: '/student/courses' },
+                    { name: 'Достижения', icon: 'fa-solid fa-ranking-star', path: '/student/portfolio' },
+                    { name: 'Live Quiz', icon: 'fa-solid fa-tower-broadcast', path: '/student/live' },
+                ]
+            },
+            en: {
+                admin: [
+                    { name: 'Dashboard', icon: 'fa-solid fa-chart-pie', path: '/admin' },
+                    { name: 'Teachers', icon: 'fa-solid fa-chalkboard-user', path: '/admin/teachers' },
+                    { name: 'System Logs', icon: 'fa-solid fa-clipboard-list', path: '/admin/logs' },
+                ],
+                teacher: [
+                    { name: 'Dashboard', icon: 'fa-solid fa-house', path: '/teacher' },
+                    { name: 'Lectures', icon: 'fa-solid fa-folder-open', path: '/teacher/lectures' },
+                    { name: 'Tests', icon: 'fa-solid fa-list-check', path: '/teacher/tests' },
+                    { name: 'Students', icon: 'fa-solid fa-users', path: '/teacher/students' },
+                    { name: 'Profile', icon: 'fa-solid fa-user-doctor', path: '/teacher/profile' },
+                ],
+                student: [
+                    { name: 'Dashboard', icon: 'fa-solid fa-house', path: '/student' },
+                    { name: 'Courses (Test)', icon: 'fa-solid fa-graduation-cap', path: '/student/courses' },
+                    { name: 'Achievements', icon: 'fa-solid fa-ranking-star', path: '/student/portfolio' },
+                    { name: 'Live Quiz', icon: 'fa-solid fa-tower-broadcast', path: '/student/live' },
+                ]
+            }
+        };
+        const activeMenus = menus[lang] || menus.uz;
+        return activeMenus[type] || activeMenus.student;
+    };
     
-    const teacherMenu = [
-        { name: 'Dashboard', icon: 'fa-solid fa-house', path: '/teacher' },
-        { name: 'Ma\'ruzalar', icon: 'fa-solid fa-folder-open', path: '/teacher/lectures' },
-        { name: 'Testlar', icon: 'fa-solid fa-list-check', path: '/teacher/tests' },
-        { name: 'Talabalar', icon: 'fa-solid fa-users', path: '/teacher/students' },
-        { name: 'Profil', icon: 'fa-solid fa-user-doctor', path: '/teacher/profile' },
-    ];
-
-    const studentMenu = [
-        { name: 'Dashboard', icon: 'fa-solid fa-house', path: '/student' },
-        { name: 'Kurslar (Test)', icon: 'fa-solid fa-graduation-cap', path: '/student/courses' },
-        { name: 'Yutuqlar', icon: 'fa-solid fa-ranking-star', path: '/student/portfolio' },
-        { name: 'Live Quiz', icon: 'fa-solid fa-tower-broadcast', path: '/student/live' },
-    ];
-    
-    const menu = role === 'admin' ? adminMenu : role === 'teacher' ? teacherMenu : studentMenu;
+    const menu = getMenu(role);
     
     const isActive = (path) => window.location.pathname === path;
 
@@ -90,7 +136,11 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                     <div>
                         <h2 className="text-xl font-black tracking-tight" style={{ color: theme === 'dark' ? '#fff' : '#0f172a' }}>Med-Zukkoo</h2>
                         <span className="text-[10px] uppercase font-bold tracking-widest text-blue-500">
-                            {role === 'admin' ? 'Super Admin' : role === 'teacher' ? "O'qituvchi" : 'Talaba'}
+                            {{
+                                uz: { admin: 'Super Admin', teacher: "O'qituvchi", student: 'Talaba' },
+                                ru: { admin: 'Супер Админ', teacher: 'Преподаватель', student: 'Студент' },
+                                en: { admin: 'Super Admin', teacher: 'Teacher', student: 'Student' }
+                            }[lang]?.[role] || 'Talaba'}
                         </span>
                     </div>
                 </div>
@@ -118,7 +168,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                         ${theme === 'dark' ? 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-400' : 'bg-rose-50 border border-rose-100 hover:bg-rose-100 text-rose-600'}`}
                     >
                         <i className="fa-solid fa-right-from-bracket"></i>
-                        <span>Chiqish</span>
+                        <span>{{ uz: 'Chiqish', ru: 'Выйти', en: 'Logout' }[lang] || 'Chiqish'}</span>
                     </button>
                 </div>
             </aside>
