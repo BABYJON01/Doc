@@ -47,8 +47,9 @@ const QuizTaking = ({ onFinish, user }) => {
         };
         fetchExamData();
 
-        // Real-time listener for the leaderboard from Firestore
-        const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10));
+        // Real-time listener for the leaderboard from Firestore, isolated by exam
+        const leaderboardRef = examId ? collection(db, "exams", examId, "leaderboard") : collection(db, "leaderboard");
+        const q = query(leaderboardRef, orderBy("score", "desc"), limit(10));
         
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
             const players = [];
@@ -74,7 +75,8 @@ const QuizTaking = ({ onFinish, user }) => {
     const updateScoreInFirebase = async (newScore) => {
         if (!user?.uid) return;
         try {
-            await setDoc(doc(db, "leaderboard", user.uid), {
+            const leaderboardRef = examId ? collection(db, "exams", examId, "leaderboard") : collection(db, "leaderboard");
+            await setDoc(doc(leaderboardRef, user.uid), {
                 name: userName,
                 score: newScore * 100,
                 status: "yechmoqda...",
@@ -119,7 +121,8 @@ const QuizTaking = ({ onFinish, user }) => {
 
             // Submit final score status
             if (user?.uid) {
-                setDoc(doc(db, "leaderboard", user.uid), {
+                const leaderboardRef = examId ? collection(db, "exams", examId, "leaderboard") : collection(db, "leaderboard");
+                setDoc(doc(leaderboardRef, user.uid), {
                     status: "tugatdi",
                     updatedAt: serverTimestamp()
                 }, { merge: true });
