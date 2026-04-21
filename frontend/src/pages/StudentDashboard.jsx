@@ -126,16 +126,80 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
         )}
 
         {path === '/student/live' && (
-            <div className="bg-slate-800 flex flex-col items-center justify-center rounded-2xl p-10 text-center border border-rose-500/30 max-w-2xl mx-auto mt-10 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(225,29,72,0.1) 0%, rgba(30,41,59,0.9) 100%)' }}>
-                <i className="fa-solid fa-tower-broadcast text-6xl text-rose-500 mb-6 drop-shadow-lg animate-pulse"></i>
-                <h2 className="text-2xl font-bold text-white mb-2">{lang === 'ru' ? 'Вход в Live Quiz' : 'Live Quiz\'ga kirish'}</h2>
-                <p className="text-slate-400 max-w-md mx-auto">{lang === 'ru' ? 'Здесь будет форма для ввода PIN кода.' : 'Bu yerda tayyorgarlik uchun alohida PIN kod kiritish oynasi mavjud bo\'ladi.'}</p>
+            <div className="max-w-lg mx-auto mt-10">
+                <div className="rounded-2xl border border-emerald-500/30 overflow-hidden shadow-[0_0_35px_rgba(16,185,129,0.12)]" style={{ background: 'linear-gradient(135deg, rgba(6,78,59,0.4) 0%, rgba(15,23,42,0.95) 100%)' }}>
+                    <div className="flex items-center gap-3 px-6 py-5 border-b border-emerald-500/20 bg-emerald-600/10">
+                        <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                            <i className="fa-solid fa-tower-broadcast text-emerald-400 animate-pulse text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 className="font-black text-white text-lg">{t.liveQuizTitle}</h2>
+                            <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Med-Zukkoo Live</div>
+                        </div>
+                    </div>
+                    <div className="p-6">
+                        <p className="text-sm text-slate-400 mb-6 text-center">{t.liveQuizDesc}</p>
+                        <div
+                            className="flex rounded-xl overflow-hidden mb-3 shadow-inner border transition-all"
+                            style={{
+                                background: 'rgba(15,23,42,0.8)',
+                                borderColor: pinInput.length === 6 ? '#10b981' : '#334155',
+                                boxShadow: pinInput.length === 6 ? '0 0 15px rgba(16,185,129,0.25)' : 'none',
+                            }}
+                        >
+                            <input
+                                type="text" inputMode="numeric"
+                                value={pinInput}
+                                onChange={(e) => setPinInput(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                                placeholder={t.liveQuizPinPlaceholder}
+                                className="flex-1 bg-transparent px-4 py-4 text-center text-3xl font-black tracking-[0.4em] outline-none w-full"
+                                style={{ color: pinInput.length === 6 ? '#10b981' : '#94a3b8' }}
+                                onKeyDown={(e) => e.key === 'Enter' && pinInput.length === 6 && handleJoinLiveQuiz()}
+                            />
+                        </div>
+                        <div className="flex justify-center gap-2 mb-4">
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <div key={i} className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                                    i < pinInput.length ? 'bg-emerald-400 scale-125 shadow-[0_0_8px_rgba(52,211,153,0.7)]' : 'bg-slate-700'
+                                }`} />
+                            ))}
+                        </div>
+                        {pinError && <p className="text-rose-400 text-xs text-center mb-3 font-bold">{pinError}</p>}
+                        <button
+                            onClick={handleJoinLiveQuiz}
+                            disabled={pinInput.length !== 6}
+                            className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl py-3.5 font-bold transition-all shadow-lg hover:shadow-emerald-900/50 flex items-center justify-center gap-2"
+                        >
+                            <i className="fa-solid fa-arrow-right-to-bracket"></i> {t.liveQuizJoin}
+                        </button>
+                    </div>
+                </div>
             </div>
         )}
 
         {path === '/student' && (
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          <div className="max-w-7xl mx-auto">
+            {/* Welcome Banner */}
+            <div className="mb-6 p-5 rounded-2xl flex items-center gap-4 border border-slate-700/60 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(30,41,59,0.9) 0%, rgba(15,23,42,0.8) 100%)' }}>
+                {user?.photoURL
+                  ? <img src={user.photoURL} alt="avatar" className="w-12 h-12 rounded-full border-2 border-blue-500/60 shrink-0" />
+                  : <div className="w-12 h-12 rounded-full bg-blue-500/20 border-2 border-blue-500/40 flex items-center justify-center text-blue-400 text-xl shrink-0"><i className="fa-solid fa-user-graduate"></i></div>
+                }
+                <div className="flex-1 min-w-0">
+                  <h2 className="font-black text-white text-base sm:text-lg truncate">
+                    {lang === 'ru' ? 'Добро пожаловать,' : 'Xush kelibsiz,'} {user?.displayName?.split(' ')[0] || 'Talaba'}! 👋
+                  </h2>
+                  <p className="text-slate-400 text-xs sm:text-sm">
+                    {lang === 'ru' ? 'Продолжайте обучение с того места, где остановились.' : 'Avval to\'xtatgan joyingizdan davom eting.'}
+                  </p>
+                </div>
+                <div className="hidden sm:flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-3 py-2 shrink-0">
+                  <i className="fa-solid fa-circle text-[6px] text-emerald-400 animate-pulse"></i>
+                  <span className="text-emerald-400 text-xs font-bold">{lang === 'ru' ? 'Онлайн' : 'Online'}</span>
+                </div>
+            </div>
 
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* ── LEFT COLUMN ───────────────────────────────── */}
         <div className="lg:col-span-2 space-y-6">
 
@@ -412,6 +476,7 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
 
         {/* end right column */}
           </div>
+        </div>
         </div>
         )}
       </div>
