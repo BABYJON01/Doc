@@ -4,12 +4,12 @@ import { getFirestore, initializeFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: "AIzaSyALlsmIliQqkdBtF2-JWd-sp98PRa4AuUs",
+  authDomain: "doc-zukkolive.firebaseapp.com",
+  projectId: "doc-zukkolive",
+  storageBucket: "doc-zukkolive.firebasestorage.app",
+  messagingSenderId: "553006858391",
+  appId: "1:553006858391:web:71764f2ee9b1a0b5c6e9d2"
 };
 
 // Safety check for Environment Variables
