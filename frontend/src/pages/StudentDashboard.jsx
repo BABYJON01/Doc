@@ -142,47 +142,37 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
         {/* ── LEFT COLUMN ───────────────────────────────── */}
         <div className="lg:col-span-2 space-y-6">
 
-          {/* Charts row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-            {/* XP Line Chart */}
-            <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-              <h3 className="text-base font-bold mb-4 flex items-center gap-2">
-                <i className="fa-solid fa-chart-line text-emerald-500"></i>
-                {t.weeklyXP}
-              </h3>
-              <div className="h-56 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={xpHistory}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis dataKey="day" stroke="#94a3b8" fontSize={11} />
-                    <YAxis stroke="#94a3b8" fontSize={11} />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
-                      itemStyle={{ color: '#10b981' }}
-                    />
-                    <Line type="monotone" dataKey="xp" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                  </LineChart>
-                </ResponsiveContainer>
+          {/* Simplified Stats Row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+              <div className="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-lg flex items-center gap-4 hover:border-blue-500/50 transition-colors cursor-pointer group">
+                  <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 text-xl group-hover:scale-110 transition-transform">
+                      <i className="fa-solid fa-layer-group"></i>
+                  </div>
+                  <div>
+                      <h4 className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">{lang === 'ru' ? 'Сдано Тестов' : 'Yechilgan Testlar'}</h4>
+                      <p className="text-xl font-black text-white">{studentHistory.length || 0}</p>
+                  </div>
               </div>
-            </div>
-
-            {/* Proficiency Radar */}
-            <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-              <h3 className="text-base font-bold mb-4 flex items-center gap-2">
-                <i className="fa-solid fa-brain text-blue-500"></i>
-                {t.subjectMastery}
-              </h3>
-              <div className="h-56 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={proficiency}>
-                    <PolarGrid stroke="#334155" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10 }} />
-                    <Radar name="Score" dataKey="score" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.5} />
-                  </RadarChart>
-                </ResponsiveContainer>
+              
+              <div className="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-lg flex items-center gap-4 hover:border-emerald-500/50 transition-colors cursor-pointer group">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-xl group-hover:scale-110 transition-transform">
+                      <i className="fa-solid fa-fire"></i>
+                  </div>
+                  <div>
+                      <h4 className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">{lang === 'ru' ? 'Опыт (XP)' : 'Jami tajriba (XP)'}</h4>
+                      <p className="text-xl font-black text-emerald-400">1,250</p>
+                  </div>
               </div>
-            </div>
+              
+              <div className="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-lg flex items-center gap-4 hover:border-violet-500/50 transition-colors cursor-pointer group">
+                  <div className="w-12 h-12 rounded-xl bg-violet-500/10 flex items-center justify-center text-violet-500 text-xl group-hover:scale-110 transition-transform">
+                      <i className="fa-solid fa-brain"></i>
+                  </div>
+                  <div>
+                      <h4 className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">{lang === 'ru' ? 'Успеваемость' : 'O\'rtacha Natia'}</h4>
+                      <p className="text-xl font-black text-white">82%</p>
+                  </div>
+              </div>
           </div>
 
           {/* ── Portfolio ───────────────────────────────── */}
