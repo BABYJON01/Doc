@@ -92,14 +92,39 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                         </h1>
                     </div>
                     
-                    <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-full relative cursor-pointer ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' : 'bg-slate-100 hover:bg-slate-200 border border-slate-200'}`}>
+                    <div className="flex items-center gap-2 sm:gap-4">
+                        {/* Language switcher */}
+                        <div className={`hidden sm:flex items-center rounded-xl overflow-hidden border ${theme === 'dark' ? 'border-slate-700 bg-slate-900' : 'border-slate-200 bg-slate-100'}`}>
+                            {['uz', 'ru', 'en'].map(l => (
+                                <button
+                                    key={l}
+                                    onClick={() => window.localStorage.setItem('mz_lang', l) || window.location.reload()}
+                                    className={`px-2 sm:px-3 py-1.5 text-[10px] font-bold uppercase transition-colors ${localStorage.getItem('mz_lang') === l || (!localStorage.getItem('mz_lang') && l === 'uz') ? 'bg-blue-600 text-white' : (theme === 'dark' ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-500 hover:bg-slate-200')}`}
+                                >
+                                    {l}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Theme Toggle */}
+                        <button
+                            onClick={() => {
+                                const newTheme = theme === 'dark' ? 'light' : 'dark';
+                                window.localStorage.setItem('mz_theme', newTheme);
+                                window.location.reload();
+                            }}
+                            className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-yellow-500 border border-slate-700' : 'bg-slate-100 hover:bg-slate-200 text-blue-600 border border-slate-200'}`}
+                        >
+                            <i className={`fa-solid ${theme === 'dark' ? 'fa-sun' : 'fa-moon'}`}></i>
+                        </button>
+                    
+                        <div className={`p-2 rounded-full relative cursor-pointer hidden sm:block ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' : 'bg-slate-100 hover:bg-slate-200 border border-slate-200'}`}>
                             <i className="fa-regular fa-bell"></i>
                             <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping"></span>
                             <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-rose-500 rounded-full border border-slate-900"></span>
                         </div>
                         
-                        <div className="flex items-center gap-3 pl-4 border-l border-slate-700/30">
+                        <div className="flex items-center gap-3 pl-2 sm:pl-4 border-l border-slate-700/30">
                             <img 
                                 src={user?.photoURL || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"} 
                                 alt="User" 

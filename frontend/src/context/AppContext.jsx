@@ -340,6 +340,11 @@ export const useApp = () => {
 export const AppToolbar = () => {
   const { theme, lang, toggleTheme, toggleLang } = useApp();
   const isDark = theme === 'dark';
+  const path = window.location.pathname;
+
+  if (path.startsWith('/admin') || path.startsWith('/teacher')) {
+    return null;
+  }
 
   const langs = [
     { code: 'uz', label: 'UZ' },
