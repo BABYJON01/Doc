@@ -187,10 +187,10 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
                 }
                 <div className="flex-1 min-w-0">
                   <h2 className="font-black text-white text-base sm:text-lg truncate">
-                    {lang === 'ru' ? 'Добро пожаловать,' : 'Xush kelibsiz,'} {user?.displayName?.split(' ')[0] || 'Talaba'}! 👋
+                    {{ uz: 'Xush kelibsiz,', ru: 'Добро пожаловать,', en: 'Welcome,' }[lang] || 'Xush kelibsiz,'} {user?.displayName?.split(' ')[0] || 'Talaba'}! 👋
                   </h2>
                   <p className="text-slate-400 text-xs sm:text-sm">
-                    {lang === 'ru' ? 'Продолжайте обучение с того места, где остановились.' : 'Avval to\'xtatgan joyingizdan davom eting.'}
+                    {{ uz: 'Avval to\'xtatgan joyingizdan davom eting.', ru: 'Продолжайте обучение с того места, где остановились.', en: 'Continue your learning right where you left off.' }[lang] || 'Avval to\'xtatgan joyingizdan davom eting.'}
                   </p>
                 </div>
                 <div className="hidden sm:flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-3 py-2 shrink-0">
@@ -210,7 +210,7 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
                       <i className="fa-solid fa-layer-group"></i>
                   </div>
                   <div>
-                      <h4 className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">{lang === 'ru' ? 'Сдано Тестов' : 'Yechilgan Testlar'}</h4>
+                      <h4 className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">{{ uz: 'Yechilgan Testlar', ru: 'Завершенные тесты', en: 'Tests Completed' }[lang] || 'Yechilgan Testlar'}</h4>
                       <p className="text-xl font-black text-white">{studentHistory.length || 0}</p>
                   </div>
               </div>
@@ -220,7 +220,7 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
                       <i className="fa-solid fa-fire"></i>
                   </div>
                   <div>
-                      <h4 className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">{lang === 'ru' ? 'Опыт (XP)' : 'Jami tajriba (XP)'}</h4>
+                      <h4 className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">{{ uz: 'Jami tajriba (XP)', ru: 'Общий опыт (XP)', en: 'Total Experience (XP)' }[lang] || 'Jami tajriba (XP)'}</h4>
                       <p className="text-xl font-black text-emerald-400">1,250</p>
                   </div>
               </div>
@@ -230,7 +230,7 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
                       <i className="fa-solid fa-brain"></i>
                   </div>
                   <div>
-                      <h4 className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">{lang === 'ru' ? 'Успеваемость' : 'O\'rtacha Natia'}</h4>
+                      <h4 className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">{{ uz: 'O\'rtacha Natija', ru: 'Успеваемость', en: 'Average Score' }[lang] || 'O\'rtacha Natija'}</h4>
                       <p className="text-xl font-black text-white">82%</p>
                   </div>
               </div>
