@@ -5,6 +5,10 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
     const { theme } = useApp();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [notifications, setNotifications] = useState([
+        { id: 1, type: 'upload', title: "Yangi ma'ruza yuklandi", desc: "AI muvaffaqiyatli 15 ta test savolini ajratib oldi.", time: "2 daqiqa oldin" },
+        { id: 2, type: 'group', title: "Yangi guruh ulandi", desc: "43 kishi Live Quiz oynasida sizni kutmoqda.", time: "Kecha" }
+    ]);
     
     // Derived styles based on theme
     const bgClass = theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800';
@@ -126,8 +130,12 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                         <div className="relative">
                             <button onClick={toggleNotifications} className={`p-2 w-9 h-9 flex items-center justify-center rounded-full relative cursor-pointer hidden sm:flex ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' : 'bg-slate-100 hover:bg-slate-200 border border-slate-200'}`}>
                                 <i className="fa-regular fa-bell"></i>
-                                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping"></span>
-                                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border border-slate-900"></span>
+                                {notifications.length > 0 && (
+                                    <>
+                                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping"></span>
+                                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border border-slate-900"></span>
+                                    </>
+                                )}
                             </button>
 
                             {/* Notifications Dropdown */}
@@ -136,34 +144,37 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                                     <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)}></div>
                                     <div className={`absolute right-0 mt-3 w-72 rounded-2xl shadow-2xl z-50 overflow-hidden border animate-[fadeInUp_0.2s_ease-out] ${theme === 'dark' ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`}>
                                         <div className={`p-4 border-b font-bold text-sm ${theme === 'dark' ? 'border-slate-800 text-white' : 'border-slate-100 text-slate-800'}`}>
-                                            Bildirishnomalar <span className="ml-2 bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full">Yangi</span>
+                                            Bildirishnomalar 
+                                            {notifications.length > 0 && (
+                                                <span className="ml-2 bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full">Yangi</span>
+                                            )}
                                         </div>
                                         <div className="max-h-64 overflow-y-auto">
-                                            <div className={`p-4 border-b flex gap-3 hover:bg-slate-500/5 transition-colors cursor-pointer ${theme === 'dark' ? 'border-slate-800 text-slate-300' : 'border-slate-100 text-slate-600'}`}>
-                                                <div className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 border border-emerald-500/20">
-                                                    <i className="fa-solid fa-file-pdf text-xs"></i>
+                                            {notifications.length === 0 ? (
+                                                <div className={`p-8 text-center text-sm font-bold opacity-60 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                                                    <i className="fa-regular fa-bell-slash text-3xl mb-3 block opacity-50"></i>
+                                                    Hozircha yangi xabarlar yo'q
                                                 </div>
-                                                <div>
-                                                    <p className={`text-xs font-bold leading-tight ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>Yangi ma'ruza yuklandi</p>
-                                                    <p className="text-[10px] mt-1 opacity-80">AI muvaffaqiyatli 15 ta test savolini ajratib oldi.</p>
-                                                    <p className="text-[9px] text-emerald-500 font-bold mt-1">2 daqiqa oldin</p>
-                                                </div>
-                                            </div>
-                                            
-                                            <div className={`p-4 flex gap-3 hover:bg-slate-500/5 transition-colors cursor-pointer ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
-                                                <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0 border border-blue-500/20">
-                                                    <i className="fa-solid fa-users text-xs"></i>
-                                                </div>
-                                                <div>
-                                                    <p className={`text-xs font-bold leading-tight ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>Yangi guruh ulandi</p>
-                                                    <p className="text-[10px] mt-1 opacity-80">43 kishi Live Quiz oynasida sizni kutmoqda.</p>
-                                                    <p className="text-[9px] text-blue-500 font-bold mt-1">Kecha</p>
-                                                </div>
-                                            </div>
+                                            ) : (
+                                                notifications.map((n, i) => (
+                                                    <div key={n.id} className={`p-4 ${i !== notifications.length - 1 ? 'border-b' : ''} flex gap-3 hover:bg-slate-500/5 transition-colors cursor-pointer ${theme === 'dark' ? 'border-slate-800 text-slate-300' : 'border-slate-100 text-slate-600'}`}>
+                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${n.type === 'upload' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-blue-500/10 text-blue-500 border-blue-500/20'}`}>
+                                                            <i className={`fa-solid ${n.type === 'upload' ? 'fa-file-pdf' : 'fa-users'} text-xs`}></i>
+                                                        </div>
+                                                        <div>
+                                                            <p className={`text-xs font-bold leading-tight ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>{n.title}</p>
+                                                            <p className="text-[10px] mt-1 opacity-80">{n.desc}</p>
+                                                            <p className={`text-[9px] font-bold mt-1 ${n.type === 'upload' ? 'text-emerald-500' : 'text-blue-500'}`}>{n.time}</p>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )}
                                         </div>
-                                        <div className={`p-3 text-center text-xs font-bold cursor-pointer transition-colors ${theme === 'dark' ? 'bg-slate-800/50 hover:bg-slate-800 text-blue-400' : 'bg-slate-50 hover:bg-slate-100 text-blue-600'}`}>
-                                            Barchasini o'qilgan deb belgilash
-                                        </div>
+                                        {notifications.length > 0 && (
+                                            <div onClick={() => setNotifications([])} className={`p-3 text-center text-xs font-bold cursor-pointer transition-colors ${theme === 'dark' ? 'bg-slate-800/50 hover:bg-slate-800 text-blue-400' : 'bg-slate-50 hover:bg-slate-100 text-blue-600'}`}>
+                                                Barchasini o'qilgan deb belgilash
+                                            </div>
+                                        )}
                                     </div>
                                 </>
                             )}
