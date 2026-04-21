@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useApp } from '../context/AppContext';
 
 const Methodology = () => {
     const navigate = useNavigate();
+    const { lang } = useApp();
+
+    const t = {
+        uz: { title: "Metodik Materiallar bazasi", sub: "Klinik o'quv modullari", btn: "Bilimni sinash (Quiz)" },
+        ru: { title: "База Методических Материалов", sub: "Клинические учебные модули", btn: "Проверить знания (Quiz)" },
+        en: { title: "Methodological Material Base", sub: "Clinical training modules", btn: "Test Knowledge (Quiz)" }
+    }[lang] || { title: "Metodik Materiallar bazasi", sub: "Klinik o'quv modullari", btn: "Bilimni sinash (Quiz)" };
 
     const practicalSkills = [
         {
@@ -259,12 +267,12 @@ const Methodology = () => {
                            <i className="fa-solid fa-arrow-left"></i>
                         </button>
                         <div>
-                            <h1 className="text-xl md:text-2xl font-bold">🩺 Metodik Materiallar bazasi</h1>
-                            <p className="text-sm text-emerald-400">Klinik o'quv modullari</p>
+                            <h1 className="text-xl md:text-2xl font-bold">🩺 {t.title}</h1>
+                            <p className="text-sm text-emerald-400">{t.sub}</p>
                         </div>
                     </div>
                     <button onClick={() => navigate('/test')} className="hidden md:flex bg-indigo-600 hover:bg-indigo-500 px-6 py-2 rounded-lg font-bold items-center transition-colors">
-                        <i className="fa-solid fa-play mr-2"></i> Bilimni sinash (Quiz)
+                        <i className="fa-solid fa-play mr-2"></i> {t.btn}
                     </button>
                 </div>
             </header>
