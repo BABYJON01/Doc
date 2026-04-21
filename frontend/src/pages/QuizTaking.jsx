@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, query, orderBy, limit, onSnapshot, setDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, orderBy, limit, onSnapshot, setDoc, doc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { useSearchParams } from 'react-router-dom';
 
 const QuizTaking = ({ onFinish, user }) => {
     const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -9,10 +10,43 @@ const QuizTaking = ({ onFinish, user }) => {
     const [score, setScore] = useState(0);
     const [showResults, setShowResults] = useState(false);
     const [leaderboard, setLeaderboard] = useState([]);
+    const [quizData, setQuizData] = useState(null);
+    const [searchParams] = useSearchParams();
+    const examId = searchParams.get('id');
 
     const userName = user?.displayName || user?.email?.split('@')[0] || "Siz";
 
     useEffect(() => {
+        // Fetch Exam Data
+        const fetchExamData = async () => {
+            if (examId) {
+                try {
+                    const docSnap = await getDoc(doc(db, "exams", examId));
+                    if (docSnap.exists()) {
+                        const payload = docSnap.data().data;
+                        setQuizData(payload.tests || payload.quizzes || []);
+                    } else {
+                        setQuizData([]);
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch exam", e);
+                    setQuizData([]);
+                }
+            } else {
+                setQuizData(JSON.parse(localStorage.getItem('generated_quiz')) || [
+                    {
+                        question: "Qaysi biri EKGda miokard infarktini yorqin anglatuvchi signal hisoblanadi?",
+                        options: ["ST elevatsiyasi", "P tishchasi yo'qolishi", "QRS ingichkaligi", "T tishchasi inverted emas"],
+                        answer: 0,
+                        explanation: "Miokard shikastlanishi darhol ST segment ko'tarilishiga olib keladi. Bu o'tkir infarktning klassik belgisidir.",
+                        topic: "Kardiologiya",
+                        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/12_lead_ECG_of_inferior_STEMI.svg/1024px-12_lead_ECG_of_inferior_STEMI.svg.png"
+                    }
+                ]);
+            }
+        };
+        fetchExamData();
+
         // Real-time listener for the leaderboard from Firestore
         const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10));
         
@@ -25,18 +59,15 @@ const QuizTaking = ({ onFinish, user }) => {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [examId]);
 
-    const quizData = JSON.parse(localStorage.getItem('generated_quiz')) || [
-        {
-            question: "Qaysi biri EKGda miokard infarktini yorqin anglatuvchi signal hisoblanadi?",
-            options: ["ST elevatsiyasi", "P tishchasi yo'qolishi", "QRS ingichkaligi", "T tishchasi inverted emas"],
-            answer: 0,
-            explanation: "Miokard shikastlanishi darhol ST segment ko'tarilishiga olib keladi. Bu o'tkir infarktning klassik belgisidir.",
-            topic: "Kardiologiya",
-            image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/12_lead_ECG_of_inferior_STEMI.svg/1024px-12_lead_ECG_of_inferior_STEMI.svg.png"
-        }
-    ];
+    if (!quizData) {
+        return <div className="min-h-screen bg-slate-900 flex items-center justify-center"><i className="fa-solid fa-circle-notch fa-spin text-4xl text-blue-500"></i></div>;
+    }
+
+    if (quizData.length === 0) {
+        return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white"><p>Ushbu imtihon majmuasi topilmadi (Yoki testlar yo'q).</p></div>;
+    }
 
     const currentQ = quizData[currentQuestion];
 

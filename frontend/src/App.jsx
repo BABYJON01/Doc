@@ -288,9 +288,9 @@ const App = () => {
                         {/* Protected Routes */}
                         <Route path="/admin" element={(role === 'admin' && user) ? <AdminDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                         <Route path="/teacher" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
-                        <Route path="/student" element={user ? <StudentDashboard onNavigate={(mode) => window.location.href = `/app?mode=${mode}`} user={user} /> : <Navigate to="/" replace />} />
-                        
+                        <Route path="/student/*" element={user ? <StudentDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                         <Route path="/test" element={user ? <QuizTaking user={user} onFinish={() => window.location.href = '/student'} /> : <Navigate to="/" replace />} />
+                        
                         <Route path="/methodology" element={user ? <Methodology /> : <Navigate to="/" replace />} />
                         <Route path="/app" element={<MedZukkooApp />} />
                         <Route path="*" element={<Navigate to="/" replace />} />

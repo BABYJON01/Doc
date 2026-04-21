@@ -28,8 +28,15 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
         { name: 'Talabalar', icon: 'fa-solid fa-users', path: '/teacher/students' },
         { name: 'Profil', icon: 'fa-solid fa-user-doctor', path: '/teacher/profile' },
     ];
+
+    const studentMenu = [
+        { name: 'Dashboard', icon: 'fa-solid fa-house', path: '/student' },
+        { name: 'Kurslar (Test)', icon: 'fa-solid fa-graduation-cap', path: '/student/courses' },
+        { name: 'Yutuqlar', icon: 'fa-solid fa-ranking-star', path: '/student/portfolio' },
+        { name: 'Live Quiz', icon: 'fa-solid fa-tower-broadcast', path: '/student/live' },
+    ];
     
-    const menu = role === 'admin' ? adminMenu : teacherMenu;
+    const menu = role === 'admin' ? adminMenu : role === 'teacher' ? teacherMenu : studentMenu;
     
     const isActive = (path) => window.location.pathname === path;
 
@@ -52,7 +59,9 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                     <img src="/assets/tma_logo.png" alt="Logo" className="w-10 h-10 drop-shadow-md" />
                     <div>
                         <h2 className="text-xl font-black tracking-tight" style={{ color: theme === 'dark' ? '#fff' : '#0f172a' }}>Med-Zukkoo</h2>
-                        <span className="text-[10px] uppercase font-bold tracking-widest text-blue-500">{role === 'admin' ? 'Super Admin' : 'O\'qituvchi'}</span>
+                        <span className="text-[10px] uppercase font-bold tracking-widest text-blue-500">
+                            {role === 'admin' ? 'Super Admin' : role === 'teacher' ? "O'qituvchi" : 'Talaba'}
+                        </span>
                     </div>
                 </div>
                 

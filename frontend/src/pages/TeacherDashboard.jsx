@@ -3,15 +3,19 @@ import { extractTextFromFile, generateMedicalContent } from '../services/aiServi
 import LiveRoom from './LiveRoom';
 import { useApp } from '../context/AppContext';
 import DashboardLayout from '../components/DashboardLayout';
+import { db } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
   const { t, lang } = useApp();
   const isAdmin = user?.email === 'rahmonjonwarrior@gmail.com';
 
   const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [progress, setProgress] = useState(0);
   const [generatedData, setGeneratedData] = useState(null);
   const [showLiveRoom, setShowLiveRoom] = useState(false);
+  const [currentTopic, setCurrentTopic] = useState("");
 
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -40,6 +44,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
 
   const handleGenerateFromTopic = async (topicName) => {
       setIsUploading(true);
+      setCurrentTopic(topicName);
       setProgress(20);
       setErrorMsg("");
       try {
@@ -62,6 +67,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       setIsUploading(true);
+      setCurrentTopic(file.name);
       setProgress(10); 
       setErrorMsg("");
 
@@ -94,6 +100,30 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
         setErrorMsg(error.message || "Faylni tahlil qilishda xatolik yuz berdi.");
       }
     }
+  };
+
+  const handleSaveToPlatform = async () => {
+      if (!generatedData) return;
+      setIsSaving(true);
+      try {
+          await addDoc(collection(db, 'exams'), {
+              teacherId: user?.uid || 'unknown',
+              teacherName: user?.displayName || user?.email || 'O\'qituvchi',
+              title: currentTopic || 'Yangi Imtihon',
+              createdAt: serverTimestamp(),
+              data: generatedData,
+              status: 'published'
+          });
+          alert(lang === 'ru' ? 'Учебный блок успешно сохранен на платформе!' : "O'quv bloki platformaga muvaffaqiyatli saqlandi!");
+          setProgress(0);
+          setIsUploading(false);
+          setGeneratedData(null);
+      } catch (err) {
+          console.error("Save error:", err);
+          alert(lang === 'ru' ? 'Ошибка сохранения!' : 'Saqlashda xatolik yuz berdi!');
+      } finally {
+          setIsSaving(false);
+      }
   };
 
   // If live room is active, show it full-screen
@@ -207,10 +237,14 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                         {progress === 100 && (
                             <div className="mt-4 flex flex-wrap gap-3">
                                 <button onClick={() => {setProgress(0); setIsUploading(false); setGeneratedData(null);}} className="px-4 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-lg text-sm text-white transition-colors">
-                                    <i className="fa-solid fa-rotate-left mr-2"></i>Yangi fayl yuklash
+                                    <i className="fa-solid fa-rotate-left mr-2"></i>Yangi boshlash
                                 </button>
                                 <button onClick={() => setShowLiveRoom(true)} className="px-5 py-2 bg-rose-600 hover:bg-rose-500 rounded-lg text-sm text-white font-bold transition-colors shadow-lg shadow-rose-900/40">
-                                    <i className="fa-solid fa-tower-broadcast mr-2 animate-pulse"></i>{lang === 'ru' ? 'Начать Live Quiz (Аудитория)' : 'Live Quiz Boshlash (Auditoriya)'}
+                                    <i className="fa-solid fa-tower-broadcast mr-2 animate-pulse"></i>{lang === 'ru' ? 'Live Quiz (Аудитория)' : 'Live Quiz'}
+                                </button>
+                                <button onClick={handleSaveToPlatform} disabled={isSaving} className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm text-white font-bold transition-colors shadow-lg shadow-emerald-900/40 ml-auto">
+                                    {isSaving ? <i className="fa-solid fa-circle-notch fa-spin mr-2"></i> : <i className="fa-solid fa-cloud-arrow-up mr-2"></i>}
+                                    {lang === 'ru' ? 'Сохранить на Платформу' : 'Platformaga Saqlash'}
                                 </button>
                             </div>
                         )}

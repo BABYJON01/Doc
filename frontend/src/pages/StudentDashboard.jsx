@@ -7,6 +7,9 @@ import {
 } from 'recharts';
 import LiveQuiz from './LiveQuiz';
 import { useApp } from '../context/AppContext';
+import DashboardLayout from '../components/DashboardLayout';
+import { useLocation } from 'react-router-dom';
+import StudentCourses from './StudentCourses';
 
 // ── Chart day labels per language ─────────────────────────
 const dayLabels = {
@@ -34,9 +37,11 @@ const proficiencyData = {
   ],
 };
 
-const StudentDashboard = ({ onNavigate, user }) => {
+const StudentDashboard = ({ onNavigate, user, onLogout }) => {
   const { t, lang } = useApp();
   const isAdmin = user?.email === 'rahmonjonwarrior@gmail.com';
+  const location = useLocation();
+  const path = location.pathname;
 
   const days = dayLabels[lang] || dayLabels.uz;
   const [xpHistory] = useState([
@@ -110,73 +115,28 @@ const StudentDashboard = ({ onNavigate, user }) => {
 
   // ════════════════════════════════════════════════════════
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans p-4 sm:p-6 pt-20 sm:pt-20 mb-20">
-
-      {/* ── HEADER ──────────────────────────────────────── */}
-      <header className="flex justify-between items-center bg-slate-800 p-4 rounded-2xl shadow-lg border border-slate-700 mb-8">
-        {/* LEFT: Logo + Profile */}
-        <div className="flex items-center gap-3">
-          <img
-            src="/assets/tma_logo.png"
-            alt="TMA"
-            className="w-11 h-11 rounded-full border-2 border-blue-400/50 shadow-[0_0_12px_rgba(59,130,246,0.3)] hidden sm:block flex-shrink-0"
-          />
-          <img
-            src={user?.photoURL || 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg'}
-            alt="Profile"
-            className="w-12 h-12 rounded-full border-2 border-emerald-500 shadow-[0_0_12px_rgba(5,150,105,0.4)] flex-shrink-0"
-          />
-          <div>
-            <h1 className="text-base font-bold leading-tight">{user?.displayName || 'Talaba'}</h1>
-            <p className="text-slate-400 text-[11px] font-medium tracking-wide">Toshkent Davlat Tibbiyot Universiteti</p>
-            <div className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest mt-0.5">MED-ZUKKOO PLATFORM</div>
-          </div>
-        </div>
-
-        {/* RIGHT: Stats + Nav + Logout */}
-        <div className="flex items-center gap-2">
-          {/* XP & Level — large screens only */}
-          <div className="hidden lg:flex items-center gap-3 mr-2">
-            <div className="text-center">
-              <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">{t.levelLabel}</p>
-              <div className="text-base font-black text-blue-400 flex items-center gap-1">
-                <i className="fa-solid fa-star text-xs"></i> 7
-              </div>
+    <DashboardLayout role="student" user={user} onLogout={onLogout}>
+      <div className="p-4 sm:p-6 pb-20">
+        
+        {path === '/student/courses' && <StudentCourses user={user} />}
+        
+        {path === '/student/portfolio' && (
+            <div className="bg-slate-800 rounded-2xl p-10 text-center border border-slate-700 shadow-xl max-w-2xl mx-auto mt-10">
+                <i className="fa-solid fa-ranking-star text-6xl text-blue-500 mb-6 drop-shadow-lg"></i>
+                <h2 className="text-2xl font-bold text-white mb-2">{lang === 'ru' ? 'Ваши Достижения' : 'Sizning Yutuqlaringiz'}</h2>
+                <p className="text-slate-400">{lang === 'ru' ? 'Эта страница находится в разработке.' : 'Ushbu sahifa tez kunda aktivlashadi.'}</p>
             </div>
-            <div className="w-px h-8 bg-slate-700" />
-            <div className="text-center">
-              <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">XP</p>
-              <div className="text-base font-black text-emerald-400 flex items-center gap-1">
-                <i className="fa-solid fa-fire text-xs"></i> 14,250
-              </div>
+        )}
+
+        {path === '/student/live' && (
+            <div className="bg-slate-800 flex flex-col items-center justify-center rounded-2xl p-10 text-center border border-rose-500/30 max-w-2xl mx-auto mt-10 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(225,29,72,0.1) 0%, rgba(30,41,59,0.9) 100%)' }}>
+                <i className="fa-solid fa-tower-broadcast text-6xl text-rose-500 mb-6 drop-shadow-lg animate-pulse"></i>
+                <h2 className="text-2xl font-bold text-white mb-2">{lang === 'ru' ? 'Вход в Live Quiz' : 'Live Quiz\'ga kirish'}</h2>
+                <p className="text-slate-400 max-w-md mx-auto">{lang === 'ru' ? 'Здесь будет форма для ввода PIN кода.' : 'Bu yerda tayyorgarlik uchun alohida PIN kod kiritish oynasi mavjud bo\'ladi.'}</p>
             </div>
-            <div className="w-px h-8 bg-slate-700" />
-          </div>
+        )}
 
-          {/* Quick switch → Teacher (Admin only) */}
-          {isAdmin && (
-            <button
-              onClick={() => window.location.href = '/teacher'}
-              title={t.switchToTeacher}
-              className="flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600 border border-blue-500/40 hover:border-blue-400 text-blue-400 hover:text-white rounded-xl font-bold text-xs transition-all duration-200"
-            >
-              <i className="fa-solid fa-chalkboard-teacher text-sm"></i>
-              <span className="hidden sm:inline">{t.switchToTeacher}</span>
-            </button>
-          )}
-
-          {/* Logout icon only */}
-          <button
-            onClick={() => window.location.href = '/'}
-            title={t.logout}
-            className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-700/60 hover:bg-rose-600 border border-slate-600 hover:border-rose-500 text-slate-400 hover:text-white transition-all duration-200 flex-shrink-0"
-          >
-            <i className="fa-solid fa-right-from-bracket text-sm"></i>
-          </button>
-        </div>
-      </header>
-
-      {/* ── MAIN GRID ────────────────────────────────────── */}
+        {path === '/student' && (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
 
         {/* ── LEFT COLUMN ───────────────────────────────── */}
@@ -463,9 +423,11 @@ const StudentDashboard = ({ onNavigate, user }) => {
             </div>
           </div>
 
-        </div>{/* end right column */}
-      </div>{/* end main grid */}
-    </div>
+        {/* end right column */}
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
   );
 };
 
