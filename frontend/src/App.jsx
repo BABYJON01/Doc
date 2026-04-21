@@ -1,26 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import MedZukkooApp from './components/MedZukkooApp';
 import StudentDashboard from './pages/StudentDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import QuizTaking from './pages/QuizTaking';
 import Methodology from './pages/Methodology';
 import { AppProvider, AppToolbar, useApp } from './context/AppContext';
+
+import { auth, googleProvider, db } from './firebase';
+import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import { collection, query, orderBy, limit, onSnapshot, setDoc, doc, getDocs, where, serverTimestamp } from 'firebase/firestore';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false, error: null };
   }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error("UI CATCHED ERROR:", error, errorInfo);
-  }
-
+  static getDerivedStateFromError(error) { return { hasError: true }; }
+  componentDidCatch(error, errorInfo) { console.error("UI CATCHED ERROR:", error, errorInfo); }
   render() {
     if (this.state.hasError) {
       return (
@@ -28,9 +26,7 @@ class ErrorBoundary extends React.Component {
           <div className="bg-slate-800 rounded-2xl p-8 border-l-4 border-red-500 shadow-xl max-w-lg mx-auto text-center">
             <h1 className="text-2xl font-bold text-red-400 mb-4">Xatolik yuz berdi</h1>
             <p className="text-slate-400 mb-6">Ilovada kutilmagan to'qnashuv bo'ldi.</p>
-            <button 
-                onClick={() => window.location.reload()} 
-                className="px-6 py-2 bg-blue-600 rounded-xl hover:bg-blue-500 transition-colors font-medium">
+            <button onClick={() => window.location.reload()} className="px-6 py-2 bg-blue-600 rounded-xl hover:bg-blue-500 transition-colors font-medium">
                 Qayta yuklash
             </button>
           </div>
@@ -41,25 +37,20 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-import { auth, googleProvider, db } from './firebase';
-import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
-import { collection, query, orderBy, limit, onSnapshot, setDoc, doc, serverTimestamp } from 'firebase/firestore';
-
-// Refactored LoginSelector with Firebase Auth
-const LoginSelector = ({ user }) => {
+const LoginSelector = ({ user, role }) => {
     const { t, theme } = useApp();
+    const [recentUsers, setRecentUsers] = useState([]);
+    
+    // Check if user is locked out from Teacher/Admin panels
+    const [showAccessDenied, setShowAccessDenied] = useState(false);
 
-    const [recentUsers, setRecentUsers] = React.useState([]);
-
-    React.useEffect(() => {
+    useEffect(() => {
         const q = query(collection(db, "latest_users"), orderBy("lastLogin", "desc"), limit(3));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const users = [];
             snapshot.forEach(docSnap => users.push(docSnap.data()));
             setRecentUsers(users);
-        }, (error) => {
-            console.warn("Recent users fetching error:", error);
-        });
+        }, () => {});
         return () => unsubscribe();
     }, []);
 
@@ -67,142 +58,119 @@ const LoginSelector = ({ user }) => {
         try {
             const result = await signInWithPopup(auth, googleProvider);
             if (result.user) {
-                // Update latest user for the live widget
                 await setDoc(doc(db, "latest_users", result.user.uid), {
                     displayName: result.user.displayName || "Talaba",
                     photoURL: result.user.photoURL || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg",
                     lastLogin: serverTimestamp()
                 }, { merge: true });
             }
-            // After successful popup, the Auth Listener will automatically update 'user' state
         } catch (error) {
             console.error("Google Sign-In Error:", error);
-            alert("Tizimga kirishda xatolik yuz berdi. Qayta urinib ko'ring.");
+            alert("Tizimga kirishda xatolik yuz berdi.");
         }
     };
 
     const handleLogout = async () => {
-        try {
-            await signOut(auth);
-        } catch (error) {
-            console.error("Logout Error:", error);
+        try { await signOut(auth); } catch (error) { console.error("Logout Error:", error); }
+    };
+
+    const handleTeacherClick = () => {
+        if (role === 'admin' || role === 'teacher') {
+            window.location.href = '/teacher';
+        } else {
+            setShowAccessDenied(true);
+            setTimeout(() => setShowAccessDenied(false), 5000);
         }
     };
 
     return (
         <div className="min-h-screen bg-slate-950 relative overflow-hidden flex items-center justify-center p-6 text-white font-sans">
-            
-            {/* Background Image / Building */}
             <div className="absolute inset-0 bg-[url('/assets/tma_bg.jpg')] bg-cover bg-center bg-no-repeat opacity-100 pointer-events-none z-0"></div>
-            
-            {/* Light dark overlay — chap taraf biroz qorong'i (matn o'qilsin), o'ng taraf shaffof */}
             <div className="absolute inset-0 bg-gradient-to-r from-slate-950/75 via-slate-900/50 to-slate-900/20 pointer-events-none z-0"></div>
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-700/20 blur-[120px] rounded-full pointer-events-none z-0"></div>
 
             <div className="max-w-6xl w-full flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20 relative z-10">
                  {!user ? (
                      <>
-                        {/* Hero Text Construction */}
                         <div className="md:w-1/2 text-left animate-[fadeInLeft_0.8s_ease-out]">
                             <div className="mb-6 flex items-center gap-4">
                                 <img src="/assets/tma_logo.png" alt="TMA Logo" className="w-20 h-auto drop-shadow-[0_0_15px_rgba(59,130,246,0.6)] animate-pulse" />
-                                <div className="inline-block px-4 py-1.5 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-                                    {t.platformBadge}
-                                </div>
+                                <div className="inline-block px-4 py-1.5 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-full text-[10px] uppercase font-bold tracking-widest">{t.platformBadge}</div>
                             </div>
                             <h1 className="text-5xl lg:text-7xl font-black mb-6 leading-tight tracking-tight">
-                                <span className="bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent drop-shadow-sm">Med-Zukkoo</span><br/>
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 drop-shadow-sm">Med-Zukkoo</span><br/>
                                 <span className="text-white drop-shadow-md">{t.platformTitle}</span>
                             </h1>
-                            <p className="text-slate-400 text-lg sm:text-xl mb-10 leading-relaxed max-w-lg font-light">
-                                {t.platformDesc}
-                            </p>
-                            <div className="flex items-center gap-4 text-sm text-slate-400 font-medium bg-slate-900/50 p-4 rounded-2xl border border-slate-800/50 inline-flex">
+                            <p className="text-slate-400 text-lg mb-10">{t.platformDesc}</p>
+                            <div className="flex items-center gap-4 text-sm text-slate-400 bg-slate-900/50 p-4 rounded-2xl border border-slate-800/50 inline-flex">
                                 <div className="flex -space-x-3">
-                                    {recentUsers.length > 0 ? (
-                                        recentUsers.map((u, i) => (
-                                            <img key={i} className="w-10 h-10 object-cover rounded-full border-2 border-slate-900 drop-shadow-md" src={u.photoURL} alt={u.displayName} title={u.displayName}/>
-                                        ))
-                                    ) : (
-                                        <>
-                                            <img className="w-10 h-10 rounded-full border-2 border-slate-900" src="https://i.pravatar.cc/100?img=11" alt="Student"/>
-                                            <img className="w-10 h-10 rounded-full border-2 border-slate-900" src="https://i.pravatar.cc/100?img=12" alt="Student"/>
-                                            <img className="w-10 h-10 rounded-full border-2 border-slate-900" src="https://i.pravatar.cc/100?img=13" alt="Student"/>
-                                        </>
-                                    )}
-                                    <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-emerald-600 flex items-center justify-center text-[11px] font-bold text-white shadow-lg">+2.4k</div>
+                                    {recentUsers.length > 0 ? recentUsers.map((u, i) => <img key={i} className="w-10 h-10 object-cover rounded-full border-2 border-slate-900" src={u.photoURL}/>) : null}
                                 </div>
-                                <p>{t.recentUsers}<br/><span className="text-emerald-400 text-xs truncate max-w-[150px] inline-block">
-                                    {recentUsers.length > 0 ? recentUsers.map(u => u.displayName.split(' ')[0]).join(', ') : t.onlineNow}
-                                </span></p>
+                                <p>{t.recentUsers}<br/><span className="text-emerald-400 text-xs">Ayni damda onlayn...</span></p>
                             </div>
                         </div>
 
-                        {/* Login Card UI */}
-                        <div className="md:w-1/2 w-full max-w-md animate-[fadeInRight_0.8s_ease-out_0.2s_both]">
-                            <div className="bg-slate-900/60 backdrop-blur-2xl p-8 sm:p-10 rounded-3xl border border-slate-700/50 shadow-[0_20px_50px_rgba(0,0,0,0.5)] shadow-blue-900/20 relative overflow-hidden group">
-                                {/* Glass shine hover effect */}
-                                <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-                                
-                                <div className="w-16 h-16 bg-slate-800/80 border border-slate-600 rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-emerald-500/20 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                                    <i className="fa-solid fa-user-doctor text-3xl text-emerald-400"></i>
+                        <div className="md:w-1/2 max-w-md animate-[fadeInRight_0.8s_ease-out_0.2s_both]">
+                            <div className="bg-slate-900/60 backdrop-blur-2xl p-8 sm:p-10 rounded-3xl border border-slate-700/50 shadow-2xl">
+                                <div className="w-16 h-16 bg-slate-800/80 border border-slate-600 rounded-2xl flex items-center justify-center mb-8 shadow-lg text-emerald-400 text-3xl">
+                                    <i className="fa-solid fa-user-doctor"></i>
                                 </div>
-                                
-                                <h2 className="text-3xl font-bold mb-2 tracking-tight text-white">{t.loginTitle}</h2>
-                                <p className="text-slate-400 light:text-slate-600 text-sm mb-10 font-medium">{t.loginSubtitle}</p>
-                                
-                                <button onClick={handleGoogleLogin} className="w-full py-4 px-6 bg-white hover:bg-slate-100 transform hover:-translate-y-1 text-slate-800 rounded-xl font-black text-sm transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl hover:shadow-white/10 uppercase tracking-widest relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-slate-200 opacity-0 hover:opacity-20 transition-opacity duration-300"></div>
-                                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6 mr-3 relative z-10" alt="Google Logo"/>
-                                    <span className="relative z-10">{t.loginButton}</span>
+                                <h2 className="text-3xl font-bold mb-2">{t.loginTitle}</h2>
+                                <p className="text-slate-400 text-sm mb-10">{t.loginSubtitle}</p>
+                                <button onClick={handleGoogleLogin} className="w-full py-4 bg-white hover:bg-slate-100 text-slate-800 flex items-center justify-center rounded-xl font-black text-sm uppercase tracking-widest transition-all shadow-lg hover:-translate-y-1">
+                                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6 mr-3" />
+                                    {t.loginButton}
                                 </button>
-
-                                <div className="mt-8 text-center text-xs text-slate-500 font-medium">
-                                    {t.loginPrivacy} <br/><a href="#" className="text-blue-400 hover:text-blue-300 hover:underline transition-colors">{t.loginPrivacyLink}</a> {t.loginPrivacyEnd}
-                                </div>
                             </div>
                         </div>
                      </>
                  ) : (
-                     <div>
-                         <div
-                           className="p-8 rounded-2xl max-w-2xl mx-auto shadow-2xl mb-8 flex items-center justify-between"
-                           style={{ background: theme==='dark' ? '#1e293b' : '#fff', border: `1px solid ${theme==='dark' ? '#334155' : '#e2e8f0'}` }}
-                         >
+                     <div className="w-full max-w-4xl mx-auto">
+                         <div className="p-8 rounded-2xl shadow-2xl mb-8 flex items-center justify-between" style={{ background: theme==='dark' ? '#1e293b' : '#fff', border: `1px solid ${theme==='dark' ? '#334155' : '#e2e8f0'}` }}>
                             <div className="flex items-center gap-6">
-                                <img src={user.photoURL || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"} alt="User Profile" className="w-20 h-20 rounded-full border-4 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]" />
-                                <div className="text-left">
-                                    <h2 className="text-2xl font-bold" style={{ color: theme==='dark' ? '#fff' : '#0f172a' }}>{user.displayName || "Foydalanuvchi"}</h2>
-                                    <p style={{ color: theme==='dark' ? '#94a3b8' : '#64748b' }}>{user.email}</p>
+                                <img src={user.photoURL} alt="User" className="w-20 h-20 rounded-full border-4 border-emerald-500" />
+                                <div>
+                                    <h2 className="text-2xl font-bold" style={{ color: theme==='dark' ? '#fff' : '#0f172a' }}>{user.displayName}</h2>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <p style={{ color: theme==='dark' ? '#94a3b8' : '#64748b' }}>{user.email}</p>
+                                        <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold tracking-widest ${role === 'admin' ? 'bg-purple-500/20 text-purple-400' : role === 'teacher' ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-500/20 text-slate-400'}`}>
+                                            {role === 'admin' ? 'Super Admin' : role === 'teacher' ? "O'qituvchi" : 'Talaba'}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                            <button onClick={handleLogout} className="px-6 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg transition-colors shadow-lg shadow-rose-900/50">
+                            <button onClick={handleLogout} className="px-6 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg transition-colors">
                                 <i className="fa-solid fa-right-from-bracket mr-2"></i> {t.logout}
                             </button>
                          </div>
 
-                         <h3
-                           className="text-xl font-bold mb-6 uppercase tracking-widest border-b pb-2"
-                           style={{ color: theme==='dark' ? '#cbd5e1' : '#1e293b', borderColor: theme==='dark' ? '#334155' : '#e2e8f0' }}
-                         >{t.selectRole}</h3>
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                             <button
-                               onClick={() => window.location.href = '/student'}
-                               className="p-10 block border-t-4 border-emerald-500 text-left transition-all rounded-2xl shadow-xl hover:shadow-emerald-500/20 hover:-translate-y-1 duration-300"
-                               style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff', border: `1px solid ${theme==='dark' ? 'rgba(51,65,85,0.5)' : '#e2e8f0'}`, borderTop: '4px solid #10b981' }}
-                             >
-                                 <i className="fa-solid fa-user-graduate text-5xl text-emerald-500 mb-6 block"></i>
-                                 <h2 className="text-xl font-bold mb-2" style={{ color: theme==='dark' ? '#fff' : '#0f172a' }}>{t.studentPanel}</h2>
-                                 <p className="text-sm" style={{ color: theme==='dark' ? '#94a3b8' : '#475569' }}>{t.studentDesc}</p>
+                         {showAccessDenied && (
+                             <div className="mb-6 p-4 rounded-xl bg-rose-500/20 border border-rose-500 text-rose-400 flex items-center gap-3 animate-pulse">
+                                 <i className="fa-solid fa-shield-halved text-2xl"></i>
+                                 <div>
+                                     <h4 className="font-bold">Kirish taqiqlangan!</h4>
+                                     <p className="text-sm">Sizda O'qituvchilar paneliga kirish uchun ruxsat yo'q. Faqat admin tomonidan tasdiqlangan o'qituvchilar kira oladi.</p>
+                                 </div>
+                             </div>
+                         )}
+
+                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                             {role === 'admin' && (
+                                <button onClick={() => window.location.href = '/admin'} className="p-8 block border-t-4 border-purple-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-y-1" style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
+                                    <i className="fa-solid fa-shield-cat text-4xl text-purple-500 mb-4 block"></i>
+                                    <h2 className="text-xl font-bold mb-2">Boshqaruv (Admin)</h2>
+                                    <p className="text-sm opacity-70">O'qituvchilarni boshqarish va nazorat.</p>
+                                </button>
+                             )}
+                             <button onClick={handleTeacherClick} className="p-8 block border-t-4 border-blue-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-y-1" style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
+                                 <i className="fa-solid fa-chalkboard-teacher text-4xl text-blue-500 mb-4 block"></i>
+                                 <h2 className="text-xl font-bold mb-2">{t.teacherPanel}</h2>
+                                 <p className="text-sm opacity-70">{t.teacherDesc}</p>
                              </button>
-                             <button
-                               onClick={() => window.location.href = '/teacher'}
-                               className="p-10 block border-t-4 border-blue-500 text-left transition-all rounded-2xl shadow-xl hover:shadow-blue-500/20 hover:-translate-y-1 duration-300"
-                               style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff', border: `1px solid ${theme==='dark' ? 'rgba(51,65,85,0.5)' : '#e2e8f0'}`, borderTop: '4px solid #3b82f6' }}
-                             >
-                                 <i className="fa-solid fa-chalkboard-teacher text-5xl text-blue-500 mb-6 block"></i>
-                                 <h2 className="text-xl font-bold mb-2" style={{ color: theme==='dark' ? '#fff' : '#0f172a' }}>{t.teacherPanel}</h2>
-                                 <p className="text-sm" style={{ color: theme==='dark' ? '#94a3b8' : '#475569' }}>{t.teacherDesc}</p>
+                             <button onClick={() => window.location.href = '/student'} className="p-8 block border-t-4 border-emerald-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-y-1" style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
+                                 <i className="fa-solid fa-user-graduate text-4xl text-emerald-500 mb-4 block"></i>
+                                 <h2 className="text-xl font-bold mb-2">{t.studentPanel}</h2>
+                                 <p className="text-sm opacity-70">{t.studentDesc}</p>
                              </button>
                          </div>
                      </div>
@@ -213,26 +181,43 @@ const LoginSelector = ({ user }) => {
 };
 
 const App = () => {
-    const [user, setUser] = React.useState(null);
-    const [loading, setLoading] = React.useState(true);
+    const [user, setUser] = useState(null);
+    const [role, setRole] = useState('student'); // 'student', 'teacher', 'admin'
+    const [loading, setLoading] = useState(true);
 
-    React.useEffect(() => {
-        // Firebase auth listener — persists session across page reloads
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
+            if (currentUser) {
+                // Determine Role
+                const email = currentUser.email;
+                if (email === 'rahmonjonwarrior@gmail.com') {
+                    setRole('admin');
+                } else {
+                    // Check Firestore 'teachers' collection
+                    try {
+                        const q = query(collection(db, "teachers"), where("email", "==", email));
+                        const snapshot = await getDocs(q);
+                        if (!snapshot.empty) {
+                            setRole('teacher');
+                        } else {
+                            setRole('student');
+                        }
+                    } catch (err) {
+                        console.error('Role fetch error:', err);
+                        setRole('student');
+                    }
+                }
+            }
             setLoading(false);
         });
-        // Cleanup listener on unmount
         return () => unsubscribe();
     }, []);
 
     if (loading) {
         return (
             <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-slate-400 font-sans">Yuklanmoqda...</p>
-                </div>
+                <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
@@ -243,16 +228,15 @@ const App = () => {
                 <AppToolbar />
                 <BrowserRouter>
                     <Routes>
-                        <Route path="/" element={<LoginSelector user={user} />} />
-
-                        {/* Protected routes: redirect to login if not authenticated */}
+                        <Route path="/" element={<LoginSelector user={user} role={role} />} />
+                        
+                        {/* Protected Routes */}
+                        <Route path="/admin" element={(role === 'admin' && user) ? <AdminDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
+                        <Route path="/teacher" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                         <Route path="/student" element={user ? <StudentDashboard onNavigate={(mode) => window.location.href = `/app?mode=${mode}`} user={user} /> : <Navigate to="/" replace />} />
-                        <Route path="/teacher" element={user ? <TeacherDashboard user={user} /> : <Navigate to="/" replace />} />
+                        
                         <Route path="/test" element={user ? <QuizTaking user={user} onFinish={() => window.location.href = '/student'} /> : <Navigate to="/" replace />} />
                         <Route path="/methodology" element={user ? <Methodology /> : <Navigate to="/" replace />} />
-
-
-                        {/* The original duel/solo mode entry matches /app */}
                         <Route path="/app" element={<MedZukkooApp />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
@@ -263,4 +247,3 @@ const App = () => {
 };
 
 export default App;
-
