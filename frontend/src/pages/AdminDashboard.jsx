@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import DashboardLayout from '../components/DashboardLayout';
-import { db } from '../firebase';
-import { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp, query, orderBy, setDoc } from 'firebase/firestore';
+import { createUserWithEmailAndPassword, updateProfile, signOut } from 'firebase/auth';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, secondaryAuth, storage } from '../firebase';
 
 const AdminDashboard = ({ user, onLogout }) => {
     const { theme } = useApp();
@@ -11,7 +13,8 @@ const AdminDashboard = ({ user, onLogout }) => {
     
     // Form state
     const [showAddModal, setShowAddModal] = useState(false);
-    const [formData, setFormData] = useState({ name: '', email: '', subject: '', experience: '' });
+    const [formData, setFormData] = useState({ name: '', email: '', password: '', subject: '', experience: '', photo: null });
+    const [uploading, setUploading] = useState(false);
     
     // Fetch teachers
     const fetchTeachers = async () => {
@@ -42,25 +45,59 @@ const AdminDashboard = ({ user, onLogout }) => {
             return;
         }
         
+        if (formData.password.length < 6) {
+            alert("Parol kamida 6 ta belgidan iborat bo'lishi kerak!");
+            return;
+        }
+        
+        setUploading(true);
         try {
-            await addDoc(collection(db, "teachers"), {
+            // 1. Create user in Firebase Auth using secondary Auth instance
+            const userCredential = await createUserWithEmailAndPassword(secondaryAuth, formData.email.toLowerCase().trim(), formData.password);
+            const newUid = userCredential.user.uid;
+            
+            // 2. Upload photo if provided
+            let photoUrl = "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg";
+            if (formData.photo) {
+                const photoRef = ref(storage, `teachers/${newUid}_${formData.photo.name}`);
+                await uploadBytes(photoRef, formData.photo);
+                photoUrl = await getDownloadURL(photoRef);
+                
+                // Update profile in Auth
+                await updateProfile(userCredential.user, {
+                    displayName: formData.name,
+                    photoURL: photoUrl
+                });
+            }
+            
+            // Explicitly sign out secondary auth to keep clean
+            await signOut(secondaryAuth);
+            
+            // 3. Save to Firestore
+            await setDoc(doc(db, "teachers", newUid), {
                 name: formData.name,
                 email: formData.email.toLowerCase().trim(),
                 subject: formData.subject,
-                experience: formData.experience,
+                experience: Number(formData.experience),
                 uploadsCount: 0,
                 testsCount: 0,
                 createdAt: serverTimestamp(),
-                photoURL: "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
+                photoURL: photoUrl
             });
             
             setShowAddModal(false);
-            setFormData({ name: '', email: '', subject: '', experience: '' });
+            setFormData({ name: '', email: '', password: '', subject: '', experience: '', photo: null });
             fetchTeachers();
-            alert("O'qituvchi muvaffaqiyatli qo'shildi! Endi ular tizimga Googledan kirishlari mumkin.");
+            alert("O'qituvchi muvaffaqiyatli qo'shildi!");
         } catch (error) {
             console.error("Error adding teacher:", error);
-            alert("O'qituvchi qo'shishda xatolik yuz berdi.");
+            if (error.code === 'auth/email-already-in-use') {
+                alert("Bu pochta allaqachon ro'yxatdan o'tgan!");
+            } else {
+                alert("O'qituvchi qo'shishda xatolik yuz berdi: " + error.message);
+            }
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -223,11 +260,23 @@ const AdminDashboard = ({ user, onLogout }) => {
                                 <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Dr. Alisher Vahobov" 
                                 className={`w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'}`} />
                             </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className={`block text-xs font-bold mb-1 uppercase ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Email Manzili (Login)</label>
+                                    <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ustoz@gmail.com" 
+                                    className={`w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'}`} />
+                                </div>
+                                <div>
+                                    <label className={`block text-xs font-bold mb-1 uppercase ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Yangi Parol</label>
+                                    <input required type="text" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="domla1234" 
+                                    className={`w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'}`} />
+                                </div>
+                            </div>
+                            
                             <div>
-                                <label className={`block text-xs font-bold mb-1 uppercase ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Google E-mail Manzili</label>
-                                <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ustoz@gmail.com" 
-                                className={`w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'}`} />
-                                <p className="text-[10px] text-amber-500 mt-1 italic">*Ular aynan shu pochta orqali Google (G) tugmasini bosib kirishadi</p>
+                                <label className={`block text-xs font-bold mb-1 uppercase ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Profil Rasmi Yuklash</label>
+                                <input type="file" accept="image/*" onChange={e => setFormData({...formData, photo: e.target.files[0]})} 
+                                className={`w-full px-4 py-2 rounded-lg border text-sm transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold ${isDark ? 'bg-slate-800 border-slate-700 text-slate-300 file:bg-blue-600/20 file:text-blue-400' : 'bg-slate-50 border-slate-300 text-slate-700 file:bg-blue-50 file:text-blue-600'}`} />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
@@ -241,8 +290,8 @@ const AdminDashboard = ({ user, onLogout }) => {
                                     className={`w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'}`} />
                                 </div>
                             </div>
-                            <button type="submit" className="w-full mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-blue-500/25">
-                                Saqlash va Ruxsat berish
+                            <button type="submit" disabled={uploading} className={`w-full mt-4 flex justify-center items-center gap-2 ${uploading ? 'bg-slate-600' : 'bg-blue-600 hover:bg-blue-500'} text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-blue-500/25`}>
+                                {uploading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : "Saqlash va Ruxsat berish"}
                             </button>
                         </form>
                     </div>

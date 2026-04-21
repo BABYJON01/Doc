@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore, initializeFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -19,9 +20,12 @@ if (!firebaseConfig.apiKey) {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
 
 // Initialize Services
 export const auth = getAuth(app);
+export const secondaryAuth = getAuth(secondaryApp);
+export const storage = getStorage(app);
 
 // Use initializeFirestore instead of getFirestore to force long polling
 let firestoreDb;
@@ -36,4 +40,3 @@ try {
 
 export const db = firestoreDb;
 export const googleProvider = new GoogleAuthProvider();
-

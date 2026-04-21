@@ -9,7 +9,7 @@ import Methodology from './pages/Methodology';
 import { AppProvider, AppToolbar, useApp } from './context/AppContext';
 
 import { auth, googleProvider, db } from './firebase';
-import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import { signInWithPopup, signOut, onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
 import { collection, query, orderBy, limit, onSnapshot, setDoc, doc, getDocs, where, serverTimestamp } from 'firebase/firestore';
 
 class ErrorBoundary extends React.Component {
@@ -43,6 +43,13 @@ const LoginSelector = ({ user, role }) => {
     
     // Check if user is locked out from Teacher/Admin panels
     const [showAccessDenied, setShowAccessDenied] = useState(false);
+    
+    // Email login states
+    const [loginTab, setLoginTab] = useState('student');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loginError, setLoginError] = useState('');
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
 
     useEffect(() => {
         const q = query(collection(db, "latest_users"), orderBy("lastLogin", "desc"), limit(3));
@@ -55,6 +62,7 @@ const LoginSelector = ({ user, role }) => {
     }, []);
 
     const handleGoogleLogin = async () => {
+        setIsLoggingIn(true);
         try {
             const result = await signInWithPopup(auth, googleProvider);
             if (result.user) {
@@ -67,6 +75,26 @@ const LoginSelector = ({ user, role }) => {
         } catch (error) {
             console.error("Google Sign-In Error:", error);
             alert("Tizimga kirishda xatolik yuz berdi.");
+        } finally {
+            setIsLoggingIn(false);
+        }
+    };
+
+    const handleEmailLogin = async (e) => {
+        e.preventDefault();
+        setIsLoggingIn(true);
+        setLoginError('');
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            console.error("Email login error:", error);
+            if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                setLoginError("Pochta yoki parol notўg'ri!");
+            } else {
+                setLoginError("Xatolik yuz berdi: " + error.message);
+            }
+        } finally {
+            setIsLoggingIn(false);
         }
     };
 
@@ -115,12 +143,39 @@ const LoginSelector = ({ user, role }) => {
                                 <div className="w-16 h-16 bg-slate-800/80 border border-slate-600 rounded-2xl flex items-center justify-center mb-8 shadow-lg text-emerald-400 text-3xl">
                                     <i className="fa-solid fa-user-doctor"></i>
                                 </div>
+                                <div className="flex gap-2 mb-8 p-1 bg-slate-800/50 rounded-xl max-w-xs cursor-pointer border border-slate-700">
+                                    <button onClick={() => setLoginTab('student')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${loginTab === 'student' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>Talaba</button>
+                                    <button onClick={() => setLoginTab('teacher')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${loginTab === 'teacher' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>O'qituvchi</button>
+                                </div>
+                                
                                 <h2 className="text-3xl font-bold mb-2">{t.loginTitle}</h2>
-                                <p className="text-slate-400 text-sm mb-10">{t.loginSubtitle}</p>
-                                <button onClick={handleGoogleLogin} className="w-full py-4 bg-white hover:bg-slate-100 text-slate-800 flex items-center justify-center rounded-xl font-black text-sm uppercase tracking-widest transition-all shadow-lg hover:-translate-y-1">
-                                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6 mr-3" />
-                                    {t.loginButton}
-                                </button>
+                                <p className="text-slate-400 text-sm mb-10">{loginTab === 'student' ? "Google akkaunt bilan tezkor kirish" : "Tizimga O'qituvchi sifatida kiring"}</p>
+                                
+                                {loginTab === 'student' ? (
+                                    <button onClick={handleGoogleLogin} disabled={isLoggingIn} className="w-full py-4 bg-white hover:bg-slate-100 text-slate-800 flex items-center justify-center rounded-xl font-black text-sm uppercase tracking-widest transition-all shadow-lg hover:-translate-y-1">
+                                        {isLoggingIn ? <i className="fa-solid fa-circle-notch fa-spin text-xl"></i> : (
+                                            <>
+                                                <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6 mr-3" />
+                                                Google orqali kirish
+                                            </>
+                                        )}
+                                    </button>
+                                ) : (
+                                    <form onSubmit={handleEmailLogin} className="space-y-4">
+                                        {loginError && <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold">{loginError}</div>}
+                                        <div>
+                                            <input type="email" placeholder="Pochta (Login)" value={email} onChange={e=>setEmail(e.target.value)} required 
+                                                className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500 transition-colors" />
+                                        </div>
+                                        <div>
+                                            <input type="password" placeholder="Parol" value={password} onChange={e=>setPassword(e.target.value)} required 
+                                                className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500 transition-colors" />
+                                        </div>
+                                        <button type="submit" disabled={isLoggingIn} className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold uppercase tracking-widest text-sm transition-all shadow-lg shadow-blue-600/30">
+                                            {isLoggingIn ? <i className="fa-solid fa-circle-notch fa-spin"></i> : "Kirish"}
+                                        </button>
+                                    </form>
+                                )}
                             </div>
                         </div>
                      </>
