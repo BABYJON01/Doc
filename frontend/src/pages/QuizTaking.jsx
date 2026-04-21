@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, query, orderBy, limit, onSnapshot, setDoc, doc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, orderBy, limit, onSnapshot, setDoc, doc, getDoc, serverTimestamp, addDoc, increment } from 'firebase/firestore';
 import { useSearchParams } from 'react-router-dom';
 
 const QuizTaking = ({ onFinish, user }) => {
@@ -107,20 +107,35 @@ const QuizTaking = ({ onFinish, user }) => {
             setIsAnswered(false);
         } else {
             setShowResults(true);
-            
-            // Record to local profile history
-            const history = JSON.parse(localStorage.getItem('student_history')) || [];
-            history.unshift({
-                topic: currentQ.topic || "Mavzulashtirilgan Diagnostika",
-                score: score,
-                total: quizData.length,
-                percent: Math.round((score / quizData.length) * 100),
-                date: new Date().toLocaleDateString("en-GB")
-            });
-            localStorage.setItem('student_history', JSON.stringify(history));
 
-            // Submit final score status
+            // Record to Firestore instead of localStorage
             if (user?.uid) {
+                const totalQ = quizData.length;
+                const percent = Math.round((score / totalQ) * 100);
+                const xpEarned = score * 10;
+                
+                // Add to student_results collection
+                addDoc(collection(db, 'student_results'), {
+                    userId: user.uid,
+                    topic: currentQ.topic || "Mavzulashtirilgan Diagnostika",
+                    score: score,
+                    total: totalQ,
+                    percent: percent,
+                    xpEarned: xpEarned,
+                    createdAt: serverTimestamp(),
+                    dateText: new Date().toLocaleDateString("en-GB")
+                }).catch(err => console.error("Error saving result:", err));
+
+                // Update total stats in user_stats
+                setDoc(doc(db, 'user_stats', user.uid), {
+                    userId: user.uid,
+                    totalXP: increment(xpEarned),
+                    totalTests: increment(1),
+                    totalScoreSum: increment(percent),
+                    lastActive: serverTimestamp()
+                }, { merge: true }).catch(err => console.error("Error updating stats:", err));
+
+                // Submit final score status for exam leaderboard
                 const leaderboardRef = examId ? collection(db, "exams", examId, "leaderboard") : collection(db, "leaderboard");
                 setDoc(doc(leaderboardRef, user.uid), {
                     status: "tugatdi",

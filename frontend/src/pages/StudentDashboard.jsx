@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, query, where, getDocs, limit, collectionGroup } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit, collectionGroup, onSnapshot, doc, orderBy } from 'firebase/firestore';
 
 import LiveQuiz from './LiveQuiz';
 import { useApp } from '../context/AppContext';
@@ -57,9 +57,36 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
   const [sessions,      setSessions]      = useState([]);
   const [studentHistory, setStudentHistory] = useState([]);
 
+  const [stats, setStats] = useState({ totalXP: 0, totalTests: 0, avgScore: 0 });
+
   useEffect(() => {
-    const history = JSON.parse(localStorage.getItem('student_history')) || [];
-    setStudentHistory(history);
+    if (!user?.uid) return;
+
+    // Listen to real-time student history
+    const resultsQuery = query(
+      collection(db, 'student_results'),
+      where('userId', '==', user.uid),
+      orderBy('createdAt', 'desc')
+    );
+    
+    const unsubResults = onSnapshot(resultsQuery, (snapshot) => {
+      const history = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setStudentHistory(history);
+    }, (err) => console.error("Error fetching results history:", err));
+
+    // Listen to overall user stats
+    const unsubStats = onSnapshot(doc(db, 'user_stats', user.uid), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const totalTests = data.totalTests || 0;
+        const totalScoreSum = data.totalScoreSum || 0;
+        setStats({
+          totalXP: data.totalXP || 0,
+          totalTests: totalTests,
+          avgScore: totalTests > 0 ? Math.round(totalScoreSum / totalTests) : 0
+        });
+      }
+    }, (err) => console.error("Error fetching user stats:", err));
 
     const fetchData = async () => {
       if (!user?.uid) return;
@@ -87,6 +114,11 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
       }
     };
     fetchData();
+
+    return () => {
+      unsubResults && unsubResults();
+      unsubStats && unsubStats();
+    };
   }, [user]);
 
   const handleJoinLiveQuiz = () => {
@@ -211,7 +243,7 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
                   </div>
                   <div>
                       <h4 className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">{{ uz: 'Yechilgan Testlar', ru: 'Завершенные тесты', en: 'Tests Completed' }[lang] || 'Yechilgan Testlar'}</h4>
-                      <p className="text-xl font-black text-white">{studentHistory.length || 0}</p>
+                      <p className="text-xl font-black text-white">{stats.totalTests}</p>
                   </div>
               </div>
               
@@ -221,7 +253,7 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
                   </div>
                   <div>
                       <h4 className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">{{ uz: 'Jami tajriba (XP)', ru: 'Общий опыт (XP)', en: 'Total Experience (XP)' }[lang] || 'Jami tajriba (XP)'}</h4>
-                      <p className="text-xl font-black text-emerald-400">1,250</p>
+                      <p className="text-xl font-black text-emerald-400">{stats.totalXP.toLocaleString()}</p>
                   </div>
               </div>
               
@@ -231,7 +263,7 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
                   </div>
                   <div>
                       <h4 className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">{{ uz: 'O\'rtacha Natija', ru: 'Успеваемость', en: 'Average Score' }[lang] || 'O\'rtacha Natija'}</h4>
-                      <p className="text-xl font-black text-white">82%</p>
+                      <p className="text-xl font-black text-white">{stats.avgScore}%</p>
                   </div>
               </div>
           </div>
@@ -249,7 +281,7 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <span className="text-[10px] font-bold text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded uppercase tracking-widest">
-                        {history.date}
+                        {history.dateText || history.date || "Bugun"}
                       </span>
                       <h3 className="text-base font-bold text-white mt-1 leading-tight">{history.topic}</h3>
                     </div>
