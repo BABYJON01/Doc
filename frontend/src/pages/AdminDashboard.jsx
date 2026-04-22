@@ -55,9 +55,25 @@ const AdminDashboard = ({ user, onLogout }) => {
                 return;
             }
 
-            // 1. Default avatar (Google Auth will automatically provide the real photo upon their first login)
+            // 1. Photo handling using Base64 encoding to bypass Firebase Storage completely!
             let photoUrl = "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg";
-            // Firebase Storage upload bypassed to avoid Blaze Plan upgrade requirement.
+            if (formData.photo) {
+                // Check size (max 500KB)
+                if (formData.photo.size > 500000) {
+                    alert("Rasm hajmi juda katta (Maksimal 500 KB). Kichikroq rasm tanlang.");
+                    setUploading(false);
+                    return;
+                }
+                const convertToBase64 = (file) => {
+                    return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(file);
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = (error) => reject(error);
+                    });
+                };
+                photoUrl = await convertToBase64(formData.photo);
+            }
             
             // 2. Save directly to Firestore (no manual Auth user required since they login via Google)
             await addDoc(collection(db, "teachers"), {
@@ -250,7 +266,11 @@ const AdminDashboard = ({ user, onLogout }) => {
                                 </div>
                             </div>
                             
-                            {/* Photo upload removed to bypass Firebase Storage Blaze requirement. Google Auth profile picture will be used automatically. */}
+                            <div>
+                                <label className={`block text-xs font-bold mb-1 uppercase ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Profil Rasmi Yuklash (Kichik hajmda, Maks 500 KB)</label>
+                                <input type="file" accept="image/*" onChange={e => setFormData({...formData, photo: e.target.files[0]})} 
+                                className={`w-full px-4 py-2 rounded-lg border text-sm transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold ${isDark ? 'bg-slate-800 border-slate-700 text-slate-300 file:bg-blue-600/20 file:text-blue-400' : 'bg-slate-50 border-slate-300 text-slate-700 file:bg-blue-50 file:text-blue-600'}`} />
+                            </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className={`block text-xs font-bold mb-1 uppercase ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Mutaxassisligi / Fan</label>
