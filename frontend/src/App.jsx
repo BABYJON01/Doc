@@ -113,8 +113,8 @@ const LoginSelector = ({ user, role }) => {
 
     return (
         <div className="min-h-screen bg-slate-950 relative overflow-hidden flex items-center justify-center p-6 text-white font-sans">
-            <div className="absolute inset-0 bg-[url('/assets/team.jpg')] bg-cover bg-top bg-no-repeat opacity-100 pointer-events-none z-0" style={{ filter: 'contrast(1.15) saturate(1.2) brightness(0.85) drop-shadow(0 0 10px rgba(0,0,0,0.5))', imageRendering: '-webkit-optimize-contrast' }}></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/80 to-slate-900/40 pointer-events-none z-0 backdrop-blur-[1px]"></div>
+            <div className="absolute inset-0 bg-[url('/assets/team.jpg')] bg-cover bg-center bg-no-repeat opacity-100 pointer-events-none z-0" style={{ filter: 'contrast(1.05) saturate(1.1)', imageRendering: '-webkit-optimize-contrast' }}></div>
+            <div className="absolute inset-0 bg-slate-950/40 pointer-events-none z-0"></div>
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-700/20 blur-[120px] rounded-full pointer-events-none z-0"></div>
 
             <div className="max-w-6xl w-full flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20 relative z-10">
