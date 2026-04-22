@@ -122,7 +122,7 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
   }, [user]);
 
   const handleJoinLiveQuiz = () => {
-    const cleaned = pinInput.replace(/\s/g, '');
+    const cleaned = pinInput.replace(new RegExp('\\s', 'g'), '');
     if (cleaned.length !== 6 || isNaN(cleaned)) {
       setPinError(t.liveQuizPinError);
       return;
@@ -182,7 +182,7 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
                             <input
                                 type="text" inputMode="numeric"
                                 value={pinInput}
-                                onChange={(e) => setPinInput(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                                onChange={(e) => setPinInput(e.target.value.replace(new RegExp('[^0-9]', 'g'), '').slice(0, 6))}
                                 placeholder={t.liveQuizPinPlaceholder}
                                 className="flex-1 bg-transparent px-4 py-4 text-center text-3xl font-black tracking-[0.4em] outline-none w-full"
                                 style={{ color: pinInput.length === 6 ? '#10b981' : '#94a3b8' }}
@@ -387,7 +387,7 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
                   type="text"
                   inputMode="numeric"
                   value={pinInput}
-                  onChange={(e) => setPinInput(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                  onChange={(e) => setPinInput(e.target.value.replace(new RegExp('[^0-9]', 'g'), '').slice(0, 6))}
                   placeholder={t.liveQuizPinPlaceholder}
                   className="flex-1 bg-transparent px-4 py-3 text-center text-2xl font-black tracking-[0.3em] outline-none w-full"
                   style={{ color: pinInput.length === 6 ? '#10b981' : '#94a3b8' }}
