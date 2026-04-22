@@ -152,34 +152,38 @@ const LoginSelector = ({ user, role }) => {
                         </div>
                      </>
                  ) : (
-                     <div className="w-full max-w-4xl mx-auto">
-                         <div className="p-8 rounded-2xl shadow-2xl mb-8 flex items-center justify-between" style={{ background: theme==='dark' ? '#1e293b' : '#fff', border: `1px solid ${theme==='dark' ? '#334155' : '#e2e8f0'}` }}>
-                            <div className="flex items-center gap-6">
-                                <img src={user.photoURL} alt="User" className="w-20 h-20 rounded-full border-4 border-emerald-500" />
-                                <div>
-                                    <h2 className="text-2xl font-bold" style={{ color: theme==='dark' ? '#fff' : '#0f172a' }}>{user.displayName}</h2>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <p style={{ color: theme==='dark' ? '#94a3b8' : '#64748b' }}>{user.email}</p>
-                                        <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold tracking-widest ${role === 'admin' ? 'bg-purple-500/20 text-purple-400' : role === 'teacher' ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-500/20 text-slate-400'}`}>
-                                            {role === 'admin' ? 'Super Admin' : role === 'teacher' ? "O'qituvchi" : 'Talaba'}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <button onClick={handleLogout} className="px-6 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg transition-colors">
-                                <i className="fa-solid fa-right-from-bracket mr-2"></i> {t.logout}
-                            </button>
+                     <>
+                         {/* User Profile Widget (Top Right) */}
+                         <div className="fixed top-6 right-6 z-50 animate-[fadeInDown_0.5s_ease-out]">
+                             <div className="p-2.5 pl-5 pr-2.5 rounded-[2rem] shadow-2xl flex items-center gap-3 border" style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.7)', backdropFilter: 'blur(12px)', borderColor: theme==='dark' ? '#334155' : '#e2e8f0' }}>
+                                 <div className="flex flex-col items-end hidden sm:flex">
+                                     <h2 className="text-sm font-bold" style={{ color: theme==='dark' ? '#fff' : '#0f172a' }}>{user.displayName}</h2>
+                                     <div className="flex items-center gap-2 mt-0.5">
+                                         <span className="text-[10px]" style={{ color: theme==='dark' ? '#94a3b8' : '#64748b' }}>{user.email}</span>
+                                         <span className={`text-[9px] px-2 py-0.5 rounded-full uppercase font-bold tracking-widest ${role === 'admin' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : role === 'teacher' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-slate-500/20 text-slate-400 border border-slate-500/30'}`}>
+                                             {role === 'admin' ? 'Super Admin' : role === 'teacher' ? "O'qituvchi" : 'Talaba'}
+                                         </span>
+                                     </div>
+                                 </div>
+                                 <img src={user.photoURL} alt="User" className="w-11 h-11 rounded-full border-2 border-emerald-500 shadow-md" />
+                                 <div className="w-px h-8 bg-slate-400/30 mx-1"></div>
+                                 <button onClick={handleLogout} className="w-11 h-11 bg-rose-500/10 hover:bg-rose-600 text-rose-500 hover:text-white rounded-full transition-all flex items-center justify-center shadow-sm" title={t.logout}>
+                                     <i className="fa-solid fa-right-from-bracket"></i>
+                                 </button>
+                             </div>
                          </div>
 
-                         {showAccessDenied && (
-                             <div className="mb-6 p-4 rounded-xl bg-rose-500/20 border border-rose-500 text-rose-400 flex items-center gap-3 animate-pulse">
-                                 <i className="fa-solid fa-shield-halved text-2xl"></i>
-                                 <div>
-                                     <h4 className="font-bold">Kirish taqiqlangan!</h4>
-                                     <p className="text-sm">Sizda O'qituvchilar paneliga kirish uchun ruxsat yo'q. Faqat admin tomonidan tasdiqlangan o'qituvchilar kira oladi.</p>
+                         {/* Role Cards Container */}
+                         <div className="w-full max-w-4xl mx-auto translate-y-16 sm:translate-y-32 flex-1 w-full animate-[fadeInUp_0.6s_ease-out]">
+                             {showAccessDenied && (
+                                 <div className="mb-6 p-4 rounded-xl bg-rose-500/20 border border-rose-500 text-rose-400 flex items-center gap-3 animate-pulse">
+                                     <i className="fa-solid fa-shield-halved text-2xl"></i>
+                                     <div>
+                                         <h4 className="font-bold">Kirish taqiqlangan!</h4>
+                                         <p className="text-sm">Sizda O'qituvchilar paneliga kirish uchun ruxsat yo'q. Faqat admin tomonidan tasdiqlangan o'qituvchilar kira oladi.</p>
+                                     </div>
                                  </div>
-                             </div>
-                         )}
+                             )}
 
 
 
