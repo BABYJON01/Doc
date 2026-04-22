@@ -401,7 +401,7 @@ export const useApp = () => {
 };
 
 // ==================== FLOATING TOOLBAR ====================
-export const AppToolbar = () => {
+export const AppToolbar = ({ user, role, onLogout }) => {
   const { theme, lang, toggleTheme, toggleLang } = useApp();
   const isDark = theme === 'dark';
   
@@ -421,6 +421,28 @@ export const AppToolbar = () => {
 
   return (
     <div className="fixed top-4 right-4 z-[9999] flex items-center gap-2">
+      {/* User Session Info (If Logged In) */}
+      {user && (
+         <div className="flex items-center gap-3 px-2 py-1.5 rounded-xl border shadow-lg mr-1 animate-[fadeInLeft_0.5s_ease-out]"
+              style={{
+                background: isDark ? 'rgba(30,41,59,0.95)' : 'rgba(255,255,255,0.95)',
+                borderColor: isDark ? 'rgba(71,85,105,0.5)' : 'rgba(203,213,225,0.7)',
+              }}>
+             <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full border border-emerald-500 shadow-sm" />
+             <div className="flex flex-col items-start hidden sm:flex pr-1">
+                 <span className="text-sm font-bold leading-tight" style={{ color: isDark ? '#f8fafc' : '#0f172a' }}>{user.displayName}</span>
+                 <div className="flex items-center gap-2 mt-0.5">
+                     <span className={`text-[9px] px-1.5 rounded-full font-bold uppercase tracking-widest ${role === 'admin' ? 'bg-purple-500/20 text-purple-400' : role === 'teacher' ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-500/20 text-slate-400'}`}>{role === 'admin' ? 'Super Admin' : role === 'teacher' ? "O'qituvchi" : 'Talaba'}</span>
+                     <span className="text-[10px]" style={{ color: isDark ? '#94a3b8' : '#64748b' }}>{user.email}</span>
+                 </div>
+             </div>
+             <div className="w-px h-6 mx-1" style={{ background: isDark ? '#475569' : '#cbd5e1' }}></div>
+             <button onClick={onLogout} className="w-8 h-8 rounded-lg flex items-center justify-center bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white transition-all text-sm" title="Chiqish">
+                 <i className="fa-solid fa-right-from-bracket"></i>
+             </button>
+         </div>
+      )}
+
       {/* Logo badge */}
       <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border shadow-lg"
         style={{
