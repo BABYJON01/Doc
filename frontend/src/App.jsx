@@ -38,7 +38,7 @@ class ErrorBoundary extends React.Component {
 }
 
 const LoginSelector = ({ user, role }) => {
-    const { t, theme } = useApp();
+    const { t, theme, lang } = useApp();
     const [recentUsers, setRecentUsers] = useState([]);
     
     // Check if user is locked out from Teacher/Admin panels
@@ -213,6 +213,24 @@ const LoginSelector = ({ user, role }) => {
                                  </div>
                              </div>
                          )}
+
+                         {/* TMA Team Banner */}
+                         <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl relative border group" style={{ borderColor: theme==='dark' ? '#334155' : '#e2e8f0', background: theme==='dark' ? '#1e293b' : '#fff' }}>
+                             <img src="/assets/team.jpg" alt="TMA Team" className="w-full h-64 sm:h-80 lg:h-96 object-cover object-center group-hover:scale-105 transition-transform duration-700" />
+                             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/40 to-transparent flex items-end">
+                                 <div className="p-6 sm:p-8">
+                                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 rounded-full text-[10px] uppercase font-bold tracking-widest mb-3 backdrop-blur-md">
+                                         <i className="fa-solid fa-users"></i> {lang === 'ru' ? 'Наша Команда' : lang === 'en' ? 'Our Team' : 'Bizning Jamoa'}
+                                     </div>
+                                     <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-white mb-2 leading-tight drop-shadow-lg">
+                                         {lang === 'ru' ? 'Кафедра Травматологии и Ортопедии ТМА' : lang === 'en' ? 'TMA Traumatology and Orthopedics Department' : 'TTA Travmatologiya va Ortopediya Kafedrasi'}
+                                     </h3>
+                                     <p className="text-slate-300 text-xs sm:text-sm max-w-2xl">
+                                         {lang === 'ru' ? 'Высококвалифицированные специалисты, преданные своему делу и здоровью пациентов.' : lang === 'en' ? 'Highly qualified specialists dedicated to their profession and patient health.' : 'O\'z ishiga va bemorlar sog\'ligiga sodiq yuqori malakali mutaxassislar.'}
+                                     </p>
+                                 </div>
+                             </div>
+                         </div>
 
                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                              {role === 'admin' && (
