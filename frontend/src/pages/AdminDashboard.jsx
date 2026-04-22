@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import DashboardLayout from '../components/DashboardLayout';
-import { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp, query, orderBy, setDoc } from 'firebase/firestore';
-import { createUserWithEmailAndPassword, updateProfile, signOut } from 'firebase/auth';
+import { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp, query, orderBy, where } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, secondaryAuth, storage } from '../firebase';
+import { db, storage } from '../firebase';
 
 const AdminDashboard = ({ user, onLogout }) => {
     const { theme } = useApp();
@@ -13,7 +12,7 @@ const AdminDashboard = ({ user, onLogout }) => {
     
     // Form state
     const [showAddModal, setShowAddModal] = useState(false);
-    const [formData, setFormData] = useState({ name: '', email: '', password: '', subject: '', experience: '', photo: null });
+    const [formData, setFormData] = useState({ name: '', email: '', subject: '', experience: '', photo: null });
     const [uploading, setUploading] = useState(false);
     
     // Fetch teachers
@@ -45,36 +44,27 @@ const AdminDashboard = ({ user, onLogout }) => {
             return;
         }
         
-        if (formData.password.length < 6) {
-            alert("Parol kamida 6 ta belgidan iborat bo'lishi kerak!");
-            return;
-        }
-        
         setUploading(true);
         try {
-            // 1. Create user in Firebase Auth using secondary Auth instance
-            const userCredential = await createUserWithEmailAndPassword(secondaryAuth, formData.email.toLowerCase().trim(), formData.password);
-            const newUid = userCredential.user.uid;
-            
-            // 2. Upload photo if provided
+            // Check if email already exists
+            const qMatch = query(collection(db, "teachers"), where("email", "==", formData.email.toLowerCase().trim()));
+            const snap = await getDocs(qMatch);
+            if (!snap.empty) {
+                alert("Bu Google pochta manzili allaqachon o'qituvchi sifatida ro'yxatdan o'tdi!");
+                setUploading(false);
+                return;
+            }
+
+            // 1. Upload photo if provided
             let photoUrl = "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg";
             if (formData.photo) {
-                const photoRef = ref(storage, `teachers/${newUid}_${formData.photo.name}`);
+                const photoRef = ref(storage, `teachers/${Date.now()}_${formData.photo.name}`);
                 await uploadBytes(photoRef, formData.photo);
                 photoUrl = await getDownloadURL(photoRef);
-                
-                // Update profile in Auth
-                await updateProfile(userCredential.user, {
-                    displayName: formData.name,
-                    photoURL: photoUrl
-                });
             }
             
-            // Explicitly sign out secondary auth to keep clean
-            await signOut(secondaryAuth);
-            
-            // 3. Save to Firestore
-            await setDoc(doc(db, "teachers", newUid), {
+            // 2. Save directly to Firestore (no manual Auth user required since they login via Google)
+            await addDoc(collection(db, "teachers"), {
                 name: formData.name,
                 email: formData.email.toLowerCase().trim(),
                 subject: formData.subject,
@@ -86,16 +76,12 @@ const AdminDashboard = ({ user, onLogout }) => {
             });
             
             setShowAddModal(false);
-            setFormData({ name: '', email: '', password: '', subject: '', experience: '', photo: null });
+            setFormData({ name: '', email: '', subject: '', experience: '', photo: null });
             fetchTeachers();
-            alert("O'qituvchi muvaffaqiyatli qo'shildi!");
+            alert("O'qituvchi ruxsatnomasi muvaffaqiyatli saqlandi!");
         } catch (error) {
             console.error("Error adding teacher:", error);
-            if (error.code === 'auth/email-already-in-use') {
-                alert("Bu pochta allaqachon ro'yxatdan o'tgan!");
-            } else {
-                alert("O'qituvchi qo'shishda xatolik yuz berdi: " + error.message);
-            }
+            alert("O'qituvchi qo'shishda xatolik yuz berdi. Konsolni tekshiring.");
         } finally {
             setUploading(false);
         }
@@ -260,15 +246,10 @@ const AdminDashboard = ({ user, onLogout }) => {
                                 <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Dr. Alisher Vahobov" 
                                 className={`w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'}`} />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4">
                                 <div>
-                                    <label className={`block text-xs font-bold mb-1 uppercase ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Email Manzili (Login)</label>
+                                    <label className={`block text-xs font-bold mb-1 uppercase ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Google Email Manzili</label>
                                     <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ustoz@gmail.com" 
-                                    className={`w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'}`} />
-                                </div>
-                                <div>
-                                    <label className={`block text-xs font-bold mb-1 uppercase ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Yangi Parol</label>
-                                    <input required type="text" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="domla1234" 
                                     className={`w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'}`} />
                                 </div>
                             </div>
