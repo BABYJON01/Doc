@@ -207,6 +207,7 @@ const LoginSelector = ({ user, role }) => {
                              </button>
                          </div>
                      </div>
+                     </>
                  )}
             </div>
         </div>
