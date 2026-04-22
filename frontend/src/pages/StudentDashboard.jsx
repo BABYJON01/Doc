@@ -34,7 +34,7 @@ const proficiencyData = {
   ],
 };
 
-const StudentDashboard = ({ onNavigate, user, onLogout }) => {
+const StudentDashboard = ({ user, onLogout }) => {
   const { t, lang } = useApp();
   const isAdmin = user?.email === 'rahmonjonwarrior@gmail.com';
   const location = useLocation();
@@ -337,7 +337,7 @@ const StudentDashboard = ({ onNavigate, user, onLogout }) => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
-              onClick={() => onNavigate('duel')}
+              onClick={() => window.location.href = '/app'}
               className="bg-slate-800 p-5 rounded-2xl border border-slate-700 hover:border-indigo-500 hover:shadow-[0_0_15px_rgba(99,102,241,0.15)] transition-all text-left flex flex-col group"
             >
               <i className="fa-solid fa-network-wired text-2xl text-indigo-400 mb-3 group-hover:scale-110 transition-transform origin-left"></i>
