@@ -55,13 +55,9 @@ const AdminDashboard = ({ user, onLogout }) => {
                 return;
             }
 
-            // 1. Upload photo if provided
+            // 1. Default avatar (Google Auth will automatically provide the real photo upon their first login)
             let photoUrl = "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg";
-            if (formData.photo) {
-                const photoRef = ref(storage, `teachers/${Date.now()}_${formData.photo.name}`);
-                await uploadBytes(photoRef, formData.photo);
-                photoUrl = await getDownloadURL(photoRef);
-            }
+            // Firebase Storage upload bypassed to avoid Blaze Plan upgrade requirement.
             
             // 2. Save directly to Firestore (no manual Auth user required since they login via Google)
             await addDoc(collection(db, "teachers"), {
@@ -254,11 +250,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                                 </div>
                             </div>
                             
-                            <div>
-                                <label className={`block text-xs font-bold mb-1 uppercase ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Profil Rasmi Yuklash</label>
-                                <input type="file" accept="image/*" onChange={e => setFormData({...formData, photo: e.target.files[0]})} 
-                                className={`w-full px-4 py-2 rounded-lg border text-sm transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold ${isDark ? 'bg-slate-800 border-slate-700 text-slate-300 file:bg-blue-600/20 file:text-blue-400' : 'bg-slate-50 border-slate-300 text-slate-700 file:bg-blue-50 file:text-blue-600'}`} />
-                            </div>
+                            {/* Photo upload removed to bypass Firebase Storage Blaze requirement. Google Auth profile picture will be used automatically. */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className={`block text-xs font-bold mb-1 uppercase ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Mutaxassisligi / Fan</label>
