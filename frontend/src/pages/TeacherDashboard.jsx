@@ -17,6 +17,9 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
   const [publishedLink, setPublishedLink] = useState(null);
   const [isUploadingJson, setIsUploadingJson] = useState(false);
   const [jsonUploadResults, setJsonUploadResults] = useState([]);
+  const [isUploadingMultiDoc, setIsUploadingMultiDoc] = useState(false);
+  const [multiDocResults, setMultiDocResults] = useState([]);
+  const [multiDocProgress, setMultiDocProgress] = useState({ current: 0, total: 0, fileName: '' });
   const [progress, setProgress] = useState(0);
   const [generatedData, setGeneratedData] = useState(null);
   const [showLiveRoom, setShowLiveRoom] = useState(false);
@@ -219,6 +222,55 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
       setJsonUploadResults(results);
       setIsUploadingJson(false);
       // reset input
+      e.target.value = '';
+  };
+
+  // Ko'p Word/PDF fayl yuklash
+  const handleMultiDocUpload = async (e) => {
+      const files = Array.from(e.target.files);
+      if (!files.length) return;
+      setIsUploadingMultiDoc(true);
+      setMultiDocResults([]);
+      const results = [];
+
+      for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          setMultiDocProgress({ current: i + 1, total: files.length, fileName: file.name });
+          try {
+              // 1. Matn ajratish
+              const text = await extractTextFromFile(file);
+
+              // 2. AI tahlil
+              const aiResult = await generateMedicalContent(text);
+
+              if (!aiResult.success) {
+                  results.push({ fileName: file.name, success: false, error: 'Tibbiy matn topilmadi' });
+                  continue;
+              }
+
+              // 3. Firestore'ga saqlash
+              const docRef = await addDoc(collection(db, 'exams'), {
+                  teacherId: user?.uid || 'unknown',
+                  teacherName: user?.displayName || user?.email || "O'qituvchi",
+                  title: file.name.replace(/\.(docx|pdf|pptx)$/i, ''),
+                  createdAt: serverTimestamp(),
+                  data: aiResult,
+                  status: 'published'
+              });
+
+              const link = `${window.location.origin}/test?id=${docRef.id}`;
+              const testsCount = (aiResult.tests || []).length;
+              const casesCount = (aiResult.cases || []).length;
+              const xraysCount = (aiResult.xrays || []).length;
+              results.push({ fileName: file.name, success: true, link, testsCount, casesCount, xraysCount });
+          } catch (err) {
+              results.push({ fileName: file.name, success: false, error: err.message });
+          }
+      }
+
+      setMultiDocResults(results);
+      setMultiDocProgress({ current: 0, total: 0, fileName: '' });
+      setIsUploadingMultiDoc(false);
       e.target.value = '';
   };
 
@@ -435,8 +487,68 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
             </div>
          </div>
 
-         <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+         <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 overflow-y-auto max-h-[90vh] custom-scrollbar">
             <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-3">{t.tcSectionStatsTitle}</h3>
+
+            {/* === Ko'p Word/PDF Yuklash === */}
+            <div className="mb-6 p-5 rounded-xl bg-blue-500/5 border border-blue-500/20">
+                <h4 className="text-sm font-black text-blue-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+                    <i className="fa-regular fa-file-word"></i> Ko'p Word / PDF Yuklash (AI)
+                </h4>
+                <p className="text-slate-400 text-xs mb-4">
+                    Bir vaqtda bir necha <code className="bg-slate-900 px-1 rounded">.docx</code> yoki <code className="bg-slate-900 px-1 rounded">.pdf</code> fayl tanlang. Har biridan AI avtomatik exam yaratadi.
+                </p>
+
+                <label className={`w-full py-3 flex items-center justify-center gap-2 font-black text-sm rounded-xl transition-all cursor-pointer border-2 border-dashed ${isUploadingMultiDoc ? 'border-slate-600 text-slate-500 cursor-not-allowed' : 'border-blue-600 text-blue-400 hover:bg-blue-500/10'}`}>
+                    {isUploadingMultiDoc ? (
+                        <div className="text-center">
+                            <i className="fa-solid fa-circle-notch fa-spin mr-2"></i>
+                            {multiDocProgress.current}/{multiDocProgress.total} — <span className="text-slate-400 italic truncate max-w-[200px] inline-block align-bottom">{multiDocProgress.fileName}</span>
+                        </div>
+                    ) : (
+                        <><i className="fa-solid fa-plus"></i> Word / PDF Fayllarni Tanlash</>
+                    )}
+                    <input type="file" accept=".docx,.pdf,.pptx" multiple className="hidden" disabled={isUploadingMultiDoc} onChange={handleMultiDocUpload} />
+                </label>
+
+                {multiDocResults.length > 0 && (
+                    <div className="mt-4 space-y-3">
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                            {multiDocResults.filter(r => r.success).length}/{multiDocResults.length} ta muvaffaqiyatli
+                        </p>
+                        {multiDocResults.map((r, i) => (
+                            <div key={i} className={`p-3 rounded-xl border ${r.success ? 'bg-blue-500/5 border-blue-500/30' : 'bg-rose-500/10 border-rose-500/30'}`}>
+                                {r.success ? (
+                                    <>
+                                        <p className="text-blue-300 font-bold text-xs mb-1 flex items-center gap-1 truncate">
+                                            <i className="fa-solid fa-check-circle text-emerald-400 shrink-0"></i> {r.fileName}
+                                        </p>
+                                        <p className="text-slate-500 text-[10px] mb-2">
+                                            {r.testsCount > 0 && `${r.testsCount} test `}
+                                            {r.casesCount > 0 && `${r.casesCount} vaziyatli `}
+                                            {r.xraysCount > 0 && `${r.xraysCount} rentgen`}
+                                        </p>
+                                        <div className="flex gap-2">
+                                            <div className="flex-1 bg-slate-900 rounded-lg px-2 py-1.5 text-[10px] text-slate-300 font-mono truncate border border-slate-700">{r.link}</div>
+                                            <button onClick={() => { navigator.clipboard.writeText(r.link); alert(`Nusxalandi!`); }} className="px-2.5 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs text-white shrink-0">
+                                                <i className="fa-solid fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <p className="text-rose-400 text-xs flex items-start gap-1">
+                                        <i className="fa-solid fa-xmark-circle shrink-0 mt-0.5"></i>
+                                        <span><b>{r.fileName}</b>: {r.error}</span>
+                                    </p>
+                                )}
+                            </div>
+                        ))}
+                        <button onClick={() => setMultiDocResults([])} className="w-full py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold rounded-lg transition-colors">
+                            <i className="fa-solid fa-trash mr-1"></i> Natijalarni tozalash
+                        </button>
+                    </div>
+                )}
+            </div>
 
             {/* === Ko'p JSON Yuklash (C variant) === */}
             <div className="mb-6 p-5 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
