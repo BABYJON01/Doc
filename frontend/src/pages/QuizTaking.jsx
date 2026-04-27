@@ -24,7 +24,12 @@ const QuizTaking = ({ onFinish, user }) => {
                     const docSnap = await getDoc(doc(db, "exams", examId));
                     if (docSnap.exists()) {
                         const payload = docSnap.data().data;
-                        setQuizData(payload.tests || payload.quizzes || []);
+                        let combined = [];
+                        if (payload.tests) combined = [...combined, ...payload.tests];
+                        if (payload.quizzes) combined = [...combined, ...payload.quizzes];
+                        if (payload.xrays) combined = [...combined, ...payload.xrays];
+                        if (payload.cases) combined = [...combined, ...payload.cases.map(c => ({...c, isCase: true}))];
+                        setQuizData(combined.length > 0 ? combined : []);
                     } else {
                         setQuizData([]);
                     }
@@ -233,36 +238,97 @@ const QuizTaking = ({ onFinish, user }) => {
                         </div>
                     )}
 
-                    <div className="space-y-2 sm:space-y-3">
-                        {currentQ.options.map((option, idx) => {
-                            let btnClass = "w-full text-left p-4 rounded-xl border-2 font-semibold transition-all text-sm sm:text-base ";
-                            if (!isAnswered) {
-                                btnClass += selectedOption === idx
-                                    ? "border-blue-500 bg-blue-500/10 text-white"
-                                    : "border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-500 hover:bg-slate-700";
-                            } else {
-                                if (idx === currentQ.answer) btnClass += "border-emerald-500 bg-emerald-500/10 text-emerald-400";
-                                else if (idx === selectedOption) btnClass += "border-rose-500 bg-rose-500/10 text-rose-400";
-                                else btnClass += "border-slate-800 bg-slate-800 text-slate-600 opacity-40";
-                            }
+                    {currentQ.isCase ? (
+                        <div className="space-y-4">
+                            <div className="bg-rose-500/10 p-4 sm:p-6 rounded-xl border border-rose-500/20">
+                                <p className="text-rose-400 font-bold mb-2 flex items-center gap-2">
+                                    <i className="fa-solid fa-stethoscope"></i> Vaziyatli Masala: {currentQ.title}
+                                </p>
+                                <p className="text-slate-300 italic mb-4 leading-relaxed">"{currentQ.scenario}"</p>
+                                <p className="text-white font-bold">{currentQ.question}</p>
+                            </div>
+                            
+                            {!isAnswered ? (
+                                <div className="space-y-3">
+                                    <textarea 
+                                        className="w-full bg-slate-800 border-2 border-slate-700 rounded-xl p-4 text-white focus:border-blue-500 outline-none transition-colors" 
+                                        rows="4" 
+                                        placeholder="Diagnostika va davolash rejangizni batafsil yozing..."
+                                        onChange={(e) => setSelectedOption(e.target.value)}
+                                        value={typeof selectedOption === 'string' ? selectedOption : ''}
+                                    ></textarea>
+                                    <button 
+                                        disabled={!selectedOption || String(selectedOption).trim().length === 0}
+                                        onClick={() => setIsAnswered(true)} 
+                                        className={`w-full py-3.5 font-black rounded-xl transition-all shadow-lg ${(!selectedOption || String(selectedOption).trim().length === 0) ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/30 hover:-translate-y-1'}`}
+                                    >
+                                        Javobni Tekshirish <i className="fa-solid fa-check-double ml-1"></i>
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="space-y-4 animate-[fadeIn_0.5s_ease-out]">
+                                    <div className="bg-slate-800 p-4 sm:p-5 rounded-xl border border-slate-700">
+                                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Sizning javobingiz</p>
+                                        <p className="text-white leading-relaxed">{selectedOption}</p>
+                                    </div>
+                                    <div className="bg-emerald-500/10 p-4 sm:p-5 rounded-xl border border-emerald-500/30">
+                                        <p className="text-emerald-400 font-bold mb-2 flex items-center gap-2">
+                                            <i className="fa-solid fa-check-circle"></i> Klinika (AI) yechimi
+                                        </p>
+                                        <p className="text-emerald-300/90 leading-relaxed">{currentQ.answer}</p>
+                                    </div>
+                                    
+                                    <div className="pt-2">
+                                        <p className="text-center text-slate-400 text-sm mb-3">O'z-o'zingizni baholang:</p>
+                                        <div className="flex flex-col sm:flex-row gap-3">
+                                            <button onClick={() => { handleNext(); }} className="flex-1 py-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 font-bold rounded-xl transition-colors">
+                                                <i className="fa-solid fa-xmark mr-2 text-rose-400"></i> Noto'g'ri / Chala
+                                            </button>
+                                            <button onClick={() => { 
+                                                const newScore = score + 1;
+                                                setScore(newScore);
+                                                updateScoreInFirebase(newScore);
+                                                handleNext(); 
+                                            }} className="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl transition-transform hover:-translate-y-0.5 shadow-lg shadow-emerald-500/25">
+                                                <i className="fa-solid fa-check mr-2"></i> To'g'ri yechdim (+1 ball)
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="space-y-2 sm:space-y-3">
+                            {currentQ.options && currentQ.options.map((option, idx) => {
+                                let btnClass = "w-full text-left p-4 rounded-xl border-2 font-semibold transition-all text-sm sm:text-base cursor-pointer ";
+                                if (!isAnswered) {
+                                    btnClass += selectedOption === idx
+                                        ? "border-blue-500 bg-blue-500/10 text-white"
+                                        : "border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-500 hover:bg-slate-700";
+                                } else {
+                                    if (idx === currentQ.answer) btnClass += "border-emerald-500 bg-emerald-500/10 text-emerald-400";
+                                    else if (idx === selectedOption) btnClass += "border-rose-500 bg-rose-500/10 text-rose-400";
+                                    else btnClass += "border-slate-800 bg-slate-800 text-slate-600 opacity-40";
+                                }
 
-                            return (
-                                <button key={idx} disabled={isAnswered} onClick={() => handleOptionSelect(idx)} className={btnClass}>
-                                    <span className="mr-2 text-slate-500 font-black">{String.fromCharCode(65 + idx)}.</span> {option}
-                                    {isAnswered && idx === currentQ.answer && <i className="fa-solid fa-check float-right text-emerald-400 mt-1"></i>}
-                                    {isAnswered && idx === selectedOption && idx !== currentQ.answer && <i className="fa-solid fa-xmark float-right text-rose-400 mt-1"></i>}
-                                </button>
-                            );
-                        })}
-                    </div>
+                                return (
+                                    <button key={idx} disabled={isAnswered} onClick={() => handleOptionSelect(idx)} className={btnClass}>
+                                        <span className="mr-2 text-slate-500 font-black">{String.fromCharCode(65 + idx)}.</span> {option}
+                                        {isAnswered && idx === currentQ.answer && <i className="fa-solid fa-check float-right text-emerald-400 mt-1"></i>}
+                                        {isAnswered && idx === selectedOption && idx !== currentQ.answer && <i className="fa-solid fa-xmark float-right text-rose-400 mt-1"></i>}
+                                    </button>
+                                );
+                            })}
 
-                    {isAnswered && (
-                        <div className="p-4 sm:p-6 bg-slate-800 rounded-xl border border-slate-700 animate-[fadeIn_0.4s_ease-out]">
-                            <h4 className="font-bold text-blue-400 mb-2 text-sm"><i className="fa-solid fa-robot mr-2"></i> AI Izohi:</h4>
-                            <p className="text-slate-300 leading-relaxed text-xs sm:text-sm">{currentQ.explanation}</p>
-                            <button onClick={handleNext} className="mt-4 w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-colors text-sm">
-                                {currentQuestion + 1 < quizData.length ? <>Keyingi Savol <i className="fa-solid fa-arrow-right ml-1"></i></> : 'Yakunlash'}
-                            </button>
+                            {isAnswered && currentQ.explanation && (
+                                <div className="p-4 sm:p-6 bg-slate-800 rounded-xl border border-slate-700 animate-[fadeIn_0.4s_ease-out] mt-4">
+                                    <h4 className="font-bold text-blue-400 mb-2 text-sm"><i className="fa-solid fa-robot mr-2"></i> Klinika (AI) Izohi:</h4>
+                                    <p className="text-slate-300 leading-relaxed text-xs sm:text-sm">{currentQ.explanation}</p>
+                                    <button onClick={handleNext} className="mt-4 w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-colors text-sm">
+                                        {currentQuestion + 1 < quizData.length ? <>Keyingi bosqich <i className="fa-solid fa-arrow-right ml-1"></i></> : 'Yakunlash'}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
