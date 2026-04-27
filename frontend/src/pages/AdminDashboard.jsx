@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import DashboardLayout from '../components/DashboardLayout';
-import { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp, query, orderBy, where } from 'firebase/firestore';
+import { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp, query, orderBy, where, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase';
 
@@ -11,8 +11,10 @@ const AdminDashboard = ({ user, onLogout }) => {
     const [loading, setLoading] = useState(true);
     
     // Form state
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [formData, setFormData] = useState({ name: '', email: '', subject: '', experience: '', photo: null });
+    const [showModal, setShowModal] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+    const [editId, setEditId] = useState(null);
+    const [formData, setFormData] = useState({ name: '', email: '', password: '', subject: '', experience: '', photo: null });
     const [uploading, setUploading] = useState(false);
     
     // Fetch teachers
@@ -37,9 +39,9 @@ const AdminDashboard = ({ user, onLogout }) => {
         fetchTeachers();
     }, []);
 
-    const handleAddTeacher = async (e) => {
+    const handleSubmitTeacher = async (e) => {
         e.preventDefault();
-        if (teachers.length >= 14) {
+        if (!editMode && teachers.length >= 14) {
             alert("Maksimal o'qituvchilar soniga yetildi (14/14)!");
             return;
         }
@@ -47,12 +49,14 @@ const AdminDashboard = ({ user, onLogout }) => {
         setUploading(true);
         try {
             // Check if email already exists
-            const qMatch = query(collection(db, "teachers"), where("email", "==", formData.email.toLowerCase().trim()));
-            const snap = await getDocs(qMatch);
-            if (!snap.empty) {
-                alert("Bu Google pochta manzili allaqachon o'qituvchi sifatida ro'yxatdan o'tdi!");
-                setUploading(false);
-                return;
+            if (!editMode || formData.email.toLowerCase().trim() !== teachers.find(t => t.id === editId)?.email) {
+                const qMatch = query(collection(db, "teachers"), where("email", "==", formData.email.toLowerCase().trim()));
+                const snap = await getDocs(qMatch);
+                if (!snap.empty) {
+                    alert("Bu pochta manzili allaqachon ro'yxatdan o'tgan!");
+                    setUploading(false);
+                    return;
+                }
             }
 
             // 1. Photo handling using Base64 encoding to bypass Firebase Storage completely!
@@ -75,28 +79,67 @@ const AdminDashboard = ({ user, onLogout }) => {
                 photoUrl = await convertToBase64(formData.photo);
             }
             
-            // 2. Save directly to Firestore (no manual Auth user required since they login via Google)
-            await addDoc(collection(db, "teachers"), {
-                name: formData.name,
-                email: formData.email.toLowerCase().trim(),
-                subject: formData.subject,
-                experience: Number(formData.experience),
-                uploadsCount: 0,
-                testsCount: 0,
-                createdAt: serverTimestamp(),
-                photoURL: photoUrl
-            });
+            // 2. Save directly to Firestore
+            if (editMode) {
+                const updateData = {
+                    name: formData.name,
+                    email: formData.email.toLowerCase().trim(),
+                    subject: formData.subject,
+                    experience: Number(formData.experience),
+                };
+                if (formData.password) { updateData.password = formData.password; }
+                if (photoUrl !== "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg") {
+                    updateData.photoURL = photoUrl;
+                }
+                await updateDoc(doc(db, "teachers", editId), updateData);
+                alert("O'qituvchi ma'lumotlari muvaffaqiyatli yangilandi!");
+            } else {
+                await addDoc(collection(db, "teachers"), {
+                    name: formData.name,
+                    email: formData.email.toLowerCase().trim(),
+                    password: formData.password || '',
+                    subject: formData.subject,
+                    experience: Number(formData.experience),
+                    uploadsCount: 0,
+                    testsCount: 0,
+                    createdAt: serverTimestamp(),
+                    photoURL: photoUrl
+                });
+                alert("O'qituvchi ruxsatnomasi muvaffaqiyatli saqlandi!");
+            }
             
-            setShowAddModal(false);
-            setFormData({ name: '', email: '', subject: '', experience: '', photo: null });
+            setShowModal(false);
+            setFormData({ name: '', email: '', password: '', subject: '', experience: '', photo: null });
+            setEditMode(false);
+            setEditId(null);
             fetchTeachers();
-            alert("O'qituvchi ruxsatnomasi muvaffaqiyatli saqlandi!");
         } catch (error) {
-            console.error("Error adding teacher:", error);
-            alert("O'qituvchi qo'shishda xatolik yuz berdi. Konsolni tekshiring.");
+            console.error("Error saving teacher:", error);
+            alert("O'qituvchini saqlashda xatolik yuz berdi. Konsolni tekshiring.");
         } finally {
             setUploading(false);
         }
+    };
+
+    const handleEditClick = (t) => {
+        setFormData({
+            name: t.name || '',
+            email: t.email || '',
+            password: t.password || '',
+            subject: t.subject || '',
+            experience: t.experience || '',
+            photo: null
+        });
+        setEditMode(true);
+        setEditId(t.id);
+        setShowModal(true);
+    };
+
+    const handleOpenAdd = () => {
+        setFormData({ name: '', email: '', password: '', subject: '', experience: '', photo: null });
+        setEditMode(false);
+        setEditId(null);
+        setShowModal(true);
     };
 
     const handleDelete = async (id) => {
@@ -175,7 +218,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Ro'yxatdan o'tgan O'qituvchilar</h2>
                     <button 
-                        onClick={() => setShowAddModal(true)}
+                        onClick={handleOpenAdd}
                         disabled={teachers.length >= 14}
                         className={`px-4 py-2 font-bold text-sm rounded-lg flex items-center gap-2 transition-all 
                         ${teachers.length >= 14 ? 'bg-slate-600 cursor-not-allowed opacity-50' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/30'}`}
@@ -228,13 +271,22 @@ const AdminDashboard = ({ user, onLogout }) => {
                                         <td className="py-4 px-4 text-center font-bold">{t.uploadsCount || 0}</td>
                                         <td className="py-4 px-4 text-center font-bold text-emerald-500">{t.testsCount || 0}</td>
                                         <td className="py-4 px-4 text-right">
-                                            <button 
-                                                onClick={() => handleDelete(t.id)}
-                                                className="w-8 h-8 rounded-lg bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white transition-colors"
-                                                title="Tizimdan O'chirish"
-                                            >
-                                                <i className="fa-solid fa-trash-can text-sm"></i>
-                                            </button>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <button 
+                                                    onClick={() => handleEditClick(t)}
+                                                    className="w-8 h-8 rounded-lg bg-blue-500/10 hover:bg-blue-500 text-blue-500 hover:text-white transition-colors"
+                                                    title="Tahrirlash"
+                                                >
+                                                    <i className="fa-solid fa-pen text-sm"></i>
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDelete(t.id)}
+                                                    className="w-8 h-8 rounded-lg bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white transition-colors"
+                                                    title="Tizimdan O'chirish"
+                                                >
+                                                    <i className="fa-solid fa-trash-can text-sm"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
@@ -244,24 +296,29 @@ const AdminDashboard = ({ user, onLogout }) => {
                 </div>
             </div>
 
-            {/* Add Teacher Modal */}
-            {showAddModal && (
+            {/* Add/Edit Teacher Modal */}
+            {showModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                    <div className={`w-full max-w-md rounded-2xl p-6 shadow-2xl animate-[fadeInUp_0.3s_ease-out] border ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`}>
+                    <div className={`w-full max-w-xl rounded-2xl p-6 shadow-2xl animate-[fadeInUp_0.3s_ease-out] border ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`}>
                         <div className="flex justify-between items-center border-b pb-4 mb-4" style={{ borderColor: isDark ? '#334155' : '#e2e8f0' }}>
-                            <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Yangi O'qituvchi</h2>
-                            <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-rose-500"><i className="fa-solid fa-xmark text-xl"></i></button>
+                            <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{editMode ? "O'qituvchini Tahrirlash" : "Yangi O'qituvchi"}</h2>
+                            <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-rose-500"><i className="fa-solid fa-xmark text-xl"></i></button>
                         </div>
-                        <form onSubmit={handleAddTeacher} className="space-y-4">
+                        <form onSubmit={handleSubmitTeacher} className="space-y-4">
                             <div>
                                 <label className={`block text-xs font-bold mb-1 uppercase ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>To'liq Ismi (F.I.Sh)</label>
                                 <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Dr. Alisher Vahobov" 
                                 className={`w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'}`} />
                             </div>
-                            <div className="grid grid-cols-1 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className={`block text-xs font-bold mb-1 uppercase ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Google Email Manzili</label>
+                                    <label className={`block text-xs font-bold mb-1 uppercase ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Email Manzili</label>
                                     <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ustoz@gmail.com" 
+                                    className={`w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'}`} />
+                                </div>
+                                <div>
+                                    <label className={`block text-xs font-bold mb-1 uppercase ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Parol (Ixtiyoriy)</label>
+                                    <input type="text" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="Parol kiriting" 
                                     className={`w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'}`} />
                                 </div>
                             </div>
