@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, query, orderBy, limit, onSnapshot, setDoc, doc, getDoc, serverTimestamp, addDoc, increment } from 'firebase/firestore';
 import { useSearchParams } from 'react-router-dom';
+import { methodologicalQuiz, caseStudies, xrayCases } from '../data/quizQuestions';
 
 const QuizTaking = ({ onFinish, user }) => {
     const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -38,16 +39,29 @@ const QuizTaking = ({ onFinish, user }) => {
                     setQuizData([]);
                 }
             } else {
-                setQuizData(JSON.parse(localStorage.getItem('generated_quiz')) || [
-                    {
-                        question: "Qaysi biri EKGda miokard infarktini yorqin anglatuvchi signal hisoblanadi?",
-                        options: ["ST elevatsiyasi", "P tishchasi yo'qolishi", "QRS ingichkaligi", "T tishchasi inverted emas"],
-                        answer: 0,
-                        explanation: "Miokard shikastlanishi darhol ST segment ko'tarilishiga olib keladi. Bu o'tkir infarktning klassik belgisidir.",
-                        topic: "Kardiologiya",
-                        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/12_lead_ECG_of_inferior_STEMI.svg/1024px-12_lead_ECG_of_inferior_STEMI.svg.png"
-                    }
-                ]);
+                const stored = JSON.parse(localStorage.getItem('generated_quiz'));
+                if (stored && stored.length > 0) {
+                     setQuizData(stored);
+                } else {
+                     // Convert local constants to match the expected schema
+                     const localTests = methodologicalQuiz.map(q => ({
+                         ...q,
+                         answer: q.options.indexOf(q.correctAnswer),
+                         topic: q.type || "Ma'lumotlar bazasidan"
+                     }));
+                     const localXrays = xrayCases.map(x => ({
+                         ...x,
+                         answer: x.options.indexOf(x.correctAnswer),
+                         topic: "Rentgenogrammalar"
+                     }));
+                     const localCases = caseStudies.map(c => ({
+                         ...c,
+                         isCase: true,
+                         topic: "Vaziyatli Masalalar"
+                     }));
+                     
+                     setQuizData([...localTests, ...localXrays, ...localCases]);
+                }
             }
         };
         fetchExamData();
