@@ -15,6 +15,8 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishedLink, setPublishedLink] = useState(null);
+  const [isUploadingJson, setIsUploadingJson] = useState(false);
+  const [jsonUploadResults, setJsonUploadResults] = useState([]);
   const [progress, setProgress] = useState(0);
   const [generatedData, setGeneratedData] = useState(null);
   const [showLiveRoom, setShowLiveRoom] = useState(false);
@@ -171,6 +173,53 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
       } finally {
           setIsPublishing(false);
       }
+  };
+
+  const handleMultiJsonUpload = async (e) => {
+      const files = Array.from(e.target.files);
+      if (!files.length) return;
+      setIsUploadingJson(true);
+      setJsonUploadResults([]);
+      const results = [];
+
+      for (const file of files) {
+          try {
+              const text = await file.text();
+              const data = JSON.parse(text);
+
+              // Normalize: support {tests, cases, xrays, practical} or array of tests
+              let payload;
+              if (Array.isArray(data)) {
+                  payload = { success: true, tests: data };
+              } else {
+                  payload = { success: true, ...data };
+              }
+
+              const title = data.title || file.name.replace('.json', '');
+              const testsCount = (payload.tests || []).length;
+              const casesCount = (payload.cases || []).length;
+              const xraysCount = (payload.xrays || []).length;
+
+              const docRef = await addDoc(collection(db, 'exams'), {
+                  teacherId: user?.uid || 'unknown',
+                  teacherName: user?.displayName || user?.email || 'O\'qituvchi',
+                  title: title,
+                  createdAt: serverTimestamp(),
+                  data: payload,
+                  status: 'published'
+              });
+
+              const link = `${window.location.origin}/test?id=${docRef.id}`;
+              results.push({ fileName: file.name, title, link, testsCount, casesCount, xraysCount, success: true });
+          } catch (err) {
+              results.push({ fileName: file.name, success: false, error: err.message });
+          }
+      }
+
+      setJsonUploadResults(results);
+      setIsUploadingJson(false);
+      // reset input
+      e.target.value = '';
   };
 
   // If live room is active, show it full-screen
@@ -388,7 +437,112 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
 
          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
             <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-3">{t.tcSectionStatsTitle}</h3>
-            
+
+            {/* === Ko'p JSON Yuklash (C variant) === */}
+            <div className="mb-6 p-5 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                <h4 className="text-sm font-black text-emerald-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+                    <i className="fa-solid fa-file-arrow-up"></i> Ko'p JSON Fayl Yuklash
+                </h4>
+                <p className="text-slate-400 text-xs mb-4">
+                    Bir vaqtda bir necha <code className="bg-slate-900 px-1 rounded">.json</code> fayl tanlang. Har biri alohida exam bo'ladi va o'z havolasini oladi.
+                </p>
+
+                <label
+                    className={`w-full py-3 flex items-center justify-center gap-2 font-black text-sm rounded-xl transition-all cursor-pointer border-2 border-dashed ${
+                        isUploadingJson
+                            ? 'border-slate-600 text-slate-500 cursor-not-allowed'
+                            : 'border-emerald-600 text-emerald-400 hover:bg-emerald-500/10'
+                    }`}
+                >
+                    {isUploadingJson ? (
+                        <><i className="fa-solid fa-circle-notch fa-spin"></i> Yuklanmoqda...</>
+                    ) : (
+                        <><i className="fa-solid fa-plus"></i> JSON Fayllarni Tanlash (Ko'p)</>
+                    )}
+                    <input
+                        type="file"
+                        accept=".json"
+                        multiple
+                        className="hidden"
+                        disabled={isUploadingJson}
+                        onChange={handleMultiJsonUpload}
+                    />
+                </label>
+
+                {/* Results */}
+                {jsonUploadResults.length > 0 && (
+                    <div className="mt-4 space-y-3">
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                            {jsonUploadResults.filter(r => r.success).length}/{jsonUploadResults.length} ta muvaffaqiyatli
+                        </p>
+                        {jsonUploadResults.map((r, i) => (
+                            <div key={i} className={`p-3 rounded-xl border ${r.success ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-rose-500/10 border-rose-500/30'}`}>
+                                {r.success ? (
+                                    <>
+                                        <p className="text-emerald-400 font-bold text-xs mb-1 flex items-center gap-1">
+                                            <i className="fa-solid fa-check-circle"></i> {r.title}
+                                        </p>
+                                        <p className="text-slate-500 text-[10px] mb-2">
+                                            {r.testsCount > 0 && `${r.testsCount} test `}
+                                            {r.casesCount > 0 && `${r.casesCount} vaziyatli `}
+                                            {r.xraysCount > 0 && `${r.xraysCount} rentgen`}
+                                        </p>
+                                        <div className="flex gap-2">
+                                            <div className="flex-1 bg-slate-900 rounded-lg px-2 py-1.5 text-[10px] text-slate-300 font-mono truncate border border-slate-700">
+                                                {r.link}
+                                            </div>
+                                            <button
+                                                onClick={() => { navigator.clipboard.writeText(r.link); alert(`"${r.title}" nusxalandi!`); }}
+                                                className="px-2.5 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs text-white"
+                                            >
+                                                <i className="fa-solid fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <p className="text-rose-400 text-xs flex items-center gap-1">
+                                        <i className="fa-solid fa-xmark-circle"></i> {r.fileName}: {r.error}
+                                    </p>
+                                )}
+                            </div>
+                        ))}
+                        <button
+                            onClick={() => setJsonUploadResults([])}
+                            className="w-full mt-2 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold rounded-lg transition-colors"
+                        >
+                            <i className="fa-solid fa-trash mr-1"></i> Natijalarni tozalash
+                        </button>
+                    </div>
+                )}
+
+                {/* JSON format namunasi */}
+                <details className="mt-4">
+                    <summary className="text-xs text-slate-500 cursor-pointer hover:text-slate-300 transition-colors">
+                        <i className="fa-solid fa-code mr-1"></i> JSON format namunasini ko'rish
+                    </summary>
+                    <pre className="mt-2 text-[10px] text-slate-400 bg-slate-900 rounded-lg p-3 overflow-x-auto border border-slate-700">{`{
+  "title": "Mavzu nomi",
+  "tests": [
+    {
+      "question": "Savol matni?",
+      "options": ["A", "B", "C", "D"],
+      "answer": 0,
+      "explanation": "Izoh"
+    }
+  ],
+  "cases": [
+    {
+      "title": "Case nomi",
+      "scenario": "Vaziyat...",
+      "question": "Savol?",
+      "answer": "To'g'ri javob"
+    }
+  ],
+  "xrays": []
+}`}</pre>
+                </details>
+            </div>
+
             {/* Tayyor Baza yuklash */}
             <div className="mb-6 p-5 rounded-xl bg-indigo-500/5 border border-indigo-500/20">
                 <h4 className="text-sm font-black text-indigo-400 uppercase tracking-widest mb-1 flex items-center gap-2">
