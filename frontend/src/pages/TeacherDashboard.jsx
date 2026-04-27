@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 import DashboardLayout from '../components/DashboardLayout';
 import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { methodologicalQuiz, caseStudies, xrayCases } from '../data/quizQuestions';
 
 const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
   const { t, lang } = useApp();
@@ -12,11 +13,12 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
 
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishedLink, setPublishedLink] = useState(null);
   const [progress, setProgress] = useState(0);
   const [generatedData, setGeneratedData] = useState(null);
   const [showLiveRoom, setShowLiveRoom] = useState(false);
   const [currentTopic, setCurrentTopic] = useState("");
-
   const [errorMsg, setErrorMsg] = useState("");
 
   const medicalTopicsUz = [
@@ -106,7 +108,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
       if (!generatedData) return;
       setIsSaving(true);
       try {
-          await addDoc(collection(db, 'exams'), {
+          const docRef = await addDoc(collection(db, 'exams'), {
               teacherId: user?.uid || 'unknown',
               teacherName: user?.displayName || user?.email || 'O\'qituvchi',
               title: currentTopic || 'Yangi Imtihon',
@@ -114,6 +116,8 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
               data: generatedData,
               status: 'published'
           });
+          const link = `${window.location.origin}/test?id=${docRef.id}`;
+          setPublishedLink(link);
           alert(lang === 'ru' ? 'Учебный блок успешно сохранен на платформе!' : "O'quv bloki platformaga muvaffaqiyatli saqlandi!");
           setProgress(0);
           setIsUploading(false);
@@ -123,6 +127,49 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
           alert(lang === 'ru' ? 'Ошибка сохранения!' : 'Saqlashda xatolik yuz berdi!');
       } finally {
           setIsSaving(false);
+      }
+  };
+
+  const handlePublishLocalBase = async () => {
+      setIsPublishing(true);
+      setPublishedLink(null);
+      try {
+          const localTests = methodologicalQuiz.map(q => ({
+              ...q,
+              answer: q.options.indexOf(q.correctAnswer),
+              topic: q.type || "Tibbiy Amaliyot",
+              explanation: q.explanation || `To'g'ri javob: ${q.correctAnswer}`
+          }));
+          const localXrays = xrayCases.map(x => ({
+              ...x,
+              answer: x.options.indexOf(x.correctAnswer),
+              topic: "Rentgenogrammalar"
+          }));
+          const localCases = caseStudies.map(c => ({ ...c, topic: "Vaziyatli Masalalar" }));
+
+          const payload = {
+              success: true,
+              tests: localTests,
+              xrays: localXrays,
+              cases: localCases
+          };
+
+          const docRef = await addDoc(collection(db, 'exams'), {
+              teacherId: user?.uid || 'unknown',
+              teacherName: user?.displayName || user?.email || 'O\'qituvchi',
+              title: `Tayyor Baza: ${localTests.length} test, ${localXrays.length} rentgen, ${localCases.length} vaziyatli`,
+              createdAt: serverTimestamp(),
+              data: payload,
+              status: 'published'
+          });
+
+          const link = `${window.location.origin}/test?id=${docRef.id}`;
+          setPublishedLink(link);
+      } catch (err) {
+          console.error("Publish local base error:", err);
+          alert("Bazani yuklashda xatolik!");
+      } finally {
+          setIsPublishing(false);
       }
   };
 
@@ -342,7 +389,53 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
             <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-3">{t.tcSectionStatsTitle}</h3>
             
-            <div className="flex flex-col items-center justify-center h-48 opacity-50">
+            {/* Tayyor Baza yuklash */}
+            <div className="mb-6 p-5 rounded-xl bg-indigo-500/5 border border-indigo-500/20">
+                <h4 className="text-sm font-black text-indigo-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+                    <i className="fa-solid fa-database"></i> Tayyor Ma'lumotlar Bazasi
+                </h4>
+                <p className="text-slate-400 text-xs mb-4">
+                    {methodologicalQuiz.length} ta nazariy test, {xrayCases.length} ta rentgen va {caseStudies.length} ta vaziyatli masaladan iborat tayyor bazani bir tugma bilan platformaga yuklab, talabalar uchun havola olish.
+                </p>
+                <button
+                    onClick={handlePublishLocalBase}
+                    disabled={isPublishing}
+                    className={`w-full py-3 flex items-center justify-center gap-2 font-black text-sm rounded-xl transition-all shadow-lg ${
+                        isPublishing
+                            ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                            : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/30 hover:-translate-y-0.5'
+                    }`}
+                >
+                    {isPublishing ? (
+                        <><i className="fa-solid fa-circle-notch fa-spin"></i> Yuklanmoqda...</>
+                    ) : (
+                        <><i className="fa-solid fa-cloud-arrow-up"></i> Bazani Platformaga Yuklash</>
+                    )}
+                </button>
+
+                {publishedLink && (
+                    <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+                        <p className="text-emerald-400 font-bold text-xs mb-2 flex items-center gap-2">
+                            <i className="fa-solid fa-check-circle"></i> Muvaffaqiyatli yuklandi!
+                        </p>
+                        <p className="text-slate-400 text-xs mb-2">Talabalar uchun havola:</p>
+                        <div className="flex gap-2">
+                            <div className="flex-1 bg-slate-900 rounded-lg px-3 py-2 text-xs text-slate-300 font-mono truncate border border-slate-700">
+                                {publishedLink}
+                            </div>
+                            <button
+                                onClick={() => { navigator.clipboard.writeText(publishedLink); alert('Nusxalandi!'); }}
+                                className="px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs text-white transition-colors"
+                                title="Nusxalash"
+                            >
+                                <i className="fa-solid fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            <div className="flex flex-col items-center justify-center h-32 opacity-40">
                <i className="fa-solid fa-chart-line text-5xl text-slate-500 mb-4"></i>
                <p className="text-slate-400">{t.tcSectionStatsDesc}</p>
             </div>
