@@ -256,54 +256,58 @@ export const chatWithAI = async (message, history = []) => {
     try {
         const model = getGemini();
         if (model) {
-            const systemContext = `Siz Med-Zukkoo platformasining tibbiyot bo'yicha aqlli AI yordamchisisiz. Sizning vazifangiz talabalar va o'qituvchilarning tibbiyot (ayniqsa travmatologiya, ortopediya) ga oid savollariga qisqa, aniq va tushunarli javob berish. Agar savol tibbiyotga aloqador bo'lmasa, muloyimlik bilan faqat tibbiyot doirasida javob bera olishingizni ayting.`;
-            
-            const formattedHistory = history.map(msg => ({
-                role: msg.sender === 'user' ? 'user' : 'model',
-                parts: [{ text: msg.text }],
-            }));
-            
-            const chat = model.startChat({
-                history: [
-                    { role: 'user', parts: [{ text: systemContext }] },
-                    { role: 'model', parts: [{ text: "Tushundim, men tibbiy yordamchiman va tayyorman." }] },
-                    ...formattedHistory
-                ]
-            });
-            
-            const result = await chat.sendMessage([{ text: message }]);
-            return { success: true, text: result.response.text().trim(), source: "Gemini" };
-        } else {
-            // Fallback to Groq if Gemini is not available
-            const messages = [
-                { role: "system", content: "Siz Med-Zukkoo platformasining tibbiyot bo'yicha aqlli AI yordamchisisiz. Qisqa, aniq va foydali tibbiy javoblar bering." },
-                ...history.map(msg => ({
-                    role: msg.sender === 'user' ? 'user' : 'assistant',
-                    content: msg.text
-                })),
-                { role: "user", content: message }
-            ];
-            
-            const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${GROQ_API_KEY}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    model: "llama3-8b-8192",
-                    messages: messages,
-                    temperature: 0.7
-                })
-            });
-            const groqData = await groqRes.json();
-            if (groqData.choices && groqData.choices.length > 0) {
-                return { success: true, text: groqData.choices[0].message.content, source: "Groq" };
+            try {
+                const systemContext = `Siz Med-Zukkoo platformasining tibbiyot bo'yicha aqlli AI yordamchisisiz. Sizning vazifangiz talabalar va o'qituvchilarning tibbiyot (ayniqsa travmatologiya, ortopediya) ga oid savollariga qisqa, aniq va tushunarli javob berish. Agar savol tibbiyotga aloqador bo'lmasa, muloyimlik bilan faqat tibbiyot doirasida javob bera olishingizni ayting.`;
+                
+                const formattedHistory = history.map(msg => ({
+                    role: msg.sender === 'user' ? 'user' : 'model',
+                    parts: [{ text: msg.text }],
+                }));
+                
+                const chat = model.startChat({
+                    history: [
+                        { role: 'user', parts: [{ text: systemContext }] },
+                        { role: 'model', parts: [{ text: "Tushundim, men tibbiy yordamchiman va tayyorman." }] },
+                        ...formattedHistory
+                    ]
+                });
+                
+                const result = await chat.sendMessage([{ text: message }]);
+                return { success: true, text: result.response.text().trim(), source: "Gemini" };
+            } catch (geminiError) {
+                console.warn("Gemini Chat Error, falling back to Groq:", geminiError.message);
             }
-            throw new Error("Groq javob qaytarmadi.");
         }
+        
+        // Fallback to Groq if Gemini fails or is not available
+        const messages = [
+            { role: "system", content: "Siz Med-Zukkoo platformasining tibbiyot bo'yicha aqlli AI yordamchisisiz. Qisqa, aniq va foydali tibbiy javoblar bering." },
+            ...history.map(msg => ({
+                role: msg.sender === 'user' ? 'user' : 'assistant',
+                content: msg.text
+            })),
+            { role: "user", content: message }
+        ];
+        
+        const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${GROQ_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "llama3-8b-8192",
+                messages: messages,
+                temperature: 0.7
+            })
+        });
+        const groqData = await groqRes.json();
+        if (groqData.choices && groqData.choices.length > 0) {
+            return { success: true, text: groqData.choices[0].message.content, source: "Groq Llama-3" };
+        }
+        throw new Error("Groq javob qaytarmadi.");
     } catch (e) {
         console.error("AI Chatbot Error:", e);
-        return { success: false, text: "Kechirasiz, xizmatda vaqtinchalik nosozlik yuz berdi. Iltimos keyinroq urinib ko'ring.", error: e.message };
+        return { success: false, text: "Kechirasiz, xizmatda vaqtinchalik nosozlik yuz berdi. Iltimos keyinroq urinib ko'ring." };
     }
 };
