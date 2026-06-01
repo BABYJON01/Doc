@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { db } from '../firebase';
 import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import AIChatbot from './AIChatbot';
 
 const DashboardLayout = ({ children, role, user, onLogout }) => {
     const { theme, lang, toggleTheme, toggleLang } = useApp();
@@ -285,6 +286,8 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                     </div>
                 </div>
             </main>
+            
+            <AIChatbot />
         </div>
     );
 };
