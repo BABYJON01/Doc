@@ -10,6 +10,12 @@ import hashlib
 from pathlib import Path
 import traceback
 import sys
+from dotenv import load_dotenv
+import google.generativeai as genai
+
+load_dotenv()
+if os.getenv("GEMINI_API_KEY"):
+    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 app = FastAPI()
 
@@ -121,85 +127,47 @@ async def save_settings(request: Request):
     except Exception as e:
         return {"error": str(e)}
 
-def analyze_xray_image(image_bytes: bytes) -> dict:
-    import numpy as np
-    from PIL import Image, ImageFilter
+async def analyze_xray_image(image_bytes: bytes) -> dict:
+    from PIL import Image
+    import re
     try:
         img = Image.open(io.BytesIO(image_bytes))
-        orig_mode = img.mode
-
-        # --- Step 1: Check if image could be a medical X-ray ---
-        if orig_mode == "RGB":
-            rgb = np.array(img, dtype=np.float32)
-            r_mean = np.mean(rgb[:, :, 0])
-            g_mean = np.mean(rgb[:, :, 1])
-            b_mean = np.mean(rgb[:, :, 2])
-            channel_std = np.std([r_mean, g_mean, b_mean])
-            if channel_std > 15: # Stricter grayscale check
-                return {"grade": -1, "valid": False, "source": "AI (Rasm tahlili)"}
-
-        # Convert to grayscale for deeper analysis
-        gray = img.convert("L").resize((256, 256), Image.LANCZOS)
-        arr = np.array(gray, dtype=np.float32)
-        h, w = arr.shape
-
-        # --- Step 2: Global statistics ---
-        mean_brightness = np.mean(arr)
-        if mean_brightness > 240 or mean_brightness < 10:
-            return {"grade": -1, "valid": False, "source": "AI (Rasm tahlili)"}
-
-        # --- Step 3: Analyze joint region ---
-        cy, cx = h // 2, w // 2
-        margin = h // 5
-        joint_region = arr[cy - margin: cy + margin, cx - margin: cx + margin]
-        joint_mean = np.mean(joint_region)
-        joint_std = np.std(joint_region)
-
-        # --- Step 4: Edge density ---
-        edges = gray.filter(ImageFilter.FIND_EDGES)
-        edge_arr = np.array(edges, dtype=np.float32)
-        edge_density = np.mean(edge_arr)
-
-        # --- Step 5: Knee-specific structural markers ---
-        # Medical X-rays usually have high contrast and specific edge patterns
-        if edge_density < 2 or edge_density > 60:
-            return {"grade": -1, "valid": False, "source": "AI (Rasm tahlili)"}
-
-        # --- Step 6: Bright pixel ratio ---
-        bright_px = np.sum(arr > 200) / arr.size
-        dark_px = np.sum(arr < 40) / arr.size
-
-        # --- Step 6: Score-based KL grading ---
-        img_hash = hashlib.md5(image_bytes).hexdigest()
-        hash_val = int(img_hash[:4], 16)
         
-        score = 0.0
-        if joint_mean < 70: score += 2.5
-        elif joint_mean < 100: score += 1.5
-        elif joint_mean < 130: score += 0.5
+        if not os.getenv("GEMINI_API_KEY"):
+            return {"grade": 2, "valid": True, "source": "Gemini (API Key yo'q, Mock)"}
 
-        if edge_density > 25: score += 1.5
-        elif edge_density > 15: score += 0.8
-
-        if bright_px > 0.35: score += 1.5
-        elif bright_px > 0.22: score += 0.8
-
-        if joint_std > 60: score += 0.8
-        elif joint_std > 40: score += 0.4
-
-        if dark_px < 0.05: score += 0.5
-        score += (hash_val % 10) * 0.05
-        grade = min(4, int(score))
-
-        return {"grade": grade, "valid": True, "source": "AI (Rasm tahlili)"}
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        prompt = (
+            "Siz tajribali ortoped-travmatologsiz. Ushbu tasvirni tahlil qiling. "
+            "Agar bu tibbiyotga oid rentgen (x-ray) yoki MRI tasviri bo'lmasa, faqat '-1' raqamini qaytaring. "
+            "Agar u tizza yoki bo'g'im rentgeni bo'lsa, osteoartroz darajasini Kellgren-Lawrence (KL) "
+            "shkalasi bo'yicha 0 dan 4 gacha baholang va faqat o'sha raqamni (0, 1, 2, 3 yoki 4) qaytaring. "
+            "Javobingizda faqat bitta raqam bo'lsin, boshqa hech qanday so'z yozmang."
+        )
+        
+        response = await model.generate_content_async([prompt, img])
+        result_text = response.text.strip()
+        
+        # Extract number using regex just in case
+        match = re.search(r'-1|[0-4]', result_text)
+        if match:
+            grade = int(match.group())
+            if grade == -1:
+                return {"grade": -1, "valid": False, "source": "Gemini 1.5 Vision"}
+            else:
+                grade = max(0, min(4, grade))
+                return {"grade": grade, "valid": True, "source": "Gemini 1.5 Vision"}
+        
+        return {"grade": -1, "valid": False, "source": "Gemini 1.5 Vision"}
     except Exception as e:
-        return {"grade": 2, "valid": True, "source": "AI (Fallback)"}
+        print("Gemini error:", str(e))
+        return {"grade": 2, "valid": True, "source": f"Gemini (Xatolik: {str(e)})"}
 
 @app.post("/api/predict")
 async def predict(file: UploadFile = File(...)):
     try:
         contents = await file.read()
-        result = analyze_xray_image(contents)
+        result = await analyze_xray_image(contents)
         grade = result["grade"]
         source = result["source"]
 
