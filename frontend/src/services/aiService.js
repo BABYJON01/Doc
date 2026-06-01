@@ -255,6 +255,7 @@ export const analyzeXrayWithGemini = async (file) => {
 export const chatWithAI = async (message, history = []) => {
     try {
         const model = getGemini();
+        let geminiErrorMsg = null;
         if (model) {
             try {
                 const systemContext = `Siz Med-Zukkoo platformasining tibbiyot bo'yicha aqlli AI yordamchisisiz. Sizning vazifangiz talabalar va o'qituvchilarning tibbiyot (ayniqsa travmatologiya, ortopediya) ga oid savollariga qisqa, aniq va tushunarli javob berish. Agar savol tibbiyotga aloqador bo'lmasa, muloyimlik bilan faqat tibbiyot doirasida javob bera olishingizni ayting.`;
@@ -276,10 +277,19 @@ export const chatWithAI = async (message, history = []) => {
                 return { success: true, text: result.response.text().trim(), source: "Gemini" };
             } catch (geminiError) {
                 console.warn("Gemini Chat Error, falling back to Groq:", geminiError.message);
+                geminiErrorMsg = geminiError.message;
             }
         }
         
-        // Fallback to Groq if Gemini fails or is not available
+        // If we reach here, Gemini failed or isn't available. Check if we can fallback to Groq.
+        if (!GROQ_API_KEY || GROQ_API_KEY === "undefined") {
+            if (geminiErrorMsg && geminiErrorMsg.includes("429")) {
+                 return { success: false, text: "Google Gemini serverlari band (Limit tugadi). Iltimos 1 daqiqadan so'ng qayta urinib ko'ring." };
+            }
+            return { success: false, text: "AI tizimida vaqtinchalik nosozlik yuz berdi. Iltimos keyinroq urinib ko'ring." };
+        }
+
+        // Fallback to Groq
         const messages = [
             { role: "system", content: "Siz Med-Zukkoo platformasining tibbiyot bo'yicha aqlli AI yordamchisisiz. Qisqa, aniq va foydali tibbiy javoblar bering." },
             ...history.map(msg => ({
@@ -305,9 +315,9 @@ export const chatWithAI = async (message, history = []) => {
         if (groqData.choices && groqData.choices.length > 0) {
             return { success: true, text: groqData.choices[0].message.content, source: "Groq Llama-3" };
         }
-        throw new Error("Groq javob qaytarmadi.");
+        throw new Error(groqData.error?.message || JSON.stringify(groqData));
     } catch (e) {
         console.error("AI Chatbot Error:", e);
-        return { success: false, text: "Kechirasiz, xizmatda vaqtinchalik nosozlik yuz berdi. Iltimos keyinroq urinib ko'ring." };
+        return { success: false, text: "Xizmatda xatolik yuz berdi: " + e.message };
     }
 };
