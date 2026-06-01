@@ -266,14 +266,17 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                             )}
                         </div>
                         
-                        <div className="flex items-center gap-3 pl-2 sm:pl-4 border-l border-slate-700/30">
+                        <div 
+                            onClick={() => window.location.href = `/${role}/profile`}
+                            className="flex items-center gap-3 pl-2 sm:pl-4 border-l border-slate-700/30 cursor-pointer hover:opacity-80 transition-opacity"
+                        >
                             <img 
                                 src={user?.photoURL || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"} 
                                 alt="User" 
                                 className="w-9 h-9 rounded-full border-2 border-emerald-500 object-cover" 
                             />
                             <div className="hidden md:block text-sm">
-                                <p className="font-bold cursor-default" style={{ color: theme === 'dark' ? '#fff' : '#0f172a' }}>{user?.displayName?.split(' ')[0]}</p>
+                                <p className="font-bold" style={{ color: theme === 'dark' ? '#fff' : '#0f172a' }}>{user?.displayName?.split(' ')[0]}</p>
                             </div>
                         </div>
                     </div>
