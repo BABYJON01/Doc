@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import MedZukkooApp from './components/MedZukkooApp';
 import StudentDashboard from './pages/StudentDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
+import TeacherLectures from './pages/TeacherLectures';
+import TeacherTests from './pages/TeacherTests';
 import AdminDashboard from './pages/AdminDashboard';
 import QuizTaking from './pages/QuizTaking';
 import Methodology from './pages/Methodology';
@@ -247,6 +249,8 @@ const App = () => {
                         {/* Protected Routes */}
                         <Route path="/admin" element={(role === 'admin' && user) ? <AdminDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                         <Route path="/teacher" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
+                        <Route path="/teacher/lectures" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherLectures user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
+                        <Route path="/teacher/tests" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherTests user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                         <Route path="/student/*" element={user ? <StudentDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                         <Route path="/test" element={user ? <QuizTaking user={user} onFinish={() => window.location.href = '/student'} /> : <Navigate to="/" replace />} />
                         
