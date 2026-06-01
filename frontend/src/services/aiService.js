@@ -160,12 +160,9 @@ export const extractTextFromFile = async (file) => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  PUBLIC: X-Ray Analysis (Gemini Vision)
+//  PUBLIC: X-Ray Analysis (Gemini Vision with Groq Fallback)
 // ─────────────────────────────────────────────────────────────────────────────
 export const analyzeXrayWithGemini = async (file) => {
-    const model = getGemini();
-    if (!model) throw new Error("GEMINI_NOT_AVAILABLE");
-    
     // Convert file to base64
     const base64Data = await new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -174,29 +171,82 @@ export const analyzeXrayWithGemini = async (file) => {
         reader.readAsDataURL(file);
     });
 
-    const prompt = `Siz tajribali ortoped-travmatologsiz. Ushbu tasvirni tahlil qiling. Agar bu tibbiyotga oid rentgen (x-ray) yoki MRI tasviri bo'lmasa, faqat '-1' raqamini qaytaring. Agar u tizza yoki bo'g'im rentgeni bo'lsa, osteoartroz darajasini Kellgren-Lawrence (KL) shkalasi bo'yicha 0 dan 4 gacha baholang va faqat o'sha raqamni (0, 1, 2, 3 yoki 4) qaytaring. Javobingizda faqat bitta raqam bo'lsin, boshqa hech qanday so'z yozmang.`;
+    const promptText = `Siz tajribali ortoped-travmatologsiz. Ushbu tasvirni tahlil qiling. Agar bu tibbiyotga oid rentgen (x-ray) yoki MRI tasviri bo'lmasa, faqat '-1' raqamini qaytaring. Agar u tizza yoki bo'g'im rentgeni bo'lsa, osteoartroz darajasini Kellgren-Lawrence (KL) shkalasi bo'yicha 0 dan 4 gacha baholang va faqat o'sha raqamni (0, 1, 2, 3 yoki 4) qaytaring. Javobingizda faqat bitta raqam bo'lsin, boshqa hech qanday so'z yozmang.`;
 
-    const imagePart = {
-        inlineData: {
-            data: base64Data,
-            mimeType: file.type || "image/jpeg"
-        }
-    };
-
-    console.log("🤖 AI: Using Gemini Vision for X-Ray...");
-    const result = await model.generateContent([prompt, imagePart]);
-    const text = result.response.text().trim();
-    
-    const match = text.match(/-1|[0-4]/);
-    if (match) {
-        const grade = parseInt(match[0], 10);
-        if (grade === -1) {
+    const model = getGemini();
+    if (model) {
+        try {
+            console.log("🤖 AI: Using Gemini Vision for X-Ray...");
+            const imagePart = {
+                inlineData: {
+                    data: base64Data,
+                    mimeType: file.type || "image/jpeg"
+                }
+            };
+            const result = await model.generateContent([promptText, imagePart]);
+            const text = result.response.text().trim();
+            
+            const match = text.match(/-1|[0-4]/);
+            if (match) {
+                const grade = parseInt(match[0], 10);
+                if (grade === -1) {
+                    return { grade: -1, valid: false, source: "Gemini Vision" };
+                } else {
+                    return { grade: Math.max(0, Math.min(4, grade)), valid: true, source: "Gemini Vision" };
+                }
+            }
             return { grade: -1, valid: false, source: "Gemini Vision" };
-        } else {
-            return { grade: Math.max(0, Math.min(4, grade)), valid: true, source: "Gemini Vision" };
+        } catch (geminiError) {
+            console.warn("Gemini Error, falling back to Groq Vision:", geminiError.message);
         }
     }
-    return { grade: -1, valid: false, source: "Gemini Vision" };
+
+    // Fallback to Groq Vision
+    console.log("🤖 AI: Using Groq Vision for X-Ray Fallback...");
+    try {
+        const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${GROQ_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "llama-3.2-11b-vision-preview",
+                messages: [
+                    {
+                        role: "user",
+                        content: [
+                            { type: "text", text: promptText },
+                            { type: "image_url", image_url: { url: `data:${file.type || "image/jpeg"};base64,${base64Data}` } }
+                        ]
+                    }
+                ],
+                temperature: 0.1
+            })
+        });
+
+        if (!groqRes.ok) {
+            const errData = await groqRes.json();
+            throw new Error(errData.error?.message || "Groq Vision API Error");
+        }
+
+        const groqData = await groqRes.json();
+        const text = groqData.choices[0].message.content.trim();
+        
+        const match = text.match(/-1|[0-4]/);
+        if (match) {
+            const grade = parseInt(match[0], 10);
+            if (grade === -1) {
+                return { grade: -1, valid: false, source: "Groq Llama-3.2 Vision" };
+            } else {
+                return { grade: Math.max(0, Math.min(4, grade)), valid: true, source: "Groq Llama-3.2 Vision" };
+            }
+        }
+        return { grade: -1, valid: false, source: "Groq Llama-3.2 Vision" };
+    } catch (groqError) {
+        console.error("Both Gemini and Groq failed:", groqError);
+        throw new Error("Tarmoq band (Limit tugadi) yoki AI serverlarida xatolik. Iltimos 1 daqiqadan so'ng qayta urinib ko'ring.");
+    }
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
