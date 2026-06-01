@@ -158,3 +158,43 @@ export const extractTextFromFile = async (file) => {
         throw new Error("Faqat .docx va .pdf fayllar qo'llab-quvvatlanadi.");
     }
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  PUBLIC: X-Ray Analysis (Gemini Vision)
+// ─────────────────────────────────────────────────────────────────────────────
+export const analyzeXrayWithGemini = async (file) => {
+    const model = getGemini();
+    if (!model) throw new Error("GEMINI_NOT_AVAILABLE");
+    
+    // Convert file to base64
+    const base64Data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+
+    const prompt = `Siz tajribali ortoped-travmatologsiz. Ushbu tasvirni tahlil qiling. Agar bu tibbiyotga oid rentgen (x-ray) yoki MRI tasviri bo'lmasa, faqat '-1' raqamini qaytaring. Agar u tizza yoki bo'g'im rentgeni bo'lsa, osteoartroz darajasini Kellgren-Lawrence (KL) shkalasi bo'yicha 0 dan 4 gacha baholang va faqat o'sha raqamni (0, 1, 2, 3 yoki 4) qaytaring. Javobingizda faqat bitta raqam bo'lsin, boshqa hech qanday so'z yozmang.`;
+
+    const imagePart = {
+        inlineData: {
+            data: base64Data,
+            mimeType: file.type || "image/jpeg"
+        }
+    };
+
+    console.log("🤖 AI: Using Gemini Vision for X-Ray...");
+    const result = await model.generateContent([prompt, imagePart]);
+    const text = result.response.text().trim();
+    
+    const match = text.match(/-1|[0-4]/);
+    if (match) {
+        const grade = parseInt(match[0], 10);
+        if (grade === -1) {
+            return { grade: -1, valid: false, source: "Gemini Vision" };
+        } else {
+            return { grade: Math.max(0, Math.min(4, grade)), valid: true, source: "Gemini Vision" };
+        }
+    }
+    return { grade: -1, valid: false, source: "Gemini Vision" };
+};

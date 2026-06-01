@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { extractTextFromFile, generateMedicalContent } from '../services/aiService';
+import { extractTextFromFile, generateMedicalContent, analyzeXrayWithGemini } from '../services/aiService';
 import LiveRoom from './LiveRoom';
 import { useApp } from '../context/AppContext';
 import DashboardLayout from '../components/DashboardLayout';
@@ -25,6 +25,8 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
   const [showLiveRoom, setShowLiveRoom] = useState(false);
   const [currentTopic, setCurrentTopic] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [isXrayAnalyzing, setIsXrayAnalyzing] = useState(false);
+  const [xrayResult, setXrayResult] = useState(null);
 
   const medicalTopicsUz = [
       "Tayanch-harakat apparati sinishlari, Transport immobilizatsiya, Gips texnikasi",
@@ -592,6 +594,61 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                                 <i className="fa-solid fa-copy"></i>
                             </button>
                         </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Rentgen AI Tahlil */}
+            <div className="mb-6 p-5 rounded-xl bg-violet-500/5 border border-violet-500/20">
+                <h4 className="text-sm font-black text-violet-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+                    <i className="fa-solid fa-x-ray"></i> Rentgen AI Tahlili (Gemini)
+                </h4>
+                <p className="text-slate-400 text-xs mb-4">
+                    Bemorning tizza yoki bo'g'im rentgen (yoki MRI) rasmini yuklang. AI uning Kellgren-Lawrence (KL) osteoartroz darajasini aniqlab beradi.
+                </p>
+                <label className={`w-full py-3 flex items-center justify-center gap-2 font-black text-sm rounded-xl transition-all cursor-pointer border-2 border-dashed ${isXrayAnalyzing ? 'border-slate-600 text-slate-500 cursor-not-allowed' : 'border-violet-600 text-violet-400 hover:bg-violet-500/10'}`}>
+                    {isXrayAnalyzing ? (
+                        <><i className="fa-solid fa-circle-notch fa-spin"></i> Tahlil qilinmoqda...</>
+                    ) : (
+                        <><i className="fa-solid fa-cloud-arrow-up"></i> Rentgen rasmini yuklash</>
+                    )}
+                    <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        disabled={isXrayAnalyzing} 
+                        onChange={async (e) => {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            setIsXrayAnalyzing(true);
+                            setXrayResult(null);
+                            try {
+                                const res = await analyzeXrayWithGemini(file);
+                                setXrayResult(res);
+                            } catch (err) {
+                                setXrayResult({ error: err.message });
+                            } finally {
+                                setIsXrayAnalyzing(false);
+                            }
+                        }} 
+                    />
+                </label>
+
+                {xrayResult && (
+                    <div className="mt-4 p-4 bg-slate-900 border border-slate-700 rounded-xl">
+                        {xrayResult.error ? (
+                            <p className="text-rose-400 text-xs font-bold"><i className="fa-solid fa-triangle-exclamation"></i> Xatolik: {xrayResult.error}</p>
+                        ) : xrayResult.grade === -1 ? (
+                            <p className="text-rose-400 text-xs font-bold"><i className="fa-solid fa-circle-xmark"></i> Bu rasm tibbiy rentgen yoki MRI tasviriga o'xshamaydi.</p>
+                        ) : (
+                            <div>
+                                <p className="text-emerald-400 font-bold text-sm mb-1 flex items-center gap-2">
+                                    <i className="fa-solid fa-check-circle"></i> Tahlil muvaffaqiyatli!
+                                </p>
+                                <p className="text-slate-300 text-xs">Osteoartroz darajasi (KL shkalasi): <span className="font-black text-violet-400 text-base ml-1">{xrayResult.grade} - daraja</span></p>
+                                <p className="text-slate-500 text-[10px] mt-2 italic">Manba: {xrayResult.source}</p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
