@@ -36,23 +36,34 @@ const parseDocumentTests = (text) => {
         let question = lines[0];
         let options = [];
         let correctAnswerIndex = -1;
-        let sequenceAnswerStr = null;
+        let complexAnswerStr = null;
         
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i];
             
-            // Check for Sequence answer: "Тўғри жавоб: 1234"
-            const seqMatch = line.match(/(?:javob|otvet|answer|жавоб)[^\d]*(\d{3,6})/i);
-            if (seqMatch) {
-                sequenceAnswerStr = seqMatch[1];
-                break;
-            }
+            // Check for ANY answer line
+            const ansLineMatch = line.match(/^(?:javob|otvet|answer|жавоб|тўғри жавоб)[^\wа-я]*(.*)$/i);
             
-            // Check for standard answer: "Javob: B"
-            const stdAnsMatch = line.match(/(?:javob|otvet|answer|жавоб)[^\w]*([A-Da-d])/i);
-            if (stdAnsMatch) {
-                const charCode = stdAnsMatch[1].toLowerCase().charCodeAt(0);
-                if (charCode >= 97 && charCode <= 100) correctAnswerIndex = charCode - 97;
+            if (ansLineMatch) {
+                let ansContent = ansLineMatch[1].trim();
+                
+                // Remove trailing dots or semicolons
+                ansContent = ansContent.replace(/[\.;]+$/, '').trim();
+                
+                if (ansContent.length === 1 && ansContent.match(/^[A-Da-dА-Да-д]$/)) {
+                    // Standard answer: "Javob: B"
+                    let charCode = ansContent.toLowerCase().charCodeAt(0);
+                    // Handle cyrillic A, B, V, G (А, Б, В, Г) -> A, B, C, D
+                    if (ansContent.toLowerCase() === 'а') charCode = 97;
+                    else if (ansContent.toLowerCase() === 'б') charCode = 98;
+                    else if (ansContent.toLowerCase() === 'в') charCode = 99;
+                    else if (ansContent.toLowerCase() === 'г') charCode = 100;
+                    
+                    if (charCode >= 97 && charCode <= 100) correctAnswerIndex = charCode - 97;
+                } else {
+                    // Complex Answer: "1234", "1г, 2в", "А-235"
+                    complexAnswerStr = ansContent;
+                }
                 break;
             }
             
@@ -70,18 +81,44 @@ const parseDocumentTests = (text) => {
             }
         }
         
-        if (sequenceAnswerStr) {
-            // Sequence Test: Generate 4 options (1 correct, 3 distractors)
+        if (complexAnswerStr) {
+            // Complex Test (Sequence or Matching): Generate 4 options
             const distractors = new Set();
-            distractors.add(sequenceAnswerStr);
+            distractors.add(complexAnswerStr);
             let attempts = 0;
-            while(distractors.size < 4 && attempts < 50) {
-                const shuf = sequenceAnswerStr.split('').sort(() => 0.5 - Math.random()).join('');
-                distractors.add(shuf);
+            
+            while(distractors.size < 4 && attempts < 100) {
+                let shuf = complexAnswerStr;
+                
+                if (complexAnswerStr.match(/\d+[а-яa-z]/i)) {
+                    // Format: 1г, 2в... -> Shuffle letters
+                    const letters = complexAnswerStr.match(/[а-яa-z]/gi) || [];
+                    if (letters.length > 1) {
+                        const shuffledLetters = [...letters].sort(() => 0.5 - Math.random());
+                        let j = 0;
+                        shuf = complexAnswerStr.replace(/[а-яa-z]/gi, () => shuffledLetters[j++]);
+                    }
+                } else {
+                    // Format: "1234" or "А-235" -> Shuffle digits
+                    const digits = complexAnswerStr.match(/\d/g) || [];
+                    if (digits.length > 1) {
+                        const shuffledDigits = [...digits].sort(() => 0.5 - Math.random());
+                        let j = 0;
+                        shuf = complexAnswerStr.replace(/\d/g, () => shuffledDigits[j++]);
+                    }
+                }
+                
+                if (shuf !== complexAnswerStr) distractors.add(shuf);
                 attempts++;
             }
+            
+            // Fallback if we couldn't generate 4 unique distractors (rare)
+            while(distractors.size < 4) {
+                distractors.add(complexAnswerStr + " (" + distractors.size + ")");
+            }
+            
             const optionsArray = Array.from(distractors).sort(() => 0.5 - Math.random());
-            const correctIdx = optionsArray.indexOf(sequenceAnswerStr);
+            const correctIdx = optionsArray.indexOf(complexAnswerStr);
             
             tests.push({
                 question: question,
