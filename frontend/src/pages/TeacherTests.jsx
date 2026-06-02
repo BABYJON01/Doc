@@ -112,7 +112,7 @@ const parseDocumentTests = (text) => {
         }
         
         const optMatch = line.match(/^([\+\*]?)\s*(?:[a-zA-Zа-яА-Я])\s*[\.\)\-\:\/\]]\s*(.*)$/);
-        const pmOptMatch = line.match(/^([\+\-\*•])\s*(.*)$/);
+        const pmOptMatch = line.match(/^([\+\-])\s*(.*)$/);
         const numOptMatch = line.match(/^([\+\*]?)\s*(\d+)\s*[\.\)\-\:\/\]]\s*(.*)$/);
         
         let isOption = !!(optMatch || pmOptMatch || numOptMatch);
@@ -253,12 +253,15 @@ const TeacherTests = ({ user, onLogout }) => {
         fetchMyExams();
     }, [user]);
 
+    const [debugText, setDebugText] = useState(null);
+
     const handleBulkTestUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
         setIsUploading(true);
         setUploadResults([]);
+        setDebugText(null);
         
         try {
             let testsArray = [];
@@ -277,6 +280,7 @@ const TeacherTests = ({ user, onLogout }) => {
                 }
             } else if (fileNameLower.endsWith(".docx") || fileNameLower.endsWith(".pdf")) {
                 const text = await extractTextFromFile(file);
+                setDebugText(text); // Save raw text for debugging
                 testsArray = parseDocumentTests(text);
             } else {
                 throw new Error("Faqat .json, .docx yoki .pdf fayllarni yuklashingiz mumkin.");
@@ -334,6 +338,16 @@ const TeacherTests = ({ user, onLogout }) => {
             setIsUploading(false);
             e.target.value = ''; // reset file input
         }
+    };
+
+    const handleDownloadDebug = () => {
+        if (!debugText) return;
+        const blob = new Blob([debugText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "mammoth_extracted_debug.txt";
+        a.click();
     };
 
     const handleDeleteExam = async (examId, title) => {
@@ -426,11 +440,21 @@ const TeacherTests = ({ user, onLogout }) => {
                                     </div>
                                     {res.success && (
                                         <button onClick={() => {navigator.clipboard.writeText(res.link); alert("Havola nusxalandi!")}} className="text-emerald-400 hover:text-white hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-500/30 transition-all">
-                                            Nusxa olish
+                                            {lang === 'ru' ? 'Копировать' : 'Nusxa olish'}
                                         </button>
                                     )}
                                 </div>
                             ))}
+                            
+                            {debugText && (
+                                <button 
+                                    onClick={handleDownloadDebug}
+                                    className="w-full mt-4 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 rounded-xl py-3 px-4 font-semibold transition-all flex items-center justify-center gap-2"
+                                >
+                                    <i className="fa-solid fa-bug"></i>
+                                    {lang === 'ru' ? 'Скачать LOG файл для анализа ошибок (Debug)' : 'Xatoliklarni tahlil qilish uchun LOG faylni yuklab olish (Debug)'}
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>
