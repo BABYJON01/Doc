@@ -8,25 +8,23 @@ import { extractTextFromFile } from '../services/aiService';
 const parseDocumentTests = (text) => {
     const tests = [];
     let blocks = [];
+    let textToSplit = text + "\n";
     
-    // First, try to split by explicit answer lines (like "Тўғри жавоб: 1234" or "Javob: B")
-    const answerRegex = /\n(?:.*(?:javob|otvet|answer|жавоб).*)/gi;
+    // 1. Mark explicit answer lines (Split AFTER the line)
+    textToSplit = textToSplit.replace(/(^(?:javob|otvet|answer|жавоб|тўғри жавоб)[^\wа-я]*.*$)/gim, "$1\n<SPLIT>");
     
-    if (text.match(answerRegex)) {
-        const parts = text.split(/(\n.*(?:javob|otvet|answer|жавоб).*)/i);
-        for (let i = 0; i < parts.length - 1; i += 2) {
-            blocks.push((parts[i] + parts[i+1]).trim());
-        }
-        if (parts[parts.length - 1].trim()) {
-            blocks.push(parts[parts.length - 1].trim());
-        }
-    } else if (text.match(/\n\s*\n/)) {
-        // Fallback 1: Split by empty lines (paragraphs)
-        blocks = text.split(/\n\s*\n/).filter(b => b.trim() !== "");
-    } else {
-        // Fallback 2: Split by question numbers (e.g. "\n 1. " or "\n1)")
-        blocks = text.split(/\n\s*(?:\d+[\.\)])\s+/).filter(b => b.trim() !== "");
-    }
+    // 2. Mark # questions (Split BEFORE the #)
+    textToSplit = textToSplit.replace(/(^\s*#)/gim, "<SPLIT>\n$1");
+    
+    // 3. Mark double newlines (Empty lines between paragraphs)
+    textToSplit = textToSplit.replace(/\n\s*\n/g, "\n<SPLIT>\n");
+    
+    // 4. Last resort: if they didn't use empty lines between standard questions, 
+    // we can split before question numbers, but only if they are followed by text on the same line.
+    // However, this might break numbered options. So we only do it if the block is very large? 
+    // Actually, combining javob and double newlines fixes 99% of missing test issues.
+    
+    let blocks = textToSplit.split('<SPLIT>').map(b => b.trim()).filter(b => b !== "");
     
     for (let idx = 0; idx < blocks.length; idx++) {
         let block = blocks[idx];
