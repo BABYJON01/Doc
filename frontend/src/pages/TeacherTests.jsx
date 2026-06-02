@@ -7,7 +7,6 @@ import { extractTextFromFile } from '../services/aiService';
 
 const parseDocumentTests = (text) => {
     const tests = [];
-    let blocks = [];
     let textToSplit = text + "\n";
     
     // 1. Mark explicit answer lines (Split AFTER the line)
@@ -19,175 +18,127 @@ const parseDocumentTests = (text) => {
     // 3. Mark double newlines (Empty lines between paragraphs)
     textToSplit = textToSplit.replace(/\n\s*\n/g, "\n<SPLIT>\n");
     
-    // 4. Last resort: if they didn't use empty lines between standard questions, 
-    // we can split before question numbers, but only if they are followed by text on the same line.
-    // However, this might break numbered options. So we only do it if the block is very large? 
-    // Actually, combining javob and double newlines fixes 99% of missing test issues.
-    
     let blocks = textToSplit.split('<SPLIT>').map(b => b.trim()).filter(b => b !== "");
     
     for (let idx = 0; idx < blocks.length; idx++) {
         let block = blocks[idx];
-        // Remove starting question number or # if present
-        block = block.replace(/^\s*(?:\d+[\.\)]|#)\s*/, '');
-        
         const lines = block.split('\n').map(l => l.trim()).filter(l => l !== "");
         if (lines.length < 2) continue;
         
-        let question = lines[0];
-        let options = [];
-        let correctAnswerIndex = -1;
-        let complexAnswerStr = null;
-        let inlineCorrectNumbers = [];
-        let allInlineNumbers = [];
+        let ct = { question: "", options: [], correctAnswerIndex: -1, complexAnswerStr: null, inlineCorrectNumbers: [], allInlineNumbers: [] };
         
-        for (let i = 1; i < lines.length; i++) {
-            const line = lines[i];
+        const flushTest = () => {
+            if (ct.inlineCorrectNumbers.length > 0) {
+                const uniqueCorrectNumbers = [...new Set(ct.inlineCorrectNumbers)].sort((a,b) => parseInt(a)-parseInt(b));
+                const correctCombo = uniqueCorrectNumbers.join(", ");
+                const distractors = new Set();
+                distractors.add(correctCombo);
+                let attempts = 0;
+                while(distractors.size < 4 && attempts < 100) {
+                    const shuffledNumbers = [...new Set(ct.allInlineNumbers)].sort(() => 0.5 - Math.random());
+                    const randomCombo = shuffledNumbers.slice(0, uniqueCorrectNumbers.length).sort((a,b) => parseInt(a)-parseInt(b)).join(", ");
+                    distractors.add(randomCombo);
+                    attempts++;
+                }
+                while(distractors.size < 4) { distractors.add(correctCombo + " (" + distractors.size + ")"); }
+                const optionsArray = Array.from(distractors).sort(() => 0.5 - Math.random());
+                tests.push({ question: ct.question, options: optionsArray, answer: optionsArray.indexOf(correctCombo), topic: "Tayyor Test Baza" });
+            } else if (ct.complexAnswerStr) {
+                const distractors = new Set();
+                distractors.add(ct.complexAnswerStr);
+                let attempts = 0;
+                while(distractors.size < 4 && attempts < 100) {
+                    let shuf = ct.complexAnswerStr;
+                    if (ct.complexAnswerStr.match(/\d+[а-яa-z]/i)) {
+                        const letters = ct.complexAnswerStr.match(/[а-яa-z]/gi) || [];
+                        if (letters.length > 1) {
+                            const shuffledLetters = [...letters].sort(() => 0.5 - Math.random());
+                            let j = 0;
+                            shuf = ct.complexAnswerStr.replace(/[а-яa-z]/gi, () => shuffledLetters[j++]);
+                        }
+                    } else {
+                        const digits = ct.complexAnswerStr.match(/\d/g) || [];
+                        if (digits.length > 1) {
+                            const shuffledDigits = [...digits].sort(() => 0.5 - Math.random());
+                            let j = 0;
+                            shuf = ct.complexAnswerStr.replace(/\d/g, () => shuffledDigits[j++]);
+                        }
+                    }
+                    if (shuf !== ct.complexAnswerStr) distractors.add(shuf);
+                    attempts++;
+                }
+                while(distractors.size < 4) { distractors.add(ct.complexAnswerStr + " (" + distractors.size + ")"); }
+                const optionsArray = Array.from(distractors).sort(() => 0.5 - Math.random());
+                tests.push({ question: ct.question, options: optionsArray, answer: optionsArray.indexOf(ct.complexAnswerStr), topic: "Tayyor Test Baza" });
+            } else if (ct.options.length >= 2) {
+                if (ct.correctAnswerIndex === -1) ct.correctAnswerIndex = 0;
+                const correctOptionText = ct.options[ct.correctAnswerIndex];
+                const shuffledOptions = [...ct.options].sort(() => 0.5 - Math.random());
+                tests.push({ question: ct.question, options: shuffledOptions, answer: shuffledOptions.indexOf(correctOptionText), topic: "Tayyor Test Baza" });
+            }
+        };
+        
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i];
             
-            // Check for ANY explicit answer line
+            // If we are in a standard test (we have standard options), a line starting with a number is unambiguously a new question!
+            if (ct.options.length > 0 && line.match(/^\s*(?:\d+[\.\)]|#)\s*/)) {
+                flushTest();
+                ct = { question: "", options: [], correctAnswerIndex: -1, complexAnswerStr: null, inlineCorrectNumbers: [], allInlineNumbers: [] };
+            }
+            
+            // First line of the test (or immediately after a flush)
+            if (ct.question === "" && ct.options.length === 0 && ct.allInlineNumbers.length === 0) {
+                 line = line.replace(/^\s*(?:\d+[\.\)]|#)\s*/, '');
+                 ct.question = line;
+                 continue;
+            }
+            
             const ansLineMatch = line.match(/^(?:javob|otvet|answer|жавоб|тўғри жавоб)[^\wа-я]*(.*)$/i);
-            
             if (ansLineMatch) {
-                let ansContent = ansLineMatch[1].trim();
-                ansContent = ansContent.replace(/[\.;]+$/, '').trim();
-                
+                let ansContent = ansLineMatch[1].trim().replace(/[\.;]+$/, '').trim();
                 if (ansContent.length === 1 && ansContent.match(/^[A-Da-dА-Да-д]$/)) {
                     let charCode = ansContent.toLowerCase().charCodeAt(0);
                     if (ansContent.toLowerCase() === 'а') charCode = 97;
                     else if (ansContent.toLowerCase() === 'б') charCode = 98;
                     else if (ansContent.toLowerCase() === 'в') charCode = 99;
                     else if (ansContent.toLowerCase() === 'г') charCode = 100;
-                    if (charCode >= 97 && charCode <= 100) correctAnswerIndex = charCode - 97;
+                    if (charCode >= 97 && charCode <= 100) ct.correctAnswerIndex = charCode - 97;
                 } else if (ansContent.match(/^[\d\s,;]+$/) && (ansContent.includes(',') || ansContent.includes(';'))) {
-                    // Comma or semicolon separated numbers (e.g. "тўғри жавоб: 2,3" or "2;3")
                     const numbers = ansContent.match(/\d+/g);
-                    if (numbers) {
-                        inlineCorrectNumbers.push(...numbers);
-                    }
+                    if (numbers) ct.inlineCorrectNumbers.push(...numbers);
                 } else {
-                    complexAnswerStr = ansContent;
+                    ct.complexAnswerStr = ansContent;
                 }
-                break;
+                continue; // Explicit answer line always terminates processing of that line
             }
             
-            // Check for standard options A, B, C, D
             const optMatch = line.match(/^([\+\*]?)\s*[a-zA-Zа-яА-Я][\.\)]\s*(.*)$/);
-            
-            // Check for simple +/- options e.g. "+фиксацию..." or "-фиксацию..."
             const pmOptMatch = line.match(/^([\+\-])\s*(.*)$/);
-            
-            // Check for inline numbered options (Multiple Select) e.g. "1. Teriosti emfizemasida *" or "*3. Jaroxat"
             const numOptMatch = line.match(/^([\+\*]?)\s*(\d+)[\.\)]\s*(.*)$/);
             
             if (optMatch) {
                 const isCorrect = optMatch[1] === '+' || optMatch[1] === '*';
-                options.push(optMatch[2]);
-                if (isCorrect) correctAnswerIndex = options.length - 1;
+                ct.options.push(optMatch[2]);
+                if (isCorrect) ct.correctAnswerIndex = ct.options.length - 1;
             } else if (pmOptMatch) {
                 const isCorrect = pmOptMatch[1] === '+';
-                options.push(pmOptMatch[2]);
-                if (isCorrect) correctAnswerIndex = options.length - 1;
+                ct.options.push(pmOptMatch[2]);
+                if (isCorrect) ct.correctAnswerIndex = ct.options.length - 1;
             } else if (numOptMatch) {
-                // It's a numbered option, append to question text so student can read it
-                question += "\n" + line.replace(/[\+\*]/g, '').trim(); // hide stars from student
-                
+                ct.question += "\n" + line.replace(/[\+\*]/g, '').trim();
                 const optNum = numOptMatch[2];
-                allInlineNumbers.push(optNum);
-                
+                ct.allInlineNumbers.push(optNum);
                 if (numOptMatch[1] === '*' || numOptMatch[1] === '+' || line.includes('*') || (line.includes('+') && !line.includes(',+'))) {
-                    // Be careful not to double count if they have both `,` and `+` at the end
-                    inlineCorrectNumbers.push(optNum);
+                    ct.inlineCorrectNumbers.push(optNum);
                 }
             } else {
-                if (options.length === 0) {
-                    question += "\n" + line;
+                if (ct.options.length === 0) {
+                    ct.question += "\n" + line;
                 }
             }
         }
-        
-        if (inlineCorrectNumbers.length > 0) {
-            // Multiple Select Test: generate combination options
-            // Deduplicate and sort numbers
-            const uniqueCorrectNumbers = [...new Set(inlineCorrectNumbers)].sort((a,b) => parseInt(a)-parseInt(b));
-            const correctCombo = uniqueCorrectNumbers.join(", ");
-            const distractors = new Set();
-            distractors.add(correctCombo);
-            
-            let attempts = 0;
-            while(distractors.size < 4 && attempts < 100) {
-                const shuffledNumbers = [...new Set(allInlineNumbers)].sort(() => 0.5 - Math.random());
-                const randomCombo = shuffledNumbers.slice(0, uniqueCorrectNumbers.length).sort((a,b) => parseInt(a)-parseInt(b)).join(", ");
-                distractors.add(randomCombo);
-                attempts++;
-            }
-            
-            while(distractors.size < 4) {
-                 distractors.add(correctCombo + " (" + distractors.size + ")");
-            }
-            
-            const optionsArray = Array.from(distractors).sort(() => 0.5 - Math.random());
-            const correctIdx = optionsArray.indexOf(correctCombo);
-            
-            tests.push({ question: question, options: optionsArray, answer: correctIdx, topic: "Tayyor Test Baza" });
-            
-        } else if (complexAnswerStr) {
-            // Complex Test (Sequence or Matching): Generate 4 options
-            const distractors = new Set();
-            distractors.add(complexAnswerStr);
-            let attempts = 0;
-            
-            while(distractors.size < 4 && attempts < 100) {
-                let shuf = complexAnswerStr;
-                
-                if (complexAnswerStr.match(/\d+[а-яa-z]/i)) {
-                    const letters = complexAnswerStr.match(/[а-яa-z]/gi) || [];
-                    if (letters.length > 1) {
-                        const shuffledLetters = [...letters].sort(() => 0.5 - Math.random());
-                        let j = 0;
-                        shuf = complexAnswerStr.replace(/[а-яa-z]/gi, () => shuffledLetters[j++]);
-                    }
-                } else {
-                    const digits = complexAnswerStr.match(/\d/g) || [];
-                    if (digits.length > 1) {
-                        const shuffledDigits = [...digits].sort(() => 0.5 - Math.random());
-                        let j = 0;
-                        shuf = complexAnswerStr.replace(/\d/g, () => shuffledDigits[j++]);
-                    }
-                }
-                
-                if (shuf !== complexAnswerStr) distractors.add(shuf);
-                attempts++;
-            }
-            
-            while(distractors.size < 4) {
-                distractors.add(complexAnswerStr + " (" + distractors.size + ")");
-            }
-            
-            const optionsArray = Array.from(distractors).sort(() => 0.5 - Math.random());
-            const correctIdx = optionsArray.indexOf(complexAnswerStr);
-            
-            tests.push({
-                question: question,
-                options: optionsArray,
-                answer: correctIdx,
-                topic: "Tayyor Test Baza"
-            });
-        } else if (options.length >= 2) {
-            // Standard Test
-            if (correctAnswerIndex === -1) correctAnswerIndex = 0;
-            
-            // Randomize options so correct answer is not always A
-            const correctOptionText = options[correctAnswerIndex];
-            const shuffledOptions = [...options].sort(() => 0.5 - Math.random());
-            const newCorrectIndex = shuffledOptions.indexOf(correctOptionText);
-            
-            tests.push({
-                question: question,
-                options: shuffledOptions,
-                answer: newCorrectIndex,
-                topic: "Tayyor Test Baza"
-            });
-        }
+        flushTest(); // Flush the final test in the block
     }
     return tests;
 };
