@@ -102,15 +102,19 @@ const parseDocumentTests = (text) => {
             continue;
         }
         
+        const optMatch = line.match(/^([\+\*]?)\s*(?:[a-zA-Zа-яА-Я])\s*[\.\)]\s*(.*)$/);
+        const pmOptMatch = line.match(/^([\+\-])\s*(.*)$/);
+        const numOptMatch = line.match(/^([\+\*]?)\s*(\d+)\s*[\.\)]\s*(.*)$/);
+        
+        let isOption = !!(optMatch || pmOptMatch || numOptMatch);
+
         let isNewQuestion = false;
         const isQuestionMarker = line.match(/^\s*(?:\d+[\.\)]|#)\s*/);
         
         if (isQuestionMarker) {
             if (ct.options.length > 0) {
-                // In standard (A, B, C, D or +/-) tests, any number or # is unambiguously a new question
                 isNewQuestion = true;
             } else if (ct.allInlineNumbers.length > 0) {
-                // In multiple-select (numbered options) tests
                 if (line.match(/^\s*#\s*/)) {
                     isNewQuestion = true;
                 } else {
@@ -118,19 +122,16 @@ const parseDocumentTests = (text) => {
                     if (numMatch) {
                         const num = parseInt(numMatch[1]);
                         const expectedNextOption = parseInt(ct.allInlineNumbers[ct.allInlineNumbers.length - 1]) + 1;
-                        
                         if (num !== expectedNextOption) {
-                            // If the number breaks the option sequence (e.g. expected 6, got 72 or 2), it's a new question
                             isNewQuestion = true;
                         } else {
-                            // Ambiguous: could be Option 6 or Question 6. Look ahead for Option 1.
                             let isNextLineOption1 = false;
                             for (let j = i + 1; j < Math.min(i + 4, lines.length); j++) {
                                 if (lines[j].trim() === "") continue;
                                 if (lines[j].match(/^([\+\*]?)\s*1[\.\)]\s*/)) {
                                     isNextLineOption1 = true;
                                 }
-                                break; // Only check the immediate next non-empty line
+                                break;
                             }
                             if (isNextLineOption1) {
                                 isNewQuestion = true;
@@ -140,16 +141,18 @@ const parseDocumentTests = (text) => {
                 }
             }
         } else if (ct.options.length >= 2 || ct.allInlineNumbers.length >= 2) {
-            // Fallback for completely unnumbered questions (e.g. "Question text\nA)\nB)\nQuestion text\nA)\nB)")
-            // If we've gathered options, and we see a sequence RESTART (like 'A)' or '1)'), it's a new question!
-            const optLetterMatch = line.match(/^([\+\*]?)\s*([a-zA-Zа-яА-Я])[\.\)]/);
-            if (optLetterMatch) {
-                const letter = optLetterMatch[2].toUpperCase();
-                if (letter === 'A' || letter === 'А') { // Latin A or Cyrillic A
-                    isNewQuestion = true;
-                }
-            } else if (line.match(/^([\+\*]?)\s*1[\.\)]/)) {
+            if (!isOption) {
+                // If it doesn't look like an option, and we already have 2+ options, it's highly likely a new question!
                 isNewQuestion = true;
+            } else {
+                // It IS an option. But is it a RESTART of the option sequence? (e.g. A) or 1) )
+                if (optMatch) {
+                    const letterStr = optMatch[2].toUpperCase();
+                    if (letterStr === 'A' || letterStr === 'А') isNewQuestion = true;
+                } else if (numOptMatch) {
+                    const num = parseInt(numOptMatch[2]);
+                    if (num === 1) isNewQuestion = true;
+                }
             }
         }
         
@@ -157,14 +160,10 @@ const parseDocumentTests = (text) => {
             flushTest();
         }
         
-        if (ct.question === "" && ct.options.length === 0 && ct.allInlineNumbers.length === 0) {
+        if (ct.question === "" && ct.options.length === 0 && ct.allInlineNumbers.length === 0 && !isOption) {
              ct.question = line.replace(/^\s*(?:\d+[\.\)]|#)\s*/, '');
              continue;
         }
-        
-        const optMatch = line.match(/^([\+\*]?)\s*[a-zA-Zа-яА-Я][\.\)]\s*(.*)$/);
-        const pmOptMatch = line.match(/^([\+\-])\s*(.*)$/);
-        const numOptMatch = line.match(/^([\+\*]?)\s*(\d+)[\.\)]\s*(.*)$/);
         
         if (optMatch) {
             const isCorrect = optMatch[1] === '+' || optMatch[1] === '*';
