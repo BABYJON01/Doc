@@ -37,9 +37,9 @@ const StudentCourses = ({ user }) => {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const q = query(collection(db, 'exams'), orderBy('createdAt', 'desc'), limit(20));
+        const q = query(collection(db, 'exams'), orderBy('createdAt', 'desc'), limit(50));
         const snap = await getDocs(q);
-        const fetched = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const fetched = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(e => e.status !== 'hidden');
         setExams(fetched);
       } catch (err) {
         console.error('Error fetching exams: ', err);

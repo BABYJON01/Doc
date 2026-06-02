@@ -20,8 +20,62 @@ const parseDocumentTests = (text) => {
     
     let ct = { question: "", options: [], correctAnswerIndex: -1, complexAnswerStr: null, inlineCorrectNumbers: [], allInlineNumbers: [] };
     let pushed = false;
+    let lastQuestionNumber = 0;
     
     const flushTest = () => {
+        if (ct.options.length < 2 && ct.allInlineNumbers.length < 2 && !ct.complexAnswerStr) {
+            // Reconstruct all text in case one option was accidentally matched
+            let allText = ct.question;
+            for (let opt of ct.options) allText += "\n" + opt;
+            
+            const qLines = allText.split('\n');
+            if (qLines.length > 1) {
+                const hasStar = qLines.some(l => l.trim().endsWith('*') || l.trim().startsWith('*'));
+                if (hasStar) {
+                    ct.question = qLines[0];
+                    ct.options = [];
+                    ct.correctAnswerIndex = -1;
+                    
+                    let correctIndices = [];
+                    for (let k = 1; k < qLines.length; k++) {
+                        let optText = qLines[k].trim();
+                        if (!optText) continue;
+                        
+                        // Clean accidental markers if they exist
+                        optText = optText.replace(/^([A-Ea-eА-Еа-еСс]|\d+)\s*[\.\)\-\:\/\]]\s*/, '');
+                        
+                        let isCorrect = false;
+                        if (optText.endsWith('*')) {
+                            isCorrect = true;
+                            optText = optText.slice(0, -1).trim();
+                        } else if (optText.startsWith('*')) {
+                            isCorrect = true;
+                            optText = optText.slice(1).trim();
+                        }
+                        
+                        ct.options.push(optText);
+                        if (isCorrect) {
+                            correctIndices.push(ct.options.length - 1);
+                            ct.correctAnswerIndex = ct.options.length - 1;
+                        }
+                    }
+                    
+                    if (correctIndices.length > 1) {
+                        ct.question += '\n\n' + ct.options.map((opt, idx) => `${idx + 1}) ${opt}`).join('\n');
+                        ct.allInlineNumbers = [];
+                        ct.inlineCorrectNumbers = [];
+                        for (let idx = 0; idx < ct.options.length; idx++) {
+                            ct.allInlineNumbers.push((idx + 1).toString());
+                        }
+                        for (let idx of correctIndices) {
+                            ct.inlineCorrectNumbers.push((idx + 1).toString());
+                        }
+                        ct.options = [];
+                    }
+                }
+            }
+        }
+        
         if (ct.inlineCorrectNumbers.length > 0) {
             const uniqueCorrectNumbers = [...new Set(ct.inlineCorrectNumbers)].sort((a,b) => parseInt(a)-parseInt(b));
             const correctCombo = uniqueCorrectNumbers.join(", ");
@@ -151,12 +205,19 @@ const parseDocumentTests = (text) => {
                         }
                     }
                 }
+            } else {
+                const currentQNumMatch = line.match(/^\s*(\d+)\s*[\.\)\-\:\/\]]/);
+                if (currentQNumMatch) {
+                    const currentNum = parseInt(currentQNumMatch[1]);
+                    // If the line starts with a number > 1, it's a new question.
+                    // (Numbered options inside a question always start at 1).
+                    if (currentNum > 1) {
+                        isNewQuestion = true;
+                    }
+                }
             }
         } else if (ct.options.length >= 2 || ct.allInlineNumbers.length >= 2) {
-            if (!isOption) {
-                // If it doesn't look like an option, and we already have 2+ options, it's highly likely a new question!
-                isNewQuestion = true;
-            } else {
+            if (isOption) {
                 // It IS an option. But is it a RESTART of the option sequence? (e.g. A) or 1) )
                 if (optMatch) {
                     const letterMatch = line.match(/^[^\wа-яА-Я]*([a-zA-Zа-яА-Я])/);
@@ -179,6 +240,10 @@ const parseDocumentTests = (text) => {
         }
         
         if (ct.question === "" && ct.options.length === 0 && ct.allInlineNumbers.length === 0 && !isOption) {
+             const qNumMatch = line.match(/^\s*(\d+)\s*[\.\)\-\:\/\]]/);
+             if (qNumMatch) {
+                 lastQuestionNumber = parseInt(qNumMatch[1]);
+             }
              ct.question = line.replace(/^\s*(?:\d+[\.\)]|#)\s*/, '');
              continue;
         }
@@ -378,6 +443,35 @@ const TeacherTests = ({ user, onLogout }) => {
         }
     };
 
+    const handleToggleStatus = async (examId, currentStatus) => {
+        const newStatus = currentStatus === 'published' ? 'hidden' : 'published';
+        try {
+            await updateDoc(doc(db, 'exams', examId), { status: newStatus });
+            setMyExams(prev => prev.map(e => e.id === examId ? { ...e, status: newStatus } : e));
+        } catch (err) {
+            console.error("Error updating exam status:", err);
+            alert("Holatni o'zgartirishda xatolik yuz berdi!");
+        }
+    };
+
+    const handleSetLimit = async (examId, currentLimit, totalTests) => {
+        const input = window.prompt(lang === 'ru' ? `Введите количество вопросов для теста (Макс: ${totalTests}):` : `Talabalarga beriladigan savollar sonini kiriting (Maksimal: ${totalTests}):`, currentLimit || totalTests);
+        if (input !== null) {
+            const limit = parseInt(input);
+            if (!isNaN(limit) && limit > 0) {
+                try {
+                    await updateDoc(doc(db, 'exams', examId), { limit: limit });
+                    setMyExams(prev => prev.map(e => e.id === examId ? { ...e, limit: limit } : e));
+                } catch (err) {
+                    console.error("Error updating limit:", err);
+                    alert("Cheklovni o'rnatishda xatolik!");
+                }
+            } else {
+                alert(lang === 'ru' ? "Пожалуйста, введите правильное число!" : "Iltimos, to'g'ri son kiriting!");
+            }
+        }
+    };
+
     return (
         <DashboardLayout role="teacher" user={user} onLogout={onLogout}>
             <div className="max-w-5xl mx-auto animate-[fadeInUp_0.4s_ease-out]">
@@ -497,6 +591,25 @@ const TeacherTests = ({ user, onLogout }) => {
                                     </div>
                                     
                                     <div className="flex items-center gap-2">
+                                        <button 
+                                            onClick={() => handleToggleStatus(exam.id, exam.status || 'published')}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                                                (exam.status || 'published') === 'published' 
+                                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500 hover:text-white' 
+                                                : 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500 hover:text-white'
+                                            }`}
+                                            title="Talabalarga ko'rinishini yoqish/o'chirish (Dopusk)"
+                                        >
+                                            <i className={`fa-solid ${(exam.status || 'published') === 'published' ? 'fa-eye' : 'fa-eye-slash'} mr-1`}></i> 
+                                            {(exam.status || 'published') === 'published' ? 'Ochiq' : 'Yopiq'}
+                                        </button>
+                                        <button 
+                                            onClick={() => handleSetLimit(exam.id, exam.limit, exam.data?.tests?.length || 0)}
+                                            className="px-3 py-1.5 bg-purple-500/10 text-purple-400 hover:bg-purple-500 hover:text-white rounded-lg text-xs font-bold border border-purple-500/30 transition-all"
+                                            title="Talabaga tushadigan savollar sonini belgilash"
+                                        >
+                                            <i className="fa-solid fa-filter mr-1"></i> {exam.limit ? `Limit: ${exam.limit}` : 'Cheklov'}
+                                        </button>
                                         <button 
                                             onClick={() => setSelectedExam(exam)}
                                             className="px-3 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg text-xs font-bold border border-blue-500/30 transition-all"

@@ -25,11 +25,26 @@ const QuizTaking = ({ onFinish, user }) => {
                     const docSnap = await getDoc(doc(db, "exams", examId));
                     if (docSnap.exists()) {
                         const payload = docSnap.data().data;
+                        const status = docSnap.data().status;
+                        
+                        if (status === 'hidden') {
+                            setQuizData([]);
+                            return;
+                        }
+
                         let combined = [];
                         if (payload.tests) combined = [...combined, ...payload.tests];
                         if (payload.quizzes) combined = [...combined, ...payload.quizzes];
                         if (payload.xrays) combined = [...combined, ...payload.xrays];
                         if (payload.cases) combined = [...combined, ...payload.cases.map(c => ({...c, isCase: true}))];
+                        
+                        // Apply limit if teacher has set one
+                        const limit = docSnap.data().limit;
+                        if (limit && limit > 0 && limit < combined.length) {
+                            // Shuffle and slice
+                            combined = combined.sort(() => 0.5 - Math.random()).slice(0, limit);
+                        }
+                        
                         setQuizData(combined.length > 0 ? combined : []);
                     } else {
                         setQuizData([]);
