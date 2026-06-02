@@ -7,57 +7,91 @@ import { extractTextFromFile } from '../services/aiService';
 
 const parseDocumentTests = (text) => {
     const tests = [];
-    // Matnni "\n 1. " yoki "\n1)" kabi raqamlanishlaridan kesamiz
-    const blocks = text.split(/\n\s*(?:\d+[\.\)])\s+/).filter(b => b.trim() !== "");
+    let blocks = [];
     
-    // Agar split ishlamasa (chunki fayl boshida raqam bo'lsa), birinchi elementni tozalaymiz
-    let startingIndex = 0;
-    if (blocks.length > 0 && !text.match(/^\s*\d+[\.\)]/)) {
-        // Fayl boshida sarlavha yoki boshqa yozuvlar bo'lishi mumkin, ularni tashlaymiz
-        startingIndex = 1; 
+    // First, try to split by explicit answer lines (like "Тўғри жавоб: 1234" or "Javob: B")
+    const answerRegex = /\n(?:.*(?:javob|otvet|answer|жавоб).*)/gi;
+    
+    if (text.match(answerRegex)) {
+        const parts = text.split(/(\n.*(?:javob|otvet|answer|жавоб).*)/i);
+        for (let i = 0; i < parts.length - 1; i += 2) {
+            blocks.push((parts[i] + parts[i+1]).trim());
+        }
+        if (parts[parts.length - 1].trim()) {
+            blocks.push(parts[parts.length - 1].trim());
+        }
+    } else {
+        // Fallback: Split by question numbers (e.g. "\n 1. " or "\n1)")
+        blocks = text.split(/\n\s*(?:\d+[\.\)])\s+/).filter(b => b.trim() !== "");
     }
     
-    for (let idx = startingIndex; idx < blocks.length; idx++) {
-        const block = blocks[idx];
+    for (let idx = 0; idx < blocks.length; idx++) {
+        let block = blocks[idx];
+        // Remove starting question number if present
+        block = block.replace(/^\s*\d+[\.\)]\s*/, '');
+        
         const lines = block.split('\n').map(l => l.trim()).filter(l => l !== "");
-        if (lines.length < 3) continue; // Kamida bitta savol va ikkita javob bo'lishi kerak
+        if (lines.length < 2) continue;
         
         let question = lines[0];
         let options = [];
         let correctAnswerIndex = -1;
+        let sequenceAnswerStr = null;
         
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i];
             
-            // "A) Javob", "+B) Javob", "*C) Javob", "a. Javob" larni qidiradi
+            // Check for Sequence answer: "Тўғри жавоб: 1234"
+            const seqMatch = line.match(/(?:javob|otvet|answer|жавоб)[^\d]*(\d{3,6})/i);
+            if (seqMatch) {
+                sequenceAnswerStr = seqMatch[1];
+                break;
+            }
+            
+            // Check for standard answer: "Javob: B"
+            const stdAnsMatch = line.match(/(?:javob|otvet|answer|жавоб)[^\w]*([A-Da-d])/i);
+            if (stdAnsMatch) {
+                const charCode = stdAnsMatch[1].toLowerCase().charCodeAt(0);
+                if (charCode >= 97 && charCode <= 100) correctAnswerIndex = charCode - 97;
+                break;
+            }
+            
+            // Check for standard options A, B, C, D
             const optMatch = line.match(/^([\+\*]?)\s*[a-zA-Zа-яА-Я][\.\)]\s*(.*)$/);
             if (optMatch) {
                 const isCorrect = optMatch[1] === '+' || optMatch[1] === '*';
-                const optText = optMatch[2];
-                options.push(optText);
+                options.push(optMatch[2]);
                 if (isCorrect) correctAnswerIndex = options.length - 1;
-            } else if (line.toLowerCase().startsWith('javob:') || line.toLowerCase().startsWith('otvet:') || line.toLowerCase().startsWith('answer:')) {
-                // "Javob: B" formatini o'qiydi
-                const ansStr = line.split(':')[1].trim().toLowerCase();
-                const charCode = ansStr.charCodeAt(0);
-                if (charCode >= 97 && charCode <= 100) { // a, b, c, d
-                    correctAnswerIndex = charCode - 97;
-                }
             } else {
-                // Agar hech qanday option topilmasa va bu savolning davomi bo'lsa
+                // Not an option, so it must be part of the question text
                 if (options.length === 0) {
-                    question += " " + line;
+                    question += "\n" + line;
                 }
             }
         }
         
-        // Agar to'g'ri javob topilmasa, avtomatik 0-chi javobni oladi
-        if (correctAnswerIndex === -1 && options.length > 0) {
-            correctAnswerIndex = 0;
-        }
-        
-        // Agar eng kamida 2 ta javob topilsa, testni qabul qilamiz
-        if (options.length >= 2) {
+        if (sequenceAnswerStr) {
+            // Sequence Test: Generate 4 options (1 correct, 3 distractors)
+            const distractors = new Set();
+            distractors.add(sequenceAnswerStr);
+            let attempts = 0;
+            while(distractors.size < 4 && attempts < 50) {
+                const shuf = sequenceAnswerStr.split('').sort(() => 0.5 - Math.random()).join('');
+                distractors.add(shuf);
+                attempts++;
+            }
+            const optionsArray = Array.from(distractors).sort(() => 0.5 - Math.random());
+            const correctIdx = optionsArray.indexOf(sequenceAnswerStr);
+            
+            tests.push({
+                question: question,
+                options: optionsArray,
+                answer: correctIdx,
+                topic: "Tayyor Test Baza"
+            });
+        } else if (options.length >= 2) {
+            // Standard Test
+            if (correctAnswerIndex === -1) correctAnswerIndex = 0;
             tests.push({
                 question: question,
                 options: options,
