@@ -91,13 +91,16 @@ const parseDocumentTests = (text) => {
         const ansLineMatch = line.match(/^(?:javob|otvet|answer|жавоб|тўғри жавоб)[^\wа-я]*(.*)$/i);
         if (ansLineMatch) {
             let ansContent = ansLineMatch[1].trim().replace(/[\.;]+$/, '').trim();
-            if (ansContent.length === 1 && ansContent.match(/^[A-Da-dА-Да-д]$/)) {
-                let charCode = ansContent.toLowerCase().charCodeAt(0);
-                if (ansContent.toLowerCase() === 'а') charCode = 97;
-                else if (ansContent.toLowerCase() === 'б') charCode = 98;
-                else if (ansContent.toLowerCase() === 'в') charCode = 99;
-                else if (ansContent.toLowerCase() === 'г') charCode = 100;
-                if (charCode >= 97 && charCode <= 100) ct.correctAnswerIndex = charCode - 97;
+            if (ansContent.length === 1 && ansContent.match(/^[A-Ea-eА-Еа-еСс]$/)) {
+                let idx = -1;
+                const c = ansContent.toLowerCase();
+                if (c === 'a' || c === 'а') idx = 0;
+                else if (c === 'b' || c === 'б' || c === 'в') idx = 1; // Cyrillic В looks like B
+                else if (c === 'c' || c === 'с') idx = 2; // Cyrillic С looks like C
+                else if (c === 'd' || c === 'д') idx = 3;
+                else if (c === 'e' || c === 'е') idx = 4;
+                
+                if (idx !== -1) ct.correctAnswerIndex = idx;
             } else if (ansContent.match(/^[\d\s,;]+$/) && (ansContent.includes(',') || ansContent.includes(';'))) {
                 const numbers = ansContent.match(/\d+/g);
                 if (numbers) ct.inlineCorrectNumbers.push(...numbers);
