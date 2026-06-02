@@ -7,7 +7,13 @@ import { extractTextFromFile } from '../services/aiService';
 
 const parseDocumentTests = (text) => {
     const tests = [];
-    const lines = text.split('\n').map(l => l.trim());
+    
+    // Pre-process text to break inline options (e.g. "A) Opt 1   B) Opt 2") into separate lines.
+    // We look for 2+ spaces or a tab followed by an option marker.
+    let processedText = text.replace(/(?:\t|\s{2,})([a-zA-Zа-яА-Я\d]\s*[\.\)\-\:\/\]]\s)/g, '\n$1');
+    processedText = processedText.replace(/(?:\t|\s{2,})([\+\-\*•]\s)/g, '\n$1');
+    
+    const lines = processedText.split('\n').map(l => l.trim());
     
     let ct = { question: "", options: [], correctAnswerIndex: -1, complexAnswerStr: null, inlineCorrectNumbers: [], allInlineNumbers: [] };
     let pushed = false;
@@ -102,9 +108,9 @@ const parseDocumentTests = (text) => {
             continue;
         }
         
-        const optMatch = line.match(/^([\+\*]?)\s*(?:[a-zA-Zа-яА-Я])\s*[\.\)]\s*(.*)$/);
-        const pmOptMatch = line.match(/^([\+\-])\s*(.*)$/);
-        const numOptMatch = line.match(/^([\+\*]?)\s*(\d+)\s*[\.\)]\s*(.*)$/);
+        const optMatch = line.match(/^([\+\*]?)\s*(?:[a-zA-Zа-яА-Я])\s*[\.\)\-\:\/\]]\s*(.*)$/);
+        const pmOptMatch = line.match(/^([\+\-\*•])\s*(.*)$/);
+        const numOptMatch = line.match(/^([\+\*]?)\s*(\d+)\s*[\.\)\-\:\/\]]\s*(.*)$/);
         
         let isOption = !!(optMatch || pmOptMatch || numOptMatch);
 
@@ -147,11 +153,17 @@ const parseDocumentTests = (text) => {
             } else {
                 // It IS an option. But is it a RESTART of the option sequence? (e.g. A) or 1) )
                 if (optMatch) {
-                    const letterStr = optMatch[2].toUpperCase();
-                    if (letterStr === 'A' || letterStr === 'А') isNewQuestion = true;
+                    const letterMatch = line.match(/^[^\wа-яА-Я]*([a-zA-Zа-яА-Я])/);
+                    if (letterMatch) {
+                        const letterStr = letterMatch[1].toUpperCase();
+                        if (letterStr === 'A' || letterStr === 'А') isNewQuestion = true;
+                    }
                 } else if (numOptMatch) {
-                    const num = parseInt(numOptMatch[2]);
-                    if (num === 1) isNewQuestion = true;
+                    const numMatchStart = line.match(/^[^\d]*(\d+)/);
+                    if (numMatchStart) {
+                        const num = parseInt(numMatchStart[1]);
+                        if (num === 1) isNewQuestion = true;
+                    }
                 }
             }
         }
