@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import DashboardLayout from '../components/DashboardLayout';
 import { db } from '../firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, deleteDoc, doc, updateDoc, orderBy } from 'firebase/firestore';
 import { extractTextFromFile } from '../services/aiService';
 
 const parseDocumentTests = (text) => {
@@ -74,6 +74,43 @@ const TeacherTests = ({ user, onLogout }) => {
     const [isUploading, setIsUploading] = useState(false);
     const [uploadResults, setUploadResults] = useState([]);
     const [progress, setProgress] = useState({ current: 0, total: 0 });
+    
+    // My Exams State
+    const [myExams, setMyExams] = useState([]);
+    const [isLoadingExams, setIsLoadingExams] = useState(true);
+    const [selectedExam, setSelectedExam] = useState(null);
+
+    const fetchMyExams = async () => {
+        if (!user) return;
+        setIsLoadingExams(true);
+        try {
+            const q = query(
+                collection(db, 'exams'), 
+                where("teacherId", "==", user.uid)
+                // Note: without composite index, orderBy might fail, we will sort in memory
+            );
+            const snapshot = await getDocs(q);
+            const examsData = [];
+            snapshot.forEach(docSnap => {
+                examsData.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            // Sort by createdAt descending
+            examsData.sort((a, b) => {
+                const timeA = a.createdAt?.toMillis() || 0;
+                const timeB = b.createdAt?.toMillis() || 0;
+                return timeB - timeA;
+            });
+            setMyExams(examsData);
+        } catch (error) {
+            console.error("Error fetching exams:", error);
+        } finally {
+            setIsLoadingExams(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchMyExams();
+    }, [user]);
 
     const handleBulkTestUpload = async (e) => {
         const file = e.target.files[0];
@@ -98,7 +135,6 @@ const TeacherTests = ({ user, onLogout }) => {
                     throw new Error("JSON faylida testlar topilmadi (array yoki {tests: []} kutilmoqda).");
                 }
             } else if (fileNameLower.endsWith(".docx") || fileNameLower.endsWith(".pdf")) {
-                // Word yoki PDF dan matn ajratib olish
                 const text = await extractTextFromFile(file);
                 testsArray = parseDocumentTests(text);
             } else {
@@ -106,9 +142,8 @@ const TeacherTests = ({ user, onLogout }) => {
             }
 
             const totalTests = testsArray.length;
-            if (totalTests === 0) throw new Error("Testlar ro'yxati bo'sh!");
+            if (totalTests === 0) throw new Error("Testlar ro'yxati bo'sh yoki format noto'g'ri!");
 
-            // Chunk the tests into groups of 500 to avoid Firestore 1MB document limit
             const chunkSize = 500;
             const chunks = [];
             for (let i = 0; i < totalTests; i += chunkSize) {
@@ -120,7 +155,7 @@ const TeacherTests = ({ user, onLogout }) => {
             let successCount = 0;
             for (let i = 0; i < chunks.length; i++) {
                 const chunk = chunks[i];
-                const title = `Baza: ${file.name} (Qism ${i + 1}/${chunks.length})`;
+                const title = chunks.length === 1 ? file.name : `${file.name} (Qism ${i + 1}/${chunks.length})`;
                 
                 const payload = {
                     success: true,
@@ -149,6 +184,7 @@ const TeacherTests = ({ user, onLogout }) => {
             }
 
             alert(lang === 'ru' ? `Успешно загружено ${successCount} тестов!` : `Muvaffaqiyatli ${successCount} ta test yuklandi!`);
+            fetchMyExams(); // Refresh list after upload
             
         } catch (err) {
             console.error("Bulk upload error:", err);
@@ -156,6 +192,31 @@ const TeacherTests = ({ user, onLogout }) => {
         } finally {
             setIsUploading(false);
             e.target.value = ''; // reset file input
+        }
+    };
+
+    const handleDeleteExam = async (examId, title) => {
+        if (window.confirm(lang === 'ru' ? `Вы уверены, что хотите удалить "${title}"?` : `Haqiqatan ham "${title}" nomli bazani o'chirmoqchimisiz?`)) {
+            try {
+                await deleteDoc(doc(db, 'exams', examId));
+                setMyExams(prev => prev.filter(e => e.id !== examId));
+            } catch (err) {
+                console.error("Error deleting exam:", err);
+                alert("O'chirishda xatolik yuz berdi!");
+            }
+        }
+    };
+
+    const handleEditTitle = async (examId, currentTitle) => {
+        const newTitle = window.prompt(lang === 'ru' ? 'Введите новое название:' : 'Yangi nomni kiriting:', currentTitle);
+        if (newTitle && newTitle.trim() !== "" && newTitle !== currentTitle) {
+            try {
+                await updateDoc(doc(db, 'exams', examId), { title: newTitle.trim() });
+                setMyExams(prev => prev.map(e => e.id === examId ? { ...e, title: newTitle.trim() } : e));
+            } catch (err) {
+                console.error("Error updating exam title:", err);
+                alert("Yangilashda xatolik!");
+            }
         }
     };
 
@@ -176,6 +237,7 @@ const TeacherTests = ({ user, onLogout }) => {
                     </div>
                 </div>
 
+                {/* YUKLASH BO'LIMI */}
                 <div className="bg-slate-900 rounded-2xl p-6 md:p-8 border border-slate-700 shadow-xl mb-8">
                     <h3 className="text-lg font-bold text-white mb-2">{lang === 'ru' ? 'Массовая загрузка (до 3000 тестов)' : 'Ommaviy yuklash (3000 tagacha test)'}</h3>
                     <p className="text-slate-400 text-sm mb-6">
@@ -231,7 +293,102 @@ const TeacherTests = ({ user, onLogout }) => {
                         </div>
                     )}
                 </div>
+
+                {/* MENING TESTLARIM BO'LIMI */}
+                <div className="bg-slate-900 rounded-2xl p-6 md:p-8 border border-slate-700 shadow-xl mb-8">
+                    <h3 className="text-lg font-bold text-white mb-6 border-b border-slate-800 pb-4">
+                        <i className="fa-solid fa-folder-open text-blue-500 mr-2"></i> 
+                        {lang === 'ru' ? 'Мои тесты' : 'Mening Testlarim'}
+                    </h3>
+                    
+                    {isLoadingExams ? (
+                        <div className="flex flex-col items-center py-10">
+                            <i className="fa-solid fa-circle-notch fa-spin text-3xl text-slate-500 mb-3"></i>
+                            <p className="text-slate-400 text-sm">Testlar yuklanmoqda...</p>
+                        </div>
+                    ) : myExams.length === 0 ? (
+                        <div className="text-center py-10 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                            <i className="fa-regular fa-folder-open text-4xl text-slate-600 mb-3 block"></i>
+                            <p className="text-slate-400 text-sm">Hali hech qanday test yuklanmagan.</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-4">
+                            {myExams.map((exam) => (
+                                <div key={exam.id} className="bg-slate-800 border border-slate-700 hover:border-slate-500 transition-all p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 group">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <h4 className="font-bold text-white text-base">{exam.title}</h4>
+                                            <button onClick={() => handleEditTitle(exam.id, exam.title)} className="text-slate-500 hover:text-blue-400 text-xs px-2" title="Nomini o'zgartirish">
+                                                <i className="fa-solid fa-pen"></i>
+                                            </button>
+                                        </div>
+                                        <div className="flex items-center gap-4 text-xs text-slate-400">
+                                            <span><i className="fa-solid fa-calendar-alt mr-1"></i> {exam.createdAt ? new Date(exam.createdAt.toMillis()).toLocaleDateString() : 'Yangi'}</span>
+                                            <span><i className="fa-solid fa-list-check mr-1"></i> {exam.data?.tests?.length || 0} ta savol</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-2">
+                                        <button 
+                                            onClick={() => setSelectedExam(exam)}
+                                            className="px-3 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg text-xs font-bold border border-blue-500/30 transition-all"
+                                        >
+                                            <i className="fa-solid fa-eye mr-1"></i> Ko'rish
+                                        </button>
+                                        <button 
+                                            onClick={() => {navigator.clipboard.writeText(`${window.location.origin}/test?id=${exam.id}`); alert("Havola nusxalandi!")}} 
+                                            className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white rounded-lg text-xs font-bold border border-emerald-500/30 transition-all"
+                                        >
+                                            <i className="fa-solid fa-link mr-1"></i> Link olish
+                                        </button>
+                                        <button 
+                                            onClick={() => handleDeleteExam(exam.id, exam.title)}
+                                            className="px-3 py-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg text-xs font-bold border border-rose-500/30 transition-all"
+                                        >
+                                            <i className="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
+
+            {/* Test Preview Modal */}
+            {selectedExam && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]">
+                    <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+                        <div className="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-800/50">
+                            <h3 className="font-bold text-white text-lg truncate pr-4">{selectedExam.title}</h3>
+                            <button onClick={() => setSelectedExam(null)} className="w-8 h-8 rounded-full bg-slate-700 text-slate-300 hover:bg-rose-500 hover:text-white flex items-center justify-center transition-colors">
+                                <i className="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-slate-900">
+                            {(!selectedExam.data?.tests || selectedExam.data.tests.length === 0) ? (
+                                <p className="text-slate-400 text-center py-10">Bu bazada savollar topilmadi.</p>
+                            ) : (
+                                <div className="space-y-6">
+                                    {selectedExam.data.tests.map((test, i) => (
+                                        <div key={i} className="bg-slate-800 p-5 rounded-xl border border-slate-700">
+                                            <p className="text-white font-bold mb-3">{i + 1}. {test.question}</p>
+                                            <div className="space-y-2">
+                                                {test.options.map((opt, j) => (
+                                                    <div key={j} className={`p-2 rounded-lg text-sm border ${j === test.answer ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300 font-bold' : 'bg-slate-900 border-slate-700 text-slate-400'}`}>
+                                                        {String.fromCharCode(65 + j)}) {opt}
+                                                        {j === test.answer && <i className="fa-solid fa-check float-right mt-0.5"></i>}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </DashboardLayout>
     );
 };
