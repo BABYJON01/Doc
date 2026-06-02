@@ -115,7 +115,7 @@ const parseDocumentTests = (text) => {
         let isOption = !!(optMatch || pmOptMatch || numOptMatch);
 
         let isNewQuestion = false;
-        const isQuestionMarker = line.match(/^\s*(?:\d+[\.\)]|#)\s*/);
+        const isQuestionMarker = line.match(/^\s*(?:\d+\s*[\.\)\-\:\/\]]|#)\s*/);
         
         if (isQuestionMarker) {
             if (ct.options.length > 0) {
@@ -124,7 +124,7 @@ const parseDocumentTests = (text) => {
                 if (line.match(/^\s*#\s*/)) {
                     isNewQuestion = true;
                 } else {
-                    const numMatch = line.match(/^\s*(\d+)[\.\)]/);
+                    const numMatch = line.match(/^\s*(\d+)\s*[\.\)\-\:\/\]]/);
                     if (numMatch) {
                         const num = parseInt(numMatch[1]);
                         const expectedNextOption = parseInt(ct.allInlineNumbers[ct.allInlineNumbers.length - 1]) + 1;
@@ -134,7 +134,7 @@ const parseDocumentTests = (text) => {
                             let isNextLineOption1 = false;
                             for (let j = i + 1; j < Math.min(i + 4, lines.length); j++) {
                                 if (lines[j].trim() === "") continue;
-                                if (lines[j].match(/^([\+\*]?)\s*1[\.\)]\s*/)) {
+                                if (lines[j].match(/^([\+\*]?)\s*1\s*[\.\)\-\:\/\]]\s*/)) {
                                     isNextLineOption1 = true;
                                 }
                                 break;
