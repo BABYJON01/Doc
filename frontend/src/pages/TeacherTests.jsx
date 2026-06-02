@@ -30,8 +30,8 @@ const parseDocumentTests = (text) => {
     
     for (let idx = 0; idx < blocks.length; idx++) {
         let block = blocks[idx];
-        // Remove starting question number if present
-        block = block.replace(/^\s*\d+[\.\)]\s*/, '');
+        // Remove starting question number or # if present
+        block = block.replace(/^\s*(?:\d+[\.\)]|#)\s*/, '');
         
         const lines = block.split('\n').map(l => l.trim()).filter(l => l !== "");
         if (lines.length < 2) continue;
@@ -69,12 +69,19 @@ const parseDocumentTests = (text) => {
             // Check for standard options A, B, C, D
             const optMatch = line.match(/^([\+\*]?)\s*[a-zA-Zа-яА-Я][\.\)]\s*(.*)$/);
             
+            // Check for simple +/- options e.g. "+фиксацию..." or "-фиксацию..."
+            const pmOptMatch = line.match(/^([\+\-])\s*(.*)$/);
+            
             // Check for inline numbered options (Multiple Select) e.g. "1. Teriosti emfizemasida *" or "*3. Jaroxat"
             const numOptMatch = line.match(/^([\+\*]?)\s*(\d+)[\.\)]\s*(.*)$/);
             
             if (optMatch) {
                 const isCorrect = optMatch[1] === '+' || optMatch[1] === '*';
                 options.push(optMatch[2]);
+                if (isCorrect) correctAnswerIndex = options.length - 1;
+            } else if (pmOptMatch) {
+                const isCorrect = pmOptMatch[1] === '+';
+                options.push(pmOptMatch[2]);
                 if (isCorrect) correctAnswerIndex = options.length - 1;
             } else if (numOptMatch) {
                 // It's a numbered option, append to question text so student can read it
