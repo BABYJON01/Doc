@@ -443,11 +443,21 @@ const TeacherTests = ({ user, onLogout }) => {
         }
     };
 
-    const handleToggleStatus = async (examId, currentStatus) => {
+    const handleToggleStatus = async (examId, currentStatus, examTitle) => {
         const newStatus = currentStatus === 'published' ? 'hidden' : 'published';
         try {
             await updateDoc(doc(db, 'exams', examId), { status: newStatus });
             setMyExams(prev => prev.map(e => e.id === examId ? { ...e, status: newStatus } : e));
+            
+            if (newStatus === 'published') {
+                await addDoc(collection(db, 'notifications'), {
+                    title: lang === 'ru' ? "Новый тест открыт!" : "Yangi test ochildi!",
+                    desc: lang === 'ru' ? `Тест "${examTitle}" теперь доступен для студентов.` : `O'qituvchi "${examTitle}" testiga ruxsat berdi.`,
+                    type: 'upload',
+                    targetRole: 'student',
+                    createdAt: serverTimestamp()
+                });
+            }
         } catch (err) {
             console.error("Error updating exam status:", err);
             alert("Holatni o'zgartirishda xatolik yuz berdi!");
@@ -592,7 +602,7 @@ const TeacherTests = ({ user, onLogout }) => {
                                     
                                     <div className="flex items-center gap-2">
                                         <button 
-                                            onClick={() => handleToggleStatus(exam.id, exam.status || 'published')}
+                                            onClick={() => handleToggleStatus(exam.id, exam.status || 'published', exam.title)}
                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
                                                 (exam.status || 'published') === 'published' 
                                                 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500 hover:text-white' 
