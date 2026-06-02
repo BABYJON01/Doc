@@ -58,7 +58,7 @@ const AIChatbot = () => {
                     <div className="bg-gradient-to-r from-blue-900 to-indigo-900 p-4 border-b border-blue-500/30 flex justify-between items-center">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-400/50">
-                                <i className="fa-solid fa-robot text-blue-400 text-lg"></i>
+                                <i className="fa-solid fa-comment-medical text-blue-400 text-lg"></i>
                             </div>
                             <div>
                                 <h3 className="text-white font-bold text-sm">Med-Zukkoo AI</h3>
@@ -124,7 +124,7 @@ const AIChatbot = () => {
                 onClick={() => setIsOpen(!isOpen)}
                 className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-[0_0_20px_rgba(59,130,246,0.4)] z-50 ${isOpen ? 'bg-slate-800 border border-slate-700 text-slate-400 hover:text-white rotate-90 scale-90' : 'bg-blue-600 hover:bg-blue-500 text-white hover:scale-110 hover:-translate-y-1'}`}
             >
-                <i className={`fa-solid ${isOpen ? 'fa-xmark' : 'fa-robot'} text-2xl`}></i>
+                <i className={`fa-solid ${isOpen ? 'fa-xmark' : 'fa-comment-medical'} text-2xl`}></i>
                 {!isOpen && (
                     <span className="absolute -top-1 -right-1 flex h-4 w-4">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
