@@ -92,10 +92,16 @@ const parseDocumentTests = (text) => {
         } else if (options.length >= 2) {
             // Standard Test
             if (correctAnswerIndex === -1) correctAnswerIndex = 0;
+            
+            // Randomize options so correct answer is not always A
+            const correctOptionText = options[correctAnswerIndex];
+            const shuffledOptions = [...options].sort(() => 0.5 - Math.random());
+            const newCorrectIndex = shuffledOptions.indexOf(correctOptionText);
+            
             tests.push({
                 question: question,
-                options: options,
-                answer: correctAnswerIndex,
+                options: shuffledOptions,
+                answer: newCorrectIndex,
                 topic: "Tayyor Test Baza"
             });
         }
