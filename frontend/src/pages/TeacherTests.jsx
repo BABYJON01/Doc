@@ -60,6 +60,12 @@ const parseDocumentTests = (text) => {
                     else if (ansContent.toLowerCase() === 'в') charCode = 99;
                     else if (ansContent.toLowerCase() === 'г') charCode = 100;
                     if (charCode >= 97 && charCode <= 100) correctAnswerIndex = charCode - 97;
+                } else if (ansContent.match(/^[\d\s,;]+$/) && (ansContent.includes(',') || ansContent.includes(';'))) {
+                    // Comma or semicolon separated numbers (e.g. "тўғри жавоб: 2,3" or "2;3")
+                    const numbers = ansContent.match(/\d+/g);
+                    if (numbers) {
+                        inlineCorrectNumbers.push(...numbers);
+                    }
                 } else {
                     complexAnswerStr = ansContent;
                 }
@@ -90,7 +96,8 @@ const parseDocumentTests = (text) => {
                 const optNum = numOptMatch[2];
                 allInlineNumbers.push(optNum);
                 
-                if (numOptMatch[1] === '*' || numOptMatch[1] === '+' || line.includes('*') || line.includes('+')) {
+                if (numOptMatch[1] === '*' || numOptMatch[1] === '+' || line.includes('*') || (line.includes('+') && !line.includes(',+'))) {
+                    // Be careful not to double count if they have both `,` and `+` at the end
                     inlineCorrectNumbers.push(optNum);
                 }
             } else {
@@ -102,14 +109,16 @@ const parseDocumentTests = (text) => {
         
         if (inlineCorrectNumbers.length > 0) {
             // Multiple Select Test: generate combination options
-            const correctCombo = inlineCorrectNumbers.sort().join(", ");
+            // Deduplicate and sort numbers
+            const uniqueCorrectNumbers = [...new Set(inlineCorrectNumbers)].sort((a,b) => parseInt(a)-parseInt(b));
+            const correctCombo = uniqueCorrectNumbers.join(", ");
             const distractors = new Set();
             distractors.add(correctCombo);
             
             let attempts = 0;
             while(distractors.size < 4 && attempts < 100) {
-                const shuffledNumbers = [...allInlineNumbers].sort(() => 0.5 - Math.random());
-                const randomCombo = shuffledNumbers.slice(0, inlineCorrectNumbers.length).sort().join(", ");
+                const shuffledNumbers = [...new Set(allInlineNumbers)].sort(() => 0.5 - Math.random());
+                const randomCombo = shuffledNumbers.slice(0, uniqueCorrectNumbers.length).sort((a,b) => parseInt(a)-parseInt(b)).join(", ");
                 distractors.add(randomCombo);
                 attempts++;
             }
