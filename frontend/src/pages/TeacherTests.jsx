@@ -8,10 +8,13 @@ import { extractTextFromFile } from '../services/aiService';
 const parseDocumentTests = (text) => {
     const tests = [];
     
-    // Pre-process text to break inline options (e.g. "A) Opt 1   B) Opt 2") into separate lines.
-    // We look for 2+ spaces or a tab followed by an option marker.
-    let processedText = text.replace(/(?:\t|\s{2,})([a-zA-Zа-яА-Я\d]\s*[\.\)\-\:\/\]]\s)/g, '\n$1');
-    processedText = processedText.replace(/(?:\t|\s{2,})([\+\-\*•]\s)/g, '\n$1');
+    // 1. Aggressively break options stuck together (PDF-to-Word artifacts like "deficiency:A. Hyper" or "flexionB. Knee")
+    // Looks for: (lowercase/number/punctuation) + (optional space) + (A-E or 1-9 marker) + (optional space) + (Uppercase or Number)
+    let processedText = text.replace(/([a-zа-я0-9\?\!\%\:\;\,\.\>\]\)])\s*([A-Ea-eА-Еа-еСс]\s*[\.\)]\s*[A-ZА-Я0-9])/g, '$1\n$2');
+    processedText = processedText.replace(/([a-zа-я0-9\?\!\%\:\;\,\.\>\]\)])\s*([1-9]\s*[\.\)]\s*[A-ZА-Я0-9])/g, '$1\n$2');
+    
+    // 2. Also keep the whitespace-based breaker for options separated by tabs or 2+ spaces
+    processedText = processedText.replace(/(?:\t|\s{2,})([a-zA-Zа-яА-Я\d]\s*[\.\)\-\:\/\]]\s)/g, '\n$1');
     
     const lines = processedText.split('\n').map(l => l.trim());
     
