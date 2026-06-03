@@ -136,7 +136,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                 <div 
                     className="absolute inset-0 z-0 pointer-events-none transition-all duration-500"
                     style={{ 
-                        backgroundImage: "url('/assets/student-white-bg.jpg')", 
+                        backgroundImage: "url('/assets/Back.jpg')", 
                         backgroundSize: 'cover', 
                         backgroundPosition: 'top center',
                         backgroundRepeat: 'no-repeat',
