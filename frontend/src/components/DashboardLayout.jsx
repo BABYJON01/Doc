@@ -136,17 +136,17 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                 <div 
                     className="absolute inset-0 z-0 pointer-events-none transition-all duration-500"
                     style={{ 
-                        backgroundImage: "url('https://images.unsplash.com/photo-1576091160399-11cbbe989951?q=80&w=2000&auto=format&fit=crop')", 
+                        backgroundImage: "url('/assets/tma_bg.jpg')", 
                         backgroundSize: 'cover', 
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat',
-                        opacity: theme === 'dark' ? 0.3 : 1
+                        opacity: theme === 'dark' ? 0.2 : 0.4
                     }}
                 >
                     {/* Dark mode overlay to ensure readability */}
                     {theme === 'dark' && <div className="absolute inset-0 bg-slate-950/80"></div>}
                     {/* Light mode gradient overlay for a beautiful fade to white at the bottom */}
-                    {theme !== 'dark' && <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white/90"></div>}
+                    {theme !== 'dark' && <div className="absolute inset-0 bg-gradient-to-b from-slate-50/10 via-slate-50/60 to-slate-50"></div>}
                 </div>
             ) : (
                 /* Decorative Background Orbs for Light Mode (Admin/Teacher) */
