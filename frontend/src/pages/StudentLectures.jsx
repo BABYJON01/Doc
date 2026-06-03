@@ -3,25 +3,25 @@ import { useApp } from '../context/AppContext';
 import DashboardLayout from '../components/DashboardLayout';
 
 const lecturesUz = [
-    { id: 1, title: "Tayanch-harakat apparati sinishlari, Transport immobilizatsiya, Gips texnikasi", videoId: "bOzeL4r9BGE" },
-    { id: 2, title: "Ko'krak qafasi va yelka kamari shikastlanishlari. Yelka suyagi chiqishlari", videoId: "bOzeL4r9BGE" },
-    { id: 3, title: "Chanoq va umurtqa pog‘onasi shikastlanishlari. Shkolnikov anesteziyasi", videoId: "bOzeL4r9BGE" },
-    { id: 4, title: "Politravma va shok bilan kechuvchi jarohatlar. Reanimatsion yordam", videoId: "bOzeL4r9BGE" },
-    { id: 5, title: "Suyak va bo'g'im yiringli xastaliklari (Osteomiyelit)", videoId: "bOzeL4r9BGE" },
-    { id: 6, title: "Kuyish kasalligi va sovuq urishi. Klinik yordam tamoyillari", videoId: "bOzeL4r9BGE" },
-    { id: 7, title: "Bosh miya yopiq va ochiq jarohatlari", videoId: "bOzeL4r9BGE" },
-    { id: 8, title: "Qon ketish turlari va qon to'xtatish (Jgut qo'yish) usullari", videoId: "bOzeL4r9BGE" }
+    { id: 1, title: "Tayanch-harakat apparati sinishlari, Transport immobilizatsiya, Gips texnikasi", videoId: "EuCYMa1JwHw" },
+    { id: 2, title: "Ko'krak qafasi va yelka kamari shikastlanishlari. Yelka suyagi chiqishlari", videoId: "9mtKZlf6O9k" },
+    { id: 3, title: "Chanoq va umurtqa pog‘onasi shikastlanishlari. Shkolnikov anesteziyasi", videoId: "ERUvPf2I3Jo" },
+    { id: 4, title: "Politravma va shok bilan kechuvchi jarohatlar. Reanimatsion yordam", videoId: "asG7joCxBG8" },
+    { id: 5, title: "Suyak va bo'g'im yiringli xastaliklari (Osteomiyelit)", videoId: "x4AEKDCGHpA" },
+    { id: 6, title: "Kuyish kasalligi va sovuq urishi. Klinik yordam tamoyillari", videoId: "D1O9z6WJ1iQ" },
+    { id: 7, title: "Bosh miya yopiq va ochiq jarohatlari", videoId: "Loc2KPwul9U" },
+    { id: 8, title: "Qon ketish turlari va qon to'xtatish (Jgut qo'yish) usullari", videoId: "EmmSJxAWVKM" }
 ];
 
 const lecturesRu = [
-    { id: 1, title: "Переломы опорно-двигательного аппарата, иммобилизация, гипсовая техника", videoId: "bOzeL4r9BGE" },
-    { id: 2, title: "Травмы грудной клетки. Вывихи плеча", videoId: "bOzeL4r9BGE" },
-    { id: 3, title: "Травмы таза и позвоночника. Анестезия по Школьникову", videoId: "bOzeL4r9BGE" },
-    { id: 4, title: "Политравма и травмы с шоком. Реанимация", videoId: "bOzeL4r9BGE" },
-    { id: 5, title: "Гнойные заболевания костей и суставов (Остеомиелит)", videoId: "bOzeL4r9BGE" },
-    { id: 6, title: "Ожоговая болезнь и обморожение. Клиническая помощь", videoId: "bOzeL4r9BGE" },
-    { id: 7, title: "Закрытые и открытые травмы головного мозга", videoId: "bOzeL4r9BGE" },
-    { id: 8, title: "Виды кровотечений и методы остановки (наложение жгута)", videoId: "bOzeL4r9BGE" }
+    { id: 1, title: "Переломы опорно-двигательного аппарата, иммобилизация, гипсовая техника", videoId: "EuCYMa1JwHw" },
+    { id: 2, title: "Травмы грудной клетки. Вывихи плеча", videoId: "9mtKZlf6O9k" },
+    { id: 3, title: "Травмы таза и позвоночника. Анестезия по Школьникову", videoId: "ERUvPf2I3Jo" },
+    { id: 4, title: "Политравма и травмы с шоком. Реанимация", videoId: "asG7joCxBG8" },
+    { id: 5, title: "Гнойные заболевания костей и суставов (Остеомиелит)", videoId: "0NvjPSST83I" },
+    { id: 6, title: "Ожоговая болезнь и обморожение. Клиническая помощь", videoId: "D1O9z6WJ1iQ" },
+    { id: 7, title: "Закрытые и открытые травмы головного мозга", videoId: "Loc2KPwul9U" },
+    { id: 8, title: "Виды кровотечений и методы остановки (наложение жгута)", videoId: "EmmSJxAWVKM" }
 ];
 
 const StudentLectures = ({ user, onLogout }) => {
