@@ -134,7 +134,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
             {/* Role-based Background */}
             {role === 'student' ? (
                 <div 
-                    className="absolute inset-0 z-0 pointer-events-none transition-all duration-500"
+                    className="absolute inset-0 top-16 z-0 pointer-events-none transition-all duration-500"
                     style={{ 
                         backgroundImage: "url('/assets/BAck.png')", 
                         backgroundSize: 'cover', 
