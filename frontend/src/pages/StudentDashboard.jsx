@@ -330,29 +330,7 @@ const StudentDashboard = ({ user, onLogout }) => {
             </div>
           </div>
 
-          {/* ── Clinical Training ───────────────────────── */}
-          <h2 className="text-xl font-bold text-white mt-6 flex items-center gap-2">
-            <i className="fa-solid fa-stethoscope text-emerald-500"></i>
-            {t.clinicalTitle}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button
-              onClick={() => window.location.href = '/app'}
-              className="bg-slate-800 p-5 rounded-2xl border border-slate-700 hover:border-indigo-500 hover:shadow-[0_0_15px_rgba(99,102,241,0.15)] transition-all text-left flex flex-col group"
-            >
-              <i className="fa-solid fa-network-wired text-2xl text-indigo-400 mb-3 group-hover:scale-110 transition-transform origin-left"></i>
-              <span className="font-bold text-lg text-white mb-1">{t.duelMode}</span>
-              <span className="text-slate-400 text-sm">{t.duelDesc}</span>
-            </button>
-            <button
-              onClick={() => window.location.href = '/test'}
-              className="bg-slate-800 p-5 rounded-2xl border border-slate-700 hover:border-emerald-500 hover:shadow-[0_0_15px_rgba(16,185,129,0.15)] transition-all text-left flex flex-col group"
-            >
-              <i className="fa-solid fa-person-falling-burst text-2xl text-emerald-400 mb-3 group-hover:scale-110 transition-transform origin-left"></i>
-              <span className="font-bold text-lg text-white mb-1">{t.newCases}</span>
-              <span className="text-slate-400 text-sm">{t.newCasesDesc}</span>
-            </button>
-          </div>
+
         </div>
 
         {/* ── RIGHT COLUMN ──────────────────────────────── */}
@@ -437,36 +415,7 @@ const StudentDashboard = ({ user, onLogout }) => {
             </div>
           )}
 
-          {/* ── AI Flashcards (Travmatologiya) ─────────── */}
-          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-xl">
-            <h3 className="font-bold text-white mb-4 border-b border-slate-700 pb-3 flex justify-between items-center">
-              <span>
-                <i className="fa-solid fa-layer-group text-rose-400 mr-2"></i>
-                {t.flashcardsTitle}
-              </span>
-              <span className="bg-rose-500/20 text-rose-400 text-xs px-2 py-1 rounded-full border border-rose-500/30">
-                {t.flashcardsNew}
-              </span>
-            </h3>
-            <div className="bg-slate-900 border border-slate-600 rounded-xl p-6 text-center cursor-pointer hover:border-rose-500 hover:shadow-[0_0_20px_rgba(244,63,94,0.2)] transition-all relative overflow-hidden group">
-              {/* Card count badge */}
-              <div className="absolute top-0 right-0 bg-rose-600 text-[10px] font-bold px-3 py-1 rounded-bl-xl">
-                {t.flashcardsCount}
-              </div>
-              {/* Topic icon */}
-              <div className="w-14 h-14 bg-rose-600/20 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-rose-600/40 transition-colors">
-                <i className="fa-solid fa-bone text-3xl text-rose-400"></i>
-              </div>
-              <h4 className="text-lg font-bold text-slate-100 mb-2">{t.flashcardsTopicTitle}</h4>
-              <p className="text-xs text-slate-400 mb-5 line-clamp-2 leading-relaxed">{t.flashcardsTopicDesc}</p>
-              <button
-                onClick={() => window.location.href = '/test'}
-                className="bg-rose-600 hover:bg-rose-500 text-white text-sm font-bold py-2.5 px-8 rounded-full transition-all hover:scale-105 active:scale-95 shadow-lg shadow-rose-900/40"
-              >
-                {t.flashcardsStart}
-              </button>
-            </div>
-          </div>
+
 
           {/* ── Achievements ────────────────────────────── */}
           <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-lg">
