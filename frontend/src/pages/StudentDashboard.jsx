@@ -417,43 +417,7 @@ const StudentDashboard = ({ user, onLogout }) => {
 
 
 
-          {/* ── Achievements ────────────────────────────── */}
-          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-lg">
-            <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-              <i className="fa-solid fa-medal text-yellow-400"></i>
-              {t.achievementsTitle}
-            </h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-slate-900 rounded-xl border border-slate-700 hover:border-yellow-500/50 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center group-hover:bg-yellow-500/20 transition-colors">
-                    <i className="fa-solid fa-shield-halved text-xl text-yellow-500"></i>
-                  </div>
-                  <div>
-                    <span className="text-sm font-bold text-slate-200 block">{t.achievement1}</span>
-                    <span className="text-[10px] text-slate-500">
-                      {lang === 'uz' ? 'Travma tashxisida 90%+ natija' : lang === 'ru' ? 'Результат 90%+ по диагностике травм' : '90%+ score in trauma diagnostics'}
-                    </span>
-                  </div>
-                </div>
-                <span className="text-xs font-black text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded-full">+500 XP</span>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-slate-900 rounded-xl border border-slate-700 hover:border-rose-500/50 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center group-hover:bg-rose-500/20 transition-colors">
-                    <i className="fa-solid fa-fire text-xl text-rose-500"></i>
-                  </div>
-                  <div>
-                    <span className="text-sm font-bold text-slate-200 block">{t.achievement2}</span>
-                    <span className="text-[10px] text-slate-500">
-                      {lang === 'uz' ? 'Har kuni platformada faol' : lang === 'ru' ? 'Активен каждый день на платформе' : 'Active on platform every day'}
-                    </span>
-                  </div>
-                </div>
-                <span className="text-xs font-black text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded-full">+1000 XP</span>
-              </div>
-            </div>
-          </div>
+
 
         {/* end right column */}
           </div>
