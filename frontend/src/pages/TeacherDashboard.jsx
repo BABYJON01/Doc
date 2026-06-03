@@ -290,26 +290,26 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
 
 
      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 max-w-7xl mx-auto">
-         <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
+         <div className="bg-slate-800/80 backdrop-blur-xl p-6 rounded-xl border border-slate-700/50 shadow-lg">
             <div className="text-slate-400 text-sm font-bold uppercase mb-1">{t.tcStatsCourses}</div>
             <div className="text-3xl font-black text-white">12</div>
          </div>
-         <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
+         <div className="bg-slate-800/80 backdrop-blur-xl p-6 rounded-xl border border-slate-700/50 shadow-lg">
             <div className="text-slate-400 text-sm font-bold uppercase mb-1">{t.tcStatsStudents}</div>
             <div className="text-3xl font-black text-blue-400">1,240</div>
          </div>
-         <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
+         <div className="bg-slate-800/80 backdrop-blur-xl p-6 rounded-xl border border-slate-700/50 shadow-lg">
             <div className="text-slate-400 text-sm font-bold uppercase mb-1">{t.tcStatsCases}</div>
             <div className="text-3xl font-black text-indigo-400">45</div>
          </div>
-         <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
+         <div className="bg-slate-800/80 backdrop-blur-xl p-6 rounded-xl border border-slate-700/50 shadow-lg">
             <div className="text-slate-400 text-sm font-bold uppercase mb-1">{t.tcStatsMastery}</div>
             <div className="text-3xl font-black text-emerald-400">82%</div>
          </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
-         <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+         <div className="bg-slate-800/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 shadow-lg">
             <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-3">{t.tcSectionCreate}</h3>
             <div className="space-y-4">
                 {/* Topic Selection UI */}
@@ -487,7 +487,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
             </div>
          </div>
 
-         <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 overflow-y-auto max-h-[90vh] custom-scrollbar">
+         <div className="bg-slate-800/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 shadow-lg overflow-y-auto max-h-[90vh] custom-scrollbar">
             <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-3">{t.tcSectionStatsTitle}</h3>
 
             {/* === Ko'p Word/PDF Yuklash === */}

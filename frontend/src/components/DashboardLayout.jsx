@@ -42,8 +42,8 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
     }, [user, role]);
     
     // Derived styles based on theme
-    const isDarkUI = role === 'student' || theme === 'dark';
-    const bgClass = theme === 'dark' ? 'bg-slate-950 text-slate-100' : (role === 'student' ? 'bg-white text-slate-800' : 'bg-slate-50 text-slate-800');
+    const isDarkUI = role === 'student' || role === 'teacher' || theme === 'dark';
+    const bgClass = theme === 'dark' ? 'bg-slate-950 text-slate-100' : ((role === 'student' || role === 'teacher') ? 'bg-[#0f172a] text-slate-200' : 'bg-slate-50 text-slate-800');
     const sidebarBg = isDarkUI ? 'bg-[#0f172a]/50 backdrop-blur-2xl border-r border-slate-800/50 text-slate-200' : 'bg-white/60 backdrop-blur-2xl border-r border-slate-200/50 shadow-sm text-slate-800';
     const headerBg = isDarkUI ? 'bg-[#0f172a]/50 border-b border-slate-800/50 text-slate-200 backdrop-blur-2xl' : 'bg-white/60 border-b border-slate-200/50 shadow-sm text-slate-800 backdrop-blur-2xl';
     
@@ -157,10 +157,8 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                         opacity: theme === 'dark' ? 0.3 : 0.8
                     }}
                 >
-                    {/* Dark mode overlay to ensure readability */}
-                    {theme === 'dark' && <div className="absolute inset-0 bg-slate-950/80"></div>}
-                    {/* Light mode gradient overlay for a beautiful fade to white at the bottom */}
-                    {theme !== 'dark' && <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white/90"></div>}
+                    {/* Dark overlay for teacher dashboard since it uses dark glassmorphism now */}
+                    <div className="absolute inset-0 bg-slate-950/60"></div>
                 </div>
             )}
             
