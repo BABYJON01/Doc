@@ -243,7 +243,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                       <i className="fa-solid fa-layer-group"></i>
                   </div>
                   <div>
-                      <h4 className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{{ uz: 'Yechilgan Testlar', ru: 'Завершенные тесты', en: 'Tests Completed' }[lang] || 'Yechilgan Testlar'}</h4>
+                      <h4 className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{{ uz: 'Yechilgan Testlar', ru: 'Завершенные тесты', en: 'Tests Completed' }[lang] || 'Yechilgan Testlar'}</h4>
                       <p className={`text-xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{stats.totalTests}</p>
                   </div>
               </div>
@@ -253,7 +253,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                       <i className="fa-solid fa-fire"></i>
                   </div>
                   <div>
-                      <h4 className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{{ uz: 'Jami tajriba (XP)', ru: 'Общий опыт (XP)', en: 'Total Experience (XP)' }[lang] || 'Jami tajriba (XP)'}</h4>
+                      <h4 className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{{ uz: 'Jami tajriba (XP)', ru: 'Общий опыт (XP)', en: 'Total Experience (XP)' }[lang] || 'Jami tajriba (XP)'}</h4>
                       <p className="text-xl font-black text-emerald-500">{stats.totalXP.toLocaleString()}</p>
                   </div>
               </div>
@@ -314,19 +314,18 @@ const StudentDashboard = ({ user, onLogout }) => {
             )}
           </div>
 
-          {/* ── Methodology Banner ──────────────────────── */}
           <div
-            className="bg-gradient-to-r from-blue-900/40 to-indigo-900/40 rounded-2xl p-6 border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.1)] mt-6 flex justify-between items-center group cursor-pointer hover:border-blue-400 transition-all"
+            className={`rounded-2xl p-6 border shadow-[0_0_15px_rgba(59,130,246,0.1)] mt-6 flex justify-between items-center group cursor-pointer transition-all ${isDark ? 'bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border-blue-500/30 hover:border-blue-400' : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:border-blue-400'}`}
             onClick={() => window.location.href = '/methodology'}
           >
             <div>
-              <h3 className="text-xl font-bold text-white mb-1 flex items-center gap-2">
-                <i className="fa-solid fa-bone text-blue-400 group-hover:animate-bounce"></i>
+              <h3 className={`text-xl font-bold mb-1 flex items-center gap-2 ${isDark ? 'text-white' : 'text-blue-900'}`}>
+                <i className={`fa-solid fa-bone group-hover:animate-bounce ${isDark ? 'text-blue-400' : 'text-blue-600'}`}></i>
                 {t.methodologyTitle}
               </h3>
-              <p className="text-sm text-blue-200/70">{t.methodologyDesc}</p>
+              <p className={`text-sm ${isDark ? 'text-blue-200/70' : 'text-blue-800/80'}`}>{t.methodologyDesc}</p>
             </div>
-            <div className="w-12 h-12 min-w-[3rem] rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+            <div className={`w-12 h-12 min-w-[3rem] rounded-full flex items-center justify-center transition-colors ${isDark ? 'bg-blue-500/20 text-blue-400 group-hover:bg-blue-500 group-hover:text-white' : 'bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white'}`}>
               <i className="fa-solid fa-arrow-right text-xl -rotate-45 group-hover:rotate-0 transition-transform"></i>
             </div>
           </div>
@@ -349,11 +348,11 @@ const StudentDashboard = ({ user, onLogout }) => {
                   <i className="fa-solid fa-tower-broadcast text-emerald-500 animate-pulse text-sm"></i>
                   {t.liveQuizTitle}
                 </h3>
-                <div className={`text-[10px] font-bold uppercase tracking-widest ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Med-Zukkoo Live</div>
+                <div className={`text-[10px] font-bold uppercase tracking-widest ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>Med-Zukkoo Live</div>
               </div>
             </div>
             <div className="p-5">
-              <p className={`text-xs mb-4 text-center ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{t.liveQuizDesc}</p>
+              <p className={`text-xs mb-4 text-center ${isDark ? 'text-slate-400' : 'text-slate-700 font-medium'}`}>{t.liveQuizDesc}</p>
               <div
                 className="flex rounded-xl overflow-hidden mb-2 shadow-inner border transition-all"
                 style={{
@@ -368,8 +367,8 @@ const StudentDashboard = ({ user, onLogout }) => {
                   value={pinInput}
                   onChange={(e) => setPinInput(e.target.value.replace(new RegExp('[^0-9]', 'g'), '').slice(0, 6))}
                   placeholder={t.liveQuizPinPlaceholder}
-                  className="flex-1 bg-transparent px-4 py-3 text-center text-2xl font-black tracking-[0.3em] outline-none w-full"
-                  style={{ color: pinInput.length === 6 ? '#10b981' : (isDark ? '#94a3b8' : '#64748b') }}
+                  className="flex-1 bg-transparent px-4 py-3 text-center text-2xl font-black tracking-[0.3em] outline-none w-full placeholder-slate-400 dark:placeholder-slate-500"
+                  style={{ color: pinInput.length === 6 ? '#10b981' : (isDark ? '#94a3b8' : '#334155') }}
                   onKeyDown={(e) => e.key === 'Enter' && pinInput.length === 6 && handleJoinLiveQuiz()}
                 />
               </div>
