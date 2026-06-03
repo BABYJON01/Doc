@@ -5,6 +5,7 @@ import StudentDashboard from './pages/StudentDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
 import TeacherLectures from './pages/TeacherLectures';
 import TeacherTests from './pages/TeacherTests';
+import TeacherStudents from './pages/TeacherStudents';
 import UserProfile from './pages/UserProfile';
 import AdminDashboard from './pages/AdminDashboard';
 import QuizTaking from './pages/QuizTaking';
@@ -265,6 +266,7 @@ const App = () => {
                         <Route path="/teacher" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                         <Route path="/teacher/lectures" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherLectures user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                         <Route path="/teacher/tests" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherTests user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
+                        <Route path="/teacher/students" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherStudents user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                         <Route path="/teacher/profile" element={((role === 'admin' || role === 'teacher') && user) ? <UserProfile role="teacher" user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                         <Route path="/student/profile" element={user ? <UserProfile role="student" user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                         <Route path="/student/*" element={user ? <StudentDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />

@@ -27,6 +27,7 @@ const medicalTopicsRu = [
 const TeacherLectures = ({ user, onLogout }) => {
     const { t, lang, theme } = useApp();
     const topics = lang === 'ru' ? medicalTopicsRu : medicalTopicsUz;
+    const isDark = true; // Always dark to match dashboard background
 
     const handleTopicClick = (topic) => {
         alert(lang === 'ru' ? `Раздел "${topic}" пока находится в разработке.` : `"${topic}" bo'limi ustida ishlanmoqda.`);
@@ -55,8 +56,8 @@ const TeacherLectures = ({ user, onLogout }) => {
                             key={index} 
                             onClick={() => handleTopicClick(topic)}
                             className={`p-5 rounded-2xl border transition-all cursor-pointer group shadow-lg ${
-                                theme === 'dark' 
-                                    ? 'bg-slate-900 border-slate-700 hover:border-blue-500 hover:bg-slate-800' 
+                                isDark 
+                                    ? 'bg-slate-900/80 backdrop-blur-xl border-slate-700/50 hover:border-blue-500/50 hover:shadow-blue-500/10' 
                                     : 'bg-white border-slate-200 hover:border-blue-500 hover:shadow-blue-500/20'
                             }`}
                         >
@@ -65,7 +66,7 @@ const TeacherLectures = ({ user, onLogout }) => {
                                     {index + 1}
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className={`font-bold text-sm leading-snug mb-3 transition-colors ${theme === 'dark' ? 'text-slate-200 group-hover:text-white' : 'text-slate-800 group-hover:text-blue-600'}`}>
+                                    <h3 className={`font-bold text-sm leading-snug mb-3 transition-colors ${isDark ? 'text-slate-200 group-hover:text-white' : 'text-slate-800 group-hover:text-blue-600'}`}>
                                         {topic}
                                     </h3>
                                     <div className="flex gap-2">
