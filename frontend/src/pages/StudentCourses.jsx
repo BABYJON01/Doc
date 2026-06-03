@@ -142,7 +142,7 @@ const StudentCourses = ({ user }) => {
             const xrayCount = exam.data?.xrays?.length || 0;
             const diff = getDifficulty(testCount);
             const estMin = Math.round((testCount * 1.2 + caseCount * 2 + xrayCount * 1.5));
-            const category = CATEGORIES[lang]?.[idx % CATEGORIES[lang].length] ?? 'Meditsina';
+            const category = lang === 'ru' ? 'БАЗА ТЕСТОВ' : 'TEST BAZASI';
 
             return (
               <div

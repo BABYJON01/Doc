@@ -153,6 +153,27 @@ const AdminDashboard = ({ user, onLogout }) => {
         }
     };
 
+    const handleClearAllTests = async () => {
+        const password = window.prompt("DIQQAT! Bu butun tizimdagi BARCHA TESTLARNI o'chirib yuboradi. Buni ortga qaytarib bo'lmaydi. Tasdiqlash uchun parolni kiriting (parol: admin123):");
+        if (password === 'admin123') {
+            try {
+                const examsSnap = await getDocs(collection(db, "exams"));
+                let count = 0;
+                for (const examDoc of examsSnap.docs) {
+                    await deleteDoc(examDoc.ref);
+                    count++;
+                }
+                alert(`Muvaffaqiyatli! ${count} ta test bazasi butunlay o'chirildi.`);
+                fetchTeachers(); // Optionally refresh stats
+            } catch (error) {
+                console.error("Error clearing tests:", error);
+                alert("Xatolik yuz berdi!");
+            }
+        } else if (password !== null) {
+            alert("Noto'g'ri parol!");
+        }
+    };
+
     const isDark = theme === 'dark';
 
     return (
@@ -217,14 +238,23 @@ const AdminDashboard = ({ user, onLogout }) => {
             <div className={`p-6 rounded-2xl shadow-sm border ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Ro'yxatdan o'tgan O'qituvchilar</h2>
-                    <button 
-                        onClick={handleOpenAdd}
-                        disabled={teachers.length >= 14}
-                        className={`px-4 py-2 font-bold text-sm rounded-lg flex items-center gap-2 transition-all 
-                        ${teachers.length >= 14 ? 'bg-slate-600 cursor-not-allowed opacity-50' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/30'}`}
-                    >
-                        <i className="fa-solid fa-plus"></i> Yangi Qo'shish
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button 
+                            onClick={handleClearAllTests}
+                            className={`px-4 py-2 font-bold text-sm rounded-lg flex items-center gap-2 transition-all bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/30`}
+                            title="Tizimdagi barcha testlarni butunlay o'chirib yuborish"
+                        >
+                            <i className="fa-solid fa-dumpster-fire"></i> Eski testlarni tozalash
+                        </button>
+                        <button 
+                            onClick={handleOpenAdd}
+                            disabled={teachers.length >= 14}
+                            className={`px-4 py-2 font-bold text-sm rounded-lg flex items-center gap-2 transition-all 
+                            ${teachers.length >= 14 ? 'bg-slate-600 cursor-not-allowed opacity-50' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/30'}`}
+                        >
+                            <i className="fa-solid fa-plus"></i> Yangi Qo'shish
+                        </button>
+                    </div>
                 </div>
 
                 {/* Table */}
