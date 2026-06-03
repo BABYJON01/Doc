@@ -151,7 +151,7 @@ const StudentDashboard = ({ user, onLogout }) => {
         {path === '/student/courses' && <StudentCourses user={user} />}
         
         {path === '/student/portfolio' && (
-            <div className={`rounded-2xl p-10 text-center border shadow-xl max-w-2xl mx-auto mt-10 ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+            <div className={`rounded-2xl p-10 text-center border shadow-xl max-w-2xl mx-auto mt-10 ${isDark ? 'bg-slate-800/80 backdrop-blur-xl border-slate-700/50' : 'bg-white/50 backdrop-blur-xl border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]'}`}>
                 <i className="fa-solid fa-ranking-star text-6xl text-blue-500 mb-6 drop-shadow-lg"></i>
                 <h2 className={`text-2xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>{lang === 'ru' ? 'Ваши Достижения' : 'Sizning Yutuqlaringiz'}</h2>
                 <p className={`${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{lang === 'ru' ? 'Эта страница находится в разработке.' : 'Ushbu sahifa tez kunda aktivlashadi.'}</p>
@@ -213,7 +213,7 @@ const StudentDashboard = ({ user, onLogout }) => {
         {path === '/student' && (
           <div className="max-w-7xl mx-auto">
             {/* Welcome Banner */}
-            <div className={`mb-6 p-5 rounded-2xl flex items-center gap-4 border shadow-lg ${isDark ? 'bg-slate-800 border-slate-700/60' : 'bg-blue-50 border-blue-100'}`} style={{ background: isDark ? 'linear-gradient(135deg, rgba(30,41,59,0.9) 0%, rgba(15,23,42,0.8) 100%)' : '' }}>
+            <div className={`mb-6 p-5 rounded-2xl flex items-center gap-4 border shadow-lg ${isDark ? 'bg-slate-800/80 backdrop-blur-xl border-slate-700/50' : 'bg-white/50 backdrop-blur-xl border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]'}`} style={{ background: isDark ? 'linear-gradient(135deg, rgba(30,41,59,0.7) 0%, rgba(15,23,42,0.6) 100%)' : '' }}>
                 {user?.photoURL
                   ? <img src={user.photoURL} alt="avatar" className="w-12 h-12 rounded-full border-2 border-blue-500/60 shrink-0" />
                   : <div className="w-12 h-12 rounded-full bg-blue-500/20 border-2 border-blue-500/40 flex items-center justify-center text-blue-400 text-xl shrink-0"><i className="fa-solid fa-user-graduate"></i></div>
@@ -238,7 +238,7 @@ const StudentDashboard = ({ user, onLogout }) => {
 
           {/* Simplified Stats Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
-              <div className={`p-5 rounded-2xl border shadow-lg flex items-center gap-4 hover:border-blue-500/50 transition-colors cursor-pointer group ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+              <div className={`p-5 rounded-2xl border shadow-lg flex items-center gap-4 hover:border-blue-500/50 transition-colors cursor-pointer group ${isDark ? 'bg-slate-800/80 backdrop-blur-xl border-slate-700/50' : 'bg-white/50 backdrop-blur-xl border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]'}`}>
                   <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 text-xl group-hover:scale-110 transition-transform">
                       <i className="fa-solid fa-layer-group"></i>
                   </div>
@@ -278,7 +278,7 @@ const StudentDashboard = ({ user, onLogout }) => {
           <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
             {studentHistory.length > 0 ? (
               studentHistory.map((history, idx) => (
-                <div key={idx} className={`rounded-2xl p-5 border-l-4 border-emerald-500 shadow-md ${isDark ? 'bg-slate-800' : 'bg-white border-y border-r border-slate-200'}`}>
+                <div key={idx} className={`rounded-2xl p-5 border-l-4 border-emerald-500 shadow-md ${isDark ? 'bg-slate-800/80 backdrop-blur-md' : 'bg-white/60 backdrop-blur-md border-y border-r border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]'}`}>
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-widest ${isDark ? 'text-emerald-400 bg-emerald-900/30' : 'text-emerald-600 bg-emerald-50'}`}>
@@ -396,7 +396,7 @@ const StudentDashboard = ({ user, onLogout }) => {
 
           {/* ── Past Sessions ──────────────────────────── */}
           {sessions.length > 0 && (
-            <div className={`rounded-2xl p-6 border shadow-lg ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+            <div className={`rounded-2xl p-6 border shadow-lg ${isDark ? 'bg-slate-800/80 backdrop-blur-xl border-slate-700/50' : 'bg-white/50 backdrop-blur-xl border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]'}`}>
               <h3 className={`font-bold mb-4 text-sm uppercase tracking-widest flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 <i className={`fa-solid fa-clock-rotate-left ${isDark ? 'text-slate-400' : 'text-slate-500'}`}></i>
                 {t.pastSessions}
