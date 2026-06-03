@@ -158,39 +158,49 @@ const LoginSelector = ({ user, role }) => {
                  ) : (
                      <>
                          {/* Role Cards Container */}
-                         <div className="w-full max-w-4xl mx-auto translate-y-16 sm:translate-y-32 flex-1 w-full animate-[fadeInUp_0.6s_ease-out]">
-                             {showAccessDenied && (
-                                 <div className="mb-6 p-4 rounded-xl bg-rose-500/20 border border-rose-500 text-rose-400 flex items-center gap-3 animate-pulse">
-                                     <i className="fa-solid fa-shield-halved text-2xl"></i>
-                                     <div>
-                                         <h4 className="font-bold">Kirish taqiqlangan!</h4>
-                                         <p className="text-sm">Sizda O'qituvchilar paneliga kirish uchun ruxsat yo'q. Faqat admin tomonidan tasdiqlangan o'qituvchilar kira oladi.</p>
+                         <div className="w-full flex justify-end animate-[fadeInRight_0.6s_ease-out] relative z-10 lg:pr-10">
+                             <div className="w-full max-w-sm flex flex-col gap-4">
+                                 {showAccessDenied && (
+                                     <div className="mb-2 p-4 rounded-xl bg-rose-500/20 border border-rose-500 text-rose-400 flex items-center gap-3 animate-pulse">
+                                         <i className="fa-solid fa-shield-halved text-2xl"></i>
+                                         <div>
+                                             <h4 className="font-bold">Kirish taqiqlangan!</h4>
+                                             <p className="text-sm">Sizda O'qituvchilar paneliga kirish uchun ruxsat yo'q. Faqat admin tomonidan tasdiqlangan o'qituvchilar kira oladi.</p>
+                                         </div>
                                      </div>
-                                 </div>
-                             )}
+                                 )}
 
-
-
-                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                             {role === 'admin' && (
-                                <button onClick={() => window.location.href = '/admin'} className={`p-8 block border-t-4 border-purple-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-y-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`} style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
-                                    <i className="fa-solid fa-shield-cat text-4xl text-purple-500 mb-4 block"></i>
-                                    <h2 className="text-xl font-bold mb-2">Boshqaruv (Admin)</h2>
-                                    <p className={`text-sm ${theme === 'dark' ? 'opacity-70' : 'text-slate-500'}`}>O'qituvchilarni boshqarish va nazorat.</p>
-                                </button>
-                             )}
-                             <button onClick={handleTeacherClick} className={`p-8 block border-t-4 border-blue-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-y-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`} style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
-                                 <i className="fa-solid fa-chalkboard-teacher text-4xl text-blue-500 mb-4 block"></i>
-                                 <h2 className="text-xl font-bold mb-2">{t.teacherPanel}</h2>
-                                 <p className={`text-sm ${theme === 'dark' ? 'opacity-70' : 'text-slate-500'}`}>{t.teacherDesc}</p>
-                             </button>
-                             <button onClick={() => window.location.href = '/student'} className={`p-8 block border-t-4 border-emerald-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-y-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`} style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
-                                 <i className="fa-solid fa-user-graduate text-4xl text-emerald-500 mb-4 block"></i>
-                                 <h2 className="text-xl font-bold mb-2">{t.studentPanel}</h2>
-                                 <p className={`text-sm ${theme === 'dark' ? 'opacity-70' : 'text-slate-500'}`}>{t.studentDesc}</p>
-                             </button>
+                                 {role === 'admin' && (
+                                    <button onClick={() => window.location.href = '/admin'} className={`p-6 block border-l-4 border-t-0 border-purple-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-x-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`} style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
+                                        <div className="flex items-center gap-4">
+                                            <i className="fa-solid fa-shield-cat text-3xl text-purple-500 w-10 text-center"></i>
+                                            <div>
+                                                <h2 className="text-lg font-bold mb-1">Boshqaruv (Admin)</h2>
+                                                <p className={`text-xs ${theme === 'dark' ? 'opacity-70' : 'text-slate-500'}`}>O'qituvchilarni boshqarish va nazorat.</p>
+                                            </div>
+                                        </div>
+                                    </button>
+                                 )}
+                                 <button onClick={handleTeacherClick} className={`p-6 block border-l-4 border-t-0 border-blue-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-x-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`} style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
+                                     <div className="flex items-center gap-4">
+                                         <i className="fa-solid fa-chalkboard-teacher text-3xl text-blue-500 w-10 text-center"></i>
+                                         <div>
+                                             <h2 className="text-lg font-bold mb-1">{t.teacherPanel}</h2>
+                                             <p className={`text-xs ${theme === 'dark' ? 'opacity-70' : 'text-slate-500'}`}>{t.teacherDesc}</p>
+                                         </div>
+                                     </div>
+                                 </button>
+                                 <button onClick={() => window.location.href = '/student'} className={`p-6 block border-l-4 border-t-0 border-emerald-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-x-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`} style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
+                                     <div className="flex items-center gap-4">
+                                         <i className="fa-solid fa-user-graduate text-3xl text-emerald-500 w-10 text-center"></i>
+                                         <div>
+                                             <h2 className="text-lg font-bold mb-1">{t.studentPanel}</h2>
+                                             <p className={`text-xs ${theme === 'dark' ? 'opacity-70' : 'text-slate-500'}`}>{t.studentDesc}</p>
+                                         </div>
+                                     </div>
+                                 </button>
+                             </div>
                          </div>
-                     </div>
                      </>
                  )}
             </div>
