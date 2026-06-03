@@ -248,8 +248,8 @@ const App = () => {
                     <Routes>
                         <Route path="/" element={<LoginSelector user={user} role={role} />} />
                         
-                        <Route path="/student/portfolio" element={<UserProfile user={user} onLogout={handleLogout} />} />
-                        <Route path="/student/lectures" element={<StudentLectures user={user} onLogout={handleLogout} />} />
+                        <Route path="/student/portfolio" element={<UserProfile user={user} onLogout={() => signOut(auth)} />} />
+                        <Route path="/student/lectures" element={<StudentLectures user={user} onLogout={() => signOut(auth)} />} />
                         
                         {/* Protected Routes */}
                         <Route path="/admin" element={(role === 'admin' && user) ? <AdminDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
