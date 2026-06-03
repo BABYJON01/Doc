@@ -403,7 +403,7 @@ const TeacherTests = ({ user, onLogout }) => {
                     title: title,
                     createdAt: serverTimestamp(),
                     data: payload,
-                    status: 'published'
+                    status: 'hidden'
                 });
 
                 const link = `${window.location.origin}/test?id=${docRef.id}`;
@@ -624,16 +624,16 @@ const TeacherTests = ({ user, onLogout }) => {
                                     
                                     <div className="flex items-center gap-2">
                                         <button 
-                                            onClick={() => handleToggleStatus(exam.id, exam.status || 'published', exam.title)}
+                                            onClick={() => handleToggleStatus(exam.id, exam.status || 'hidden', exam.title)}
                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
-                                                (exam.status || 'published') === 'published' 
+                                                exam.status === 'published' 
                                                 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500 hover:text-white' 
                                                 : 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500 hover:text-white'
                                             }`}
                                             title="Talabalarga ko'rinishini yoqish/o'chirish (Dopusk)"
                                         >
-                                            <i className={`fa-solid ${(exam.status || 'published') === 'published' ? 'fa-eye' : 'fa-eye-slash'} mr-1`}></i> 
-                                            {(exam.status || 'published') === 'published' ? 'Ochiq' : 'Yopiq'}
+                                            <i className={`fa-solid ${exam.status === 'published' ? 'fa-eye' : 'fa-eye-slash'} mr-1`}></i> 
+                                            {exam.status === 'published' ? 'Ochiq' : 'Yopiq'}
                                         </button>
                                         <button 
                                             onClick={() => handleSetLimit(exam.id, exam.limit, exam.data?.tests?.length || 0)}
