@@ -66,8 +66,8 @@ const StudentDashboard = ({ user, onLogout }) => {
     // Listen to real-time student history
     const resultsQuery = query(
       collection(db, 'student_results'),
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc')
+      where('userId', '==', user.uid)
+      // Removed orderBy to prevent missing index errors on Firebase
     );
     
     const unsubResults = onSnapshot(resultsQuery, (snapshot) => {
@@ -100,7 +100,7 @@ const StudentDashboard = ({ user, onLogout }) => {
 
         try {
           const sessionsSnap = await getDocs(
-            query(collectionGroup(db, 'players'), where('__name__', '==', user.uid))
+            query(collectionGroup(db, 'players'), where('uid', '==', user.uid))
           );
           setSessions(sessionsSnap.docs.map(d => ({
             ...d.data(),
