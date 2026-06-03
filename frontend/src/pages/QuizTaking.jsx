@@ -12,14 +12,28 @@ const QuizTaking = ({ onFinish, user }) => {
     const [showResults, setShowResults] = useState(false);
     const [leaderboard, setLeaderboard] = useState([]);
     const [quizData, setQuizData] = useState(null);
+    const [isBlocked, setIsBlocked] = useState(false);
     const [searchParams] = useSearchParams();
     const examId = searchParams.get('id');
 
     const userName = user?.displayName || user?.email?.split('@')[0] || "Siz";
 
     useEffect(() => {
-        // Fetch Exam Data
+        // Fetch Exam Data and User Block Status
         const fetchExamData = async () => {
+            if (user?.uid) {
+                try {
+                    const userSnap = await getDoc(doc(db, "latest_users", user.uid));
+                    if (userSnap.exists() && userSnap.data().isBlocked === true) {
+                        setIsBlocked(true);
+                        setQuizData([]); // Prevent loading
+                        return;
+                    }
+                } catch (err) {
+                    console.error("Error checking block status", err);
+                }
+            }
+
             if (examId) {
                 try {
                     const docSnap = await getDoc(doc(db, "exams", examId));
@@ -94,10 +108,29 @@ const QuizTaking = ({ onFinish, user }) => {
         });
 
         return () => unsubscribe();
-    }, [examId]);
+    }, [examId, user]);
 
-    if (!quizData) {
+    if (!quizData && !isBlocked) {
         return <div className="min-h-screen bg-slate-900 flex items-center justify-center"><i className="fa-solid fa-circle-notch fa-spin text-4xl text-blue-500"></i></div>;
+    }
+
+    if (isBlocked) {
+        return (
+            <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4">
+                <div className="max-w-md w-full bg-slate-800 rounded-2xl border border-rose-500/30 p-8 text-center shadow-2xl animate-[fadeInUp_0.4s_ease-out]">
+                    <div className="w-20 h-20 bg-rose-500/10 border-2 border-rose-500/50 text-rose-500 rounded-full flex items-center justify-center text-4xl shadow-lg shadow-rose-500/20 mx-auto mb-6">
+                        <i className="fa-solid fa-lock"></i>
+                    </div>
+                    <h2 className="text-2xl font-black text-white mb-2">Kirish cheklangan</h2>
+                    <p className="text-slate-400 text-sm mb-8 leading-relaxed">
+                        Hurmatli talaba, sizning test ishlash huquqingiz o'qituvchi tomonidan vaqtincha cheklangan. Iltimos, sababini bilish uchun o'qituvchingizga murojaat qiling.
+                    </p>
+                    <button onClick={onFinish} className="w-full py-3.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-colors shadow-lg">
+                        <i className="fa-solid fa-house mr-2"></i> Bosh sahifaga qaytish
+                    </button>
+                </div>
+            </div>
+        );
     }
 
     if (quizData.length === 0) {

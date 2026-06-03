@@ -58,6 +58,7 @@ const StudentDashboard = ({ user, onLogout }) => {
   const [pinError,      setPinError]      = useState('');
   const [sessions,      setSessions]      = useState([]);
   const [studentHistory, setStudentHistory] = useState([]);
+  const [isBlocked, setIsBlocked] = useState(false);
 
   const [stats, setStats] = useState({ totalXP: 0, totalTests: 0, avgScore: 0 });
 
@@ -90,6 +91,13 @@ const StudentDashboard = ({ user, onLogout }) => {
       }
     }, (err) => console.error("Error fetching user stats:", err));
 
+    // Listen to user block status
+    const unsubUser = onSnapshot(doc(db, 'latest_users', user.uid), (docSnap) => {
+      if (docSnap.exists()) {
+        setIsBlocked(docSnap.data().isBlocked === true);
+      }
+    }, (err) => console.error("Error fetching user status:", err));
+
     const fetchData = async () => {
       if (!user?.uid) return;
       try {
@@ -120,6 +128,7 @@ const StudentDashboard = ({ user, onLogout }) => {
     return () => {
       unsubResults && unsubResults();
       unsubStats && unsubStats();
+      unsubUser && unsubUser();
     };
   }, [user]);
 
@@ -229,6 +238,18 @@ const StudentDashboard = ({ user, onLogout }) => {
                   <span className="text-emerald-400 text-xs font-bold">{lang === 'ru' ? 'Онлайн' : 'Online'}</span>
                 </div>
             </div>
+
+            {isBlocked && (
+                <div className="mb-6 p-5 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-center gap-4 shadow-lg shadow-rose-500/10 animate-[fadeIn_0.5s_ease-out]">
+                    <div className="w-12 h-12 rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center text-2xl shrink-0">
+                        <i className="fa-solid fa-lock"></i>
+                    </div>
+                    <div>
+                        <h3 className="text-rose-400 font-bold text-lg">Test ishlash huquqingiz cheklangan</h3>
+                        <p className="text-slate-400 text-sm mt-0.5">O'qituvchingiz vaqtincha test ishlash huquqingizni bloklagan. Qo'shimcha ma'lumot uchun ustozingizga murojaat qiling.</p>
+                    </div>
+                </div>
+            )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* ── LEFT COLUMN ───────────────────────────────── */}
