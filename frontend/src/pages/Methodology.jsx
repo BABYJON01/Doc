@@ -117,15 +117,25 @@ const Methodology = () => {
 
     const [randomSkill, setRandomSkill] = useState(null);
     const [isSpinning, setIsSpinning] = useState(false);
+    const [completedSteps, setCompletedSteps] = useState([]);
 
     const handleDrawTicket = () => {
         setIsSpinning(true);
         setRandomSkill(null);
+        setCompletedSteps([]);
         setTimeout(() => {
             const index = Math.floor(Math.random() * practicalSkills.length);
             setRandomSkill(practicalSkills[index]);
             setIsSpinning(false);
         }, 1500); // 1.5s spinning simulation
+    };
+
+    const toggleStep = (idx) => {
+        if (completedSteps.includes(idx)) {
+            setCompletedSteps(completedSteps.filter(i => i !== idx));
+        } else {
+            setCompletedSteps([...completedSteps, idx]);
+        }
     };
 
     const sections = [
@@ -343,14 +353,33 @@ const Methodology = () => {
                                      </h4>
                                      
                                      <div className="space-y-4">
-                                         {randomSkill.steps.map((step, idx) => (
-                                             <div key={idx} className="flex gap-4 items-start bg-slate-800/80 p-3 rounded-xl border border-slate-700/50 hover:bg-slate-700 transition-colors">
-                                                 <div className="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 font-black flex items-center justify-center shrink-0">
-                                                     {idx + 1}
+                                         {randomSkill.steps.map((step, idx) => {
+                                             const isCompleted = completedSteps.includes(idx);
+                                             return (
+                                                 <div 
+                                                     key={idx} 
+                                                     onClick={() => toggleStep(idx)}
+                                                     className={`flex gap-4 items-start p-3 rounded-xl border transition-all cursor-pointer select-none group ${
+                                                         isCompleted 
+                                                             ? 'bg-emerald-900/20 border-emerald-500/50' 
+                                                             : 'bg-slate-800/80 border-slate-700/50 hover:bg-slate-700'
+                                                     }`}
+                                                 >
+                                                     <div className={`w-8 h-8 rounded-full font-black flex items-center justify-center shrink-0 transition-colors ${
+                                                         isCompleted
+                                                             ? 'bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.5)]'
+                                                             : 'bg-indigo-500/20 text-indigo-400 group-hover:bg-indigo-500/40'
+                                                     }`}>
+                                                         {isCompleted ? <i className="fa-solid fa-check"></i> : idx + 1}
+                                                     </div>
+                                                     <p className={`pt-1 text-sm md:text-base transition-colors ${
+                                                         isCompleted ? 'text-emerald-400 opacity-70 line-through' : 'text-slate-300'
+                                                     }`}>
+                                                         {step}
+                                                     </p>
                                                  </div>
-                                                 <p className="text-slate-300 pt-1 text-sm md:text-base">{step}</p>
-                                             </div>
-                                         ))}
+                                             );
+                                         })}
                                      </div>
 
                                      <div className="mt-8 flex justify-center border-t border-slate-800 pt-6">
