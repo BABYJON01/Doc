@@ -622,7 +622,7 @@ const TeacherTests = ({ user, onLogout }) => {
                                         </div>
                                     </div>
                                     
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex flex-wrap items-center gap-2 mt-2 md:mt-0">
                                         <button 
                                             onClick={() => handleToggleStatus(exam.id, exam.status || 'hidden', exam.title)}
                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${

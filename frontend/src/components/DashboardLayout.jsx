@@ -175,7 +175,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
             </aside>
             
             {/* Main Content Area */}
-            <main className="flex-1 flex flex-col h-full overflow-hidden relative z-10 w-full">
+            <main className="flex-1 flex flex-col h-full overflow-hidden relative z-10 min-w-0">
                 {/* Header */}
                 <header className={`h-16 flex items-center justify-between px-6 backdrop-blur-md ${headerBg} sticky top-0 z-30`}>
                     <div className="flex items-center gap-3">
