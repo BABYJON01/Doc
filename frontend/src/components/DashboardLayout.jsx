@@ -44,8 +44,8 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
     // Derived styles based on theme
     const isDarkUI = role === 'student' || theme === 'dark';
     const bgClass = theme === 'dark' ? 'bg-slate-950 text-slate-100' : (role === 'student' ? 'bg-white text-slate-800' : 'bg-slate-50 text-slate-800');
-    const sidebarBg = isDarkUI ? 'bg-[#0f172a] border-r border-slate-800/50 text-slate-200' : 'bg-white border-r border-slate-200 shadow-sm text-slate-800';
-    const headerBg = isDarkUI ? 'bg-[#0f172a]/95 border-b border-slate-800/50 text-slate-200 backdrop-blur-xl' : 'bg-white/80 border-b border-slate-200 shadow-sm text-slate-800';
+    const sidebarBg = isDarkUI ? 'bg-[#0f172a]/50 backdrop-blur-2xl border-r border-slate-800/50 text-slate-200' : 'bg-white/60 backdrop-blur-2xl border-r border-slate-200/50 shadow-sm text-slate-800';
+    const headerBg = isDarkUI ? 'bg-[#0f172a]/50 border-b border-slate-800/50 text-slate-200 backdrop-blur-2xl' : 'bg-white/60 border-b border-slate-200/50 shadow-sm text-slate-800 backdrop-blur-2xl';
     
     const sidebarLinkClass = (isActive) => isActive 
         ? (isDarkUI ? 'bg-blue-600/10 text-blue-400 font-bold' : 'bg-blue-50 text-blue-600 font-bold')
@@ -219,7 +219,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col h-full overflow-hidden relative z-10 min-w-0">
                 {/* Header */}
-                <header className={`h-16 flex items-center justify-between px-6 backdrop-blur-md ${headerBg} sticky top-0 z-30`}>
+                <header className={`h-16 flex items-center justify-between px-6 ${headerBg} sticky top-0 z-30`}>
                     <div className="flex items-center gap-3">
                         <button 
                             className={`lg:hidden w-10 h-10 flex items-center justify-center rounded-lg ${isDarkUI ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}
