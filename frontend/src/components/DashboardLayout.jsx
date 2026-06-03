@@ -124,7 +124,16 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
     const toggleNotifications = () => setShowNotifications(!showNotifications);
 
     return (
-        <div className={`flex h-screen overflow-hidden ${bgClass} font-sans transition-colors duration-300`}>
+        <div className={`flex h-screen overflow-hidden ${bgClass} font-sans transition-colors duration-300 relative`}>
+            {/* Decorative Background Orbs for Light Mode */}
+            {theme !== 'dark' && (
+                <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                    <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-blue-300/20 blur-[100px]"></div>
+                    <div className="absolute top-[20%] -right-[5%] w-[30%] h-[50%] rounded-full bg-emerald-300/15 blur-[100px]"></div>
+                    <div className="absolute -bottom-[10%] left-[20%] w-[50%] h-[40%] rounded-full bg-violet-300/20 blur-[100px]"></div>
+                </div>
+            )}
+            
             {/* Mobile Sidebar Overlay */}
             {isSidebarOpen && (
                 <div 
