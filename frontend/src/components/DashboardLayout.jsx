@@ -43,7 +43,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
     
     // Derived styles based on theme
     const isDarkUI = role === 'student' || theme === 'dark';
-    const bgClass = theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800';
+    const bgClass = theme === 'dark' ? 'bg-slate-950 text-slate-100' : (role === 'student' ? 'bg-white text-slate-800' : 'bg-slate-50 text-slate-800');
     const sidebarBg = isDarkUI ? 'bg-[#0f172a] border-r border-slate-800/50 text-slate-200' : 'bg-white border-r border-slate-200 shadow-sm text-slate-800';
     const headerBg = isDarkUI ? 'bg-[#0f172a]/95 border-b border-slate-800/50 text-slate-200 backdrop-blur-xl' : 'bg-white/80 border-b border-slate-200 shadow-sm text-slate-800';
     
@@ -136,15 +136,17 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                 <div 
                     className="absolute inset-0 z-0 pointer-events-none transition-all duration-500"
                     style={{ 
-                        backgroundImage: "url('/assets/student-bg.jpg')", 
+                        backgroundImage: "url('/assets/student-white-bg.jpg')", 
                         backgroundSize: 'cover', 
-                        backgroundPosition: 'center',
+                        backgroundPosition: 'top center',
                         backgroundRepeat: 'no-repeat',
-                        opacity: theme === 'dark' ? 0.3 : 1
+                        opacity: theme === 'dark' ? 0.2 : 1
                     }}
                 >
                     {/* Dark mode overlay to ensure readability */}
                     {theme === 'dark' && <div className="absolute inset-0 bg-slate-950/80"></div>}
+                    {/* Light mode gradient overlay for a beautiful fade to white at the bottom */}
+                    {theme !== 'dark' && <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white"></div>}
                 </div>
             ) : (
                 /* Decorative Background Orbs for Light Mode (Admin/Teacher) */
