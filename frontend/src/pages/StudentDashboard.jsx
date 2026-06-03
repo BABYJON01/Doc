@@ -35,7 +35,8 @@ const proficiencyData = {
 };
 
 const StudentDashboard = ({ user, onLogout }) => {
-  const { t, lang } = useApp();
+  const { t, lang, theme } = useApp();
+  const isDark = theme === 'dark';
   const isAdmin = user?.email === 'rahmonjonwarrior@gmail.com';
   const location = useLocation();
   const path = location.pathname;
@@ -150,10 +151,10 @@ const StudentDashboard = ({ user, onLogout }) => {
         {path === '/student/courses' && <StudentCourses user={user} />}
         
         {path === '/student/portfolio' && (
-            <div className="bg-slate-800 rounded-2xl p-10 text-center border border-slate-700 shadow-xl max-w-2xl mx-auto mt-10">
+            <div className={`rounded-2xl p-10 text-center border shadow-xl max-w-2xl mx-auto mt-10 ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                 <i className="fa-solid fa-ranking-star text-6xl text-blue-500 mb-6 drop-shadow-lg"></i>
-                <h2 className="text-2xl font-bold text-white mb-2">{lang === 'ru' ? 'Ваши Достижения' : 'Sizning Yutuqlaringiz'}</h2>
-                <p className="text-slate-400">{lang === 'ru' ? 'Эта страница находится в разработке.' : 'Ushbu sahifa tez kunda aktivlashadi.'}</p>
+                <h2 className={`text-2xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>{lang === 'ru' ? 'Ваши Достижения' : 'Sizning Yutuqlaringiz'}</h2>
+                <p className={`${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{lang === 'ru' ? 'Эта страница находится в разработке.' : 'Ushbu sahifa tez kunda aktivlashadi.'}</p>
             </div>
         )}
 
@@ -212,16 +213,16 @@ const StudentDashboard = ({ user, onLogout }) => {
         {path === '/student' && (
           <div className="max-w-7xl mx-auto">
             {/* Welcome Banner */}
-            <div className="mb-6 p-5 rounded-2xl flex items-center gap-4 border border-slate-700/60 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(30,41,59,0.9) 0%, rgba(15,23,42,0.8) 100%)' }}>
+            <div className={`mb-6 p-5 rounded-2xl flex items-center gap-4 border shadow-lg ${isDark ? 'bg-slate-800 border-slate-700/60' : 'bg-blue-50 border-blue-100'}`} style={{ background: isDark ? 'linear-gradient(135deg, rgba(30,41,59,0.9) 0%, rgba(15,23,42,0.8) 100%)' : '' }}>
                 {user?.photoURL
                   ? <img src={user.photoURL} alt="avatar" className="w-12 h-12 rounded-full border-2 border-blue-500/60 shrink-0" />
                   : <div className="w-12 h-12 rounded-full bg-blue-500/20 border-2 border-blue-500/40 flex items-center justify-center text-blue-400 text-xl shrink-0"><i className="fa-solid fa-user-graduate"></i></div>
                 }
                 <div className="flex-1 min-w-0">
-                  <h2 className="font-black text-white text-base sm:text-lg truncate">
+                  <h2 className={`font-black text-base sm:text-lg truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {{ uz: 'Xush kelibsiz,', ru: 'Добро пожаловать,', en: 'Welcome,' }[lang] || 'Xush kelibsiz,'} {user?.displayName?.split(' ')[0] || 'Talaba'}! 👋
                   </h2>
-                  <p className="text-slate-400 text-xs sm:text-sm">
+                  <p className={`text-xs sm:text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                     {{ uz: 'Avval to\'xtatgan joyingizdan davom eting.', ru: 'Продолжайте обучение с того места, где остановились.', en: 'Continue your learning right where you left off.' }[lang] || 'Avval to\'xtatgan joyingizdan davom eting.'}
                   </p>
                 </div>
@@ -237,39 +238,39 @@ const StudentDashboard = ({ user, onLogout }) => {
 
           {/* Simplified Stats Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
-              <div className="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-lg flex items-center gap-4 hover:border-blue-500/50 transition-colors cursor-pointer group">
+              <div className={`p-5 rounded-2xl border shadow-lg flex items-center gap-4 hover:border-blue-500/50 transition-colors cursor-pointer group ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                   <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 text-xl group-hover:scale-110 transition-transform">
                       <i className="fa-solid fa-layer-group"></i>
                   </div>
                   <div>
-                      <h4 className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">{{ uz: 'Yechilgan Testlar', ru: 'Завершенные тесты', en: 'Tests Completed' }[lang] || 'Yechilgan Testlar'}</h4>
-                      <p className="text-xl font-black text-white">{stats.totalTests}</p>
+                      <h4 className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{{ uz: 'Yechilgan Testlar', ru: 'Завершенные тесты', en: 'Tests Completed' }[lang] || 'Yechilgan Testlar'}</h4>
+                      <p className={`text-xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{stats.totalTests}</p>
                   </div>
               </div>
               
-              <div className="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-lg flex items-center gap-4 hover:border-emerald-500/50 transition-colors cursor-pointer group">
+              <div className={`p-5 rounded-2xl border shadow-lg flex items-center gap-4 hover:border-emerald-500/50 transition-colors cursor-pointer group ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                   <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-xl group-hover:scale-110 transition-transform">
                       <i className="fa-solid fa-fire"></i>
                   </div>
                   <div>
-                      <h4 className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">{{ uz: 'Jami tajriba (XP)', ru: 'Общий опыт (XP)', en: 'Total Experience (XP)' }[lang] || 'Jami tajriba (XP)'}</h4>
-                      <p className="text-xl font-black text-emerald-400">{stats.totalXP.toLocaleString()}</p>
+                      <h4 className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{{ uz: 'Jami tajriba (XP)', ru: 'Общий опыт (XP)', en: 'Total Experience (XP)' }[lang] || 'Jami tajriba (XP)'}</h4>
+                      <p className="text-xl font-black text-emerald-500">{stats.totalXP.toLocaleString()}</p>
                   </div>
               </div>
               
-              <div className="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-lg flex items-center gap-4 hover:border-violet-500/50 transition-colors cursor-pointer group">
+              <div className={`p-5 rounded-2xl border shadow-lg flex items-center gap-4 hover:border-violet-500/50 transition-colors cursor-pointer group ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                   <div className="w-12 h-12 rounded-xl bg-violet-500/10 flex items-center justify-center text-violet-500 text-xl group-hover:scale-110 transition-transform">
                       <i className="fa-solid fa-brain"></i>
                   </div>
                   <div>
-                      <h4 className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">{{ uz: 'O\'rtacha Natija', ru: 'Успеваемость', en: 'Average Score' }[lang] || 'O\'rtacha Natija'}</h4>
-                      <p className="text-xl font-black text-white">{stats.avgScore}%</p>
+                      <h4 className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{{ uz: 'O\'rtacha Natija', ru: 'Успеваемость', en: 'Average Score' }[lang] || 'O\'rtacha Natija'}</h4>
+                      <p className={`text-xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{stats.avgScore}%</p>
                   </div>
               </div>
           </div>
 
           {/* ── Portfolio ───────────────────────────────── */}
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          <h2 className={`text-xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
             <i className="fa-solid fa-graduation-cap text-emerald-500"></i>
             {t.portfolioTitle}
           </h2>
@@ -277,26 +278,26 @@ const StudentDashboard = ({ user, onLogout }) => {
           <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
             {studentHistory.length > 0 ? (
               studentHistory.map((history, idx) => (
-                <div key={idx} className="bg-slate-800 rounded-2xl p-5 border-l-4 border-emerald-500 shadow-md">
+                <div key={idx} className={`rounded-2xl p-5 border-l-4 border-emerald-500 shadow-md ${isDark ? 'bg-slate-800' : 'bg-white border-y border-r border-slate-200'}`}>
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <span className="text-[10px] font-bold text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded uppercase tracking-widest">
+                      <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-widest ${isDark ? 'text-emerald-400 bg-emerald-900/30' : 'text-emerald-600 bg-emerald-50'}`}>
                         {history.dateText || history.date || "Bugun"}
                       </span>
-                      <h3 className="text-base font-bold text-white mt-1 leading-tight">{history.topic}</h3>
+                      <h3 className={`text-base font-bold mt-1 leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>{history.topic}</h3>
                     </div>
                     <div className="text-right">
-                      <div className="text-xl font-black text-emerald-400">
-                        {history.score}<span className="text-slate-500 text-sm font-bold">/{history.total}</span>
+                      <div className={`text-xl font-black ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                        {history.score}<span className={`text-sm font-bold ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>/{history.total}</span>
                       </div>
                     </div>
                   </div>
                   <div>
-                    <div className="flex justify-between text-[10px] text-slate-400 mb-1 font-bold uppercase tracking-widest">
+                    <div className={`flex justify-between text-[10px] mb-1 font-bold uppercase tracking-widest ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                       <span>{t.mastery}</span>
                       <span>{history.percent}%</span>
                     </div>
-                    <div className="w-full bg-slate-700 rounded-full h-2">
+                    <div className={`w-full rounded-full h-2 ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`}>
                       <div
                         className="bg-emerald-500 h-2 rounded-full transition-all duration-500"
                         style={{ width: `${history.percent}%` }}
@@ -306,7 +307,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                 </div>
               ))
             ) : (
-              <div className="bg-slate-800/50 rounded-2xl p-8 border border-dashed border-slate-700 text-center text-slate-500">
+              <div className={`rounded-2xl p-8 border border-dashed text-center ${isDark ? 'bg-slate-800/50 border-slate-700 text-slate-500' : 'bg-slate-50 border-slate-300 text-slate-500'}`}>
                 <i className="fa-solid fa-file-medical mb-3 text-3xl opacity-50 block"></i>
                 <p className="font-medium text-sm">{t.noResults}</p>
               </div>
@@ -338,26 +339,26 @@ const StudentDashboard = ({ user, onLogout }) => {
 
           {/* ── Live Quiz PIN ──────────────────────────── */}
           <div
-            className="rounded-2xl border border-emerald-500/30 overflow-hidden shadow-[0_0_25px_rgba(16,185,129,0.15)]"
-            style={{ background: 'linear-gradient(135deg, rgba(6,78,59,0.3) 0%, rgba(30,41,59,0.9) 100%)' }}
+            className={`rounded-2xl border overflow-hidden shadow-lg ${isDark ? 'border-emerald-500/30 shadow-[0_0_25px_rgba(16,185,129,0.15)]' : 'border-emerald-200 bg-emerald-50/50'}`}
+            style={{ background: isDark ? 'linear-gradient(135deg, rgba(6,78,59,0.3) 0%, rgba(30,41,59,0.9) 100%)' : '' }}
           >
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-emerald-500/20 bg-emerald-600/10">
+            <div className={`flex items-center gap-3 px-5 py-4 border-b ${isDark ? 'border-emerald-500/20 bg-emerald-600/10' : 'border-emerald-200 bg-emerald-100/50'}`}>
               <img src="/assets/tma_logo.png" alt="TMA" className="w-9 h-9 rounded-full border border-emerald-400/40" />
               <div>
-                <h3 className="font-black text-white text-base flex items-center gap-2">
-                  <i className="fa-solid fa-tower-broadcast text-emerald-400 animate-pulse text-sm"></i>
+                <h3 className={`font-black text-base flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  <i className="fa-solid fa-tower-broadcast text-emerald-500 animate-pulse text-sm"></i>
                   {t.liveQuizTitle}
                 </h3>
-                <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Med-Zukkoo Live</div>
+                <div className={`text-[10px] font-bold uppercase tracking-widest ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Med-Zukkoo Live</div>
               </div>
             </div>
             <div className="p-5">
-              <p className="text-xs text-slate-400 mb-4 text-center">{t.liveQuizDesc}</p>
+              <p className={`text-xs mb-4 text-center ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{t.liveQuizDesc}</p>
               <div
                 className="flex rounded-xl overflow-hidden mb-2 shadow-inner border transition-all"
                 style={{
-                  background: 'rgba(15,23,42,0.8)',
-                  borderColor: pinInput.length === 6 ? '#10b981' : '#334155',
+                  background: isDark ? 'rgba(15,23,42,0.8)' : '#ffffff',
+                  borderColor: pinInput.length === 6 ? '#10b981' : (isDark ? '#334155' : '#cbd5e1'),
                   boxShadow: pinInput.length === 6 ? '0 0 15px rgba(16,185,129,0.25)' : 'none',
                 }}
               >
@@ -368,7 +369,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                   onChange={(e) => setPinInput(e.target.value.replace(new RegExp('[^0-9]', 'g'), '').slice(0, 6))}
                   placeholder={t.liveQuizPinPlaceholder}
                   className="flex-1 bg-transparent px-4 py-3 text-center text-2xl font-black tracking-[0.3em] outline-none w-full"
-                  style={{ color: pinInput.length === 6 ? '#10b981' : '#94a3b8' }}
+                  style={{ color: pinInput.length === 6 ? '#10b981' : (isDark ? '#94a3b8' : '#64748b') }}
                   onKeyDown={(e) => e.key === 'Enter' && pinInput.length === 6 && handleJoinLiveQuiz()}
                 />
               </div>
@@ -396,19 +397,19 @@ const StudentDashboard = ({ user, onLogout }) => {
 
           {/* ── Past Sessions ──────────────────────────── */}
           {sessions.length > 0 && (
-            <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-lg">
-              <h3 className="font-bold text-white mb-4 text-sm uppercase tracking-widest flex items-center gap-2">
-                <i className="fa-solid fa-clock-rotate-left text-slate-400"></i>
+            <div className={`rounded-2xl p-6 border shadow-lg ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+              <h3 className={`font-bold mb-4 text-sm uppercase tracking-widest flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <i className={`fa-solid fa-clock-rotate-left ${isDark ? 'text-slate-400' : 'text-slate-500'}`}></i>
                 {t.pastSessions}
               </h3>
               <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
                 {sessions.sort((a, b) => b.score - a.score).map((s, i) => (
-                  <div key={i} className="flex justify-between items-center p-3 bg-slate-900 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors">
+                  <div key={i} className={`flex justify-between items-center p-3 rounded-lg border transition-colors ${isDark ? 'bg-slate-900 border-slate-700 hover:border-slate-600' : 'bg-slate-50 border-slate-200 hover:border-slate-300'}`}>
                     <div>
-                      <div className="text-sm font-bold text-slate-300">PIN: {s.pin || t.unknownPin}</div>
-                      <div className="text-xs text-slate-500">{s.correct || 0} {t.correctAnswers}</div>
+                      <div className={`text-sm font-bold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>PIN: {s.pin || t.unknownPin}</div>
+                      <div className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>{s.correct || 0} {t.correctAnswers}</div>
                     </div>
-                    <div className="text-emerald-400 font-black">+{s.score || 0} XP</div>
+                    <div className="text-emerald-500 font-black">+{s.score || 0} XP</div>
                   </div>
                 ))}
               </div>
