@@ -3,8 +3,10 @@ import { db } from '../firebase';
 import { collection, query, orderBy, limit, onSnapshot, setDoc, doc, getDoc, serverTimestamp, addDoc, increment } from 'firebase/firestore';
 import { useSearchParams } from 'react-router-dom';
 import { methodologicalQuiz, caseStudies, xrayCases } from '../data/quizQuestions';
+import { useApp } from '../context/AppContext';
 
 const QuizTaking = ({ onFinish, user }) => {
+    const { lang } = useApp();
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [selectedOption, setSelectedOption] = useState(null);
     const [isAnswered, setIsAnswered] = useState(false);
@@ -121,12 +123,12 @@ const QuizTaking = ({ onFinish, user }) => {
                     <div className="w-20 h-20 bg-rose-500/10 border-2 border-rose-500/50 text-rose-500 rounded-full flex items-center justify-center text-4xl shadow-lg shadow-rose-500/20 mx-auto mb-6">
                         <i className="fa-solid fa-lock"></i>
                     </div>
-                    <h2 className="text-2xl font-black text-white mb-2">Kirish cheklangan</h2>
+                    <h2 className="text-2xl font-black text-white mb-2">{ { ru: 'Доступ ограничен', uz: 'Kirish cheklangan', en: 'Access Restricted' }[lang] || 'Kirish cheklangan' }</h2>
                     <p className="text-slate-400 text-sm mb-8 leading-relaxed">
-                        Hurmatli talaba, sizning test ishlash huquqingiz o'qituvchi tomonidan vaqtincha cheklangan. Iltimos, sababini bilish uchun o'qituvchingizga murojaat qiling.
+                        { { ru: 'Уважаемый студент, ваш доступ к тестам временно ограничен преподавателем. Пожалуйста, обратитесь к преподавателю, чтобы узнать причину.', uz: 'Hurmatli talaba, sizning test ishlash huquqingiz o\'qituvchi tomonidan vaqtincha cheklangan. Iltimos, sababini bilish uchun o\'qituvchingizga murojaat qiling.', en: 'Dear student, your test access has been temporarily restricted by the teacher. Please contact your teacher to find out the reason.' }[lang] || 'Hurmatli talaba, sizning test ishlash huquqingiz o\'qituvchi tomonidan vaqtincha cheklangan. Iltimos, sababini bilish uchun o\'qituvchingizga murojaat qiling.' }
                     </p>
                     <button onClick={onFinish} className="w-full py-3.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-colors shadow-lg">
-                        <i className="fa-solid fa-house mr-2"></i> Bosh sahifaga qaytish
+                        <i className="fa-solid fa-house mr-2"></i> { { ru: 'Вернуться на главную', uz: 'Bosh sahifaga qaytish', en: 'Back to home' }[lang] || 'Bosh sahifaga qaytish' }
                     </button>
                 </div>
             </div>
@@ -134,7 +136,7 @@ const QuizTaking = ({ onFinish, user }) => {
     }
 
     if (quizData.length === 0) {
-        return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white"><p>Ushbu imtihon majmuasi topilmadi (Yoki testlar yo'q).</p></div>;
+        return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white"><p>{ { ru: 'Этот экзамен не найден (или нет тестов).', uz: 'Ushbu imtihon majmuasi topilmadi (Yoki testlar yo\'q).', en: 'This exam was not found (Or there are no tests).' }[lang] || 'Ushbu imtihon majmuasi topilmadi (Yoki testlar yo\'q).' }</p></div>;
     }
 
     const currentQ = quizData[currentQuestion];
@@ -234,18 +236,18 @@ const QuizTaking = ({ onFinish, user }) => {
                     <div className="w-16 h-16 rounded-full bg-emerald-500/10 border-2 border-emerald-500 flex items-center justify-center mx-auto mb-4">
                         <i className="fa-solid fa-graduation-cap text-2xl text-emerald-400"></i>
                     </div>
-                    <h1 className="text-2xl sm:text-3xl font-bold mb-1">Test Yakunlandi!</h1>
-                    <p className="text-slate-400 text-sm mb-6">Natijangiz hisoblandi</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold mb-1">{ { ru: 'Тест завершен!', uz: 'Test Yakunlandi!', en: 'Test Completed!' }[lang] || 'Test Yakunlandi!' }</h1>
+                    <p className="text-slate-400 text-sm mb-6">{ { ru: 'Ваш результат рассчитан', uz: 'Natijangiz hisoblandi', en: 'Your score has been calculated' }[lang] || 'Natijangiz hisoblandi' }</p>
                     
                     <div className="flex justify-center items-center gap-6 mb-6">
                         <div className="text-center">
                             <div className="text-4xl sm:text-5xl font-black text-emerald-400 mb-1">{score}/{quizData.length}</div>
-                            <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Natijangiz</div>
+                            <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">{ { ru: 'Ваш результат', uz: 'Natijangiz', en: 'Your Score' }[lang] || 'Natijangiz' }</div>
                         </div>
                         <div className="w-px h-12 bg-slate-700"></div>
                         <div className="text-center">
                             <div className="text-3xl font-bold text-blue-400 mb-1">{percent}%</div>
-                            <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">O'zlashtirish</div>
+                            <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">{ { ru: 'Усвоение', uz: 'O\'zlashtirish', en: 'Mastery' }[lang] || 'O\'zlashtirish' }</div>
                         </div>
                     </div>
 
@@ -260,16 +262,16 @@ const QuizTaking = ({ onFinish, user }) => {
                     {score < quizData.length && (
                         <div className="bg-slate-900 rounded-xl p-4 border border-rose-500/30 text-left mb-6">
                             <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
-                                <i className="fa-solid fa-notes-medical text-rose-500"></i> AI Tavsiyasi
+                                <i className="fa-solid fa-notes-medical text-rose-500"></i> { { ru: 'Рекомендация ИИ', uz: 'AI Tavsiyasi', en: 'AI Recommendation' }[lang] || 'AI Tavsiyasi' }
                             </h3>
                             <p className="text-slate-400 text-xs leading-relaxed">
-                                Groq AI tahlili: Ba'zi savollarda noto'g'ri javob tanladingiz. Mavzuni qayta ko'rib chiqishni maslahat beramiz.
+                                { { ru: 'Вы выбрали неправильный ответ в некоторых вопросах. Рекомендуем пересмотреть тему.', uz: 'Groq AI tahlili: Ba\'zi savollarda noto\'g\'ri javob tanladingiz. Mavzuni qayta ko\'rib chiqishni maslahat beramiz.', en: 'Groq AI analysis: You selected the wrong answer in some questions. We recommend reviewing the topic.' }[lang] || 'Groq AI tahlili: Ba\'zi savollarda noto\'g\'ri javob tanladingiz. Mavzuni qayta ko\'rib chiqishni maslahat beramiz.' }
                             </p>
                         </div>
                     )}
 
                     <button onClick={onFinish} className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors">
-                        <i className="fa-solid fa-house mr-2"></i> Bosh sahifaga qaytish
+                        <i className="fa-solid fa-house mr-2"></i> { { ru: 'Вернуться на главную', uz: 'Bosh sahifaga qaytish', en: 'Back to home' }[lang] || 'Bosh sahifaga qaytish' }
                     </button>
                 </div>
             </div>
@@ -292,7 +294,7 @@ const QuizTaking = ({ onFinish, user }) => {
                         <div className="text-xl sm:text-2xl font-black text-white">
                             {currentQuestion + 1} <span className="text-slate-500 text-base">/ {quizData.length}</span>
                         </div>
-                        <div className="text-[10px] text-emerald-400 font-bold">{score} to'g'ri</div>
+                        <div className="text-[10px] text-emerald-400 font-bold">{score} { { ru: 'прав.', uz: 'to\'g\'ri', en: 'correct' }[lang] || 'to\'g\'ri' }</div>
                     </div>
                 </header>
 
@@ -317,7 +319,7 @@ const QuizTaking = ({ onFinish, user }) => {
                         <div className="space-y-4">
                             <div className="bg-rose-500/10 p-4 sm:p-6 rounded-xl border border-rose-500/20">
                                 <p className="text-rose-400 font-bold mb-2 flex items-center gap-2">
-                                    <i className="fa-solid fa-stethoscope"></i> Vaziyatli Masala: {currentQ.title}
+                                    <i className="fa-solid fa-stethoscope"></i> { { ru: 'Ситуационная Задача', uz: 'Vaziyatli Masala', en: 'Case Study' }[lang] || 'Vaziyatli Masala' }: {currentQ.title}
                                 </p>
                                 <p className="text-slate-300 italic mb-4 leading-relaxed">"{currentQ.scenario}"</p>
                                 <p className="text-white font-bold">{currentQ.question}</p>
@@ -328,7 +330,7 @@ const QuizTaking = ({ onFinish, user }) => {
                                     <textarea 
                                         className="w-full bg-slate-800 border-2 border-slate-700 rounded-xl p-4 text-white focus:border-blue-500 outline-none transition-colors" 
                                         rows="4" 
-                                        placeholder="Diagnostika va davolash rejangizni batafsil yozing..."
+                                        placeholder={ { ru: 'Напишите свой план диагностики и лечения подробно...', uz: 'Diagnostika va davolash rejangizni batafsil yozing...', en: 'Write your diagnosis and treatment plan in detail...' }[lang] || 'Diagnostika va davolash rejangizni batafsil yozing...' }
                                         onChange={(e) => setSelectedOption(e.target.value)}
                                         value={typeof selectedOption === 'string' ? selectedOption : ''}
                                     ></textarea>
@@ -337,27 +339,27 @@ const QuizTaking = ({ onFinish, user }) => {
                                         onClick={() => setIsAnswered(true)} 
                                         className={`w-full py-3.5 font-black rounded-xl transition-all shadow-lg ${(!selectedOption || String(selectedOption).trim().length === 0) ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/30 hover:-translate-y-1'}`}
                                     >
-                                        Javobni Tekshirish <i className="fa-solid fa-check-double ml-1"></i>
+                                        { { ru: 'Проверить ответ', uz: 'Javobni Tekshirish', en: 'Check Answer' }[lang] || 'Javobni Tekshirish' } <i className="fa-solid fa-check-double ml-1"></i>
                                     </button>
                                 </div>
                             ) : (
                                 <div className="space-y-4 animate-[fadeIn_0.5s_ease-out]">
                                     <div className="bg-slate-800 p-4 sm:p-5 rounded-xl border border-slate-700">
-                                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Sizning javobingiz</p>
+                                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">{ { ru: 'Ваш ответ', uz: 'Sizning javobingiz', en: 'Your answer' }[lang] || 'Sizning javobingiz' }</p>
                                         <p className="text-white leading-relaxed">{selectedOption}</p>
                                     </div>
                                     <div className="bg-emerald-500/10 p-4 sm:p-5 rounded-xl border border-emerald-500/30">
                                         <p className="text-emerald-400 font-bold mb-2 flex items-center gap-2">
-                                            <i className="fa-solid fa-check-circle"></i> Klinika (AI) yechimi
+                                            <i className="fa-solid fa-check-circle"></i> { { ru: 'Решение Клиники (ИИ)', uz: 'Klinika (AI) yechimi', en: 'Clinic (AI) solution' }[lang] || 'Klinika (AI) yechimi' }
                                         </p>
                                         <p className="text-emerald-300/90 leading-relaxed">{currentQ.answer}</p>
                                     </div>
                                     
                                     <div className="pt-2">
-                                        <p className="text-center text-slate-400 text-sm mb-3">O'z-o'zingizni baholang:</p>
+                                        <p className="text-center text-slate-400 text-sm mb-3">{ { ru: 'Оцените себя:', uz: 'O\'z-o\'zingizni baholang:', en: 'Self-evaluate:' }[lang] || 'O\'z-o\'zingizni baholang:' }</p>
                                         <div className="flex flex-col sm:flex-row gap-3">
                                             <button onClick={() => { handleNext(); }} className="flex-1 py-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 font-bold rounded-xl transition-colors">
-                                                <i className="fa-solid fa-xmark mr-2 text-rose-400"></i> Noto'g'ri / Chala
+                                                <i className="fa-solid fa-xmark mr-2 text-rose-400"></i> { { ru: 'Неправильно / Частично', uz: 'Noto\'g\'ri / Chala', en: 'Incorrect / Partial' }[lang] || 'Noto\'g\'ri / Chala' }
                                             </button>
                                             <button onClick={() => { 
                                                 const newScore = score + 1;
@@ -365,7 +367,7 @@ const QuizTaking = ({ onFinish, user }) => {
                                                 updateScoreInFirebase(newScore);
                                                 handleNext(); 
                                             }} className="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl transition-transform hover:-translate-y-0.5 shadow-lg shadow-emerald-500/25">
-                                                <i className="fa-solid fa-check mr-2"></i> To'g'ri yechdim (+1 ball)
+                                                <i className="fa-solid fa-check mr-2"></i> { { ru: 'Я решил правильно (+1 балл)', uz: 'To\'g\'ri yechdim (+1 ball)', en: 'I solved it correctly (+1 point)' }[lang] || 'To\'g\'ri yechdim (+1 ball)' }
                                             </button>
                                         </div>
                                     </div>
@@ -397,10 +399,10 @@ const QuizTaking = ({ onFinish, user }) => {
 
                             {isAnswered && currentQ.explanation && (
                                 <div className="p-4 sm:p-6 bg-slate-800 rounded-xl border border-slate-700 animate-[fadeIn_0.4s_ease-out] mt-4">
-                                    <h4 className="font-bold text-blue-400 mb-2 text-sm"><i className="fa-solid fa-robot mr-2"></i> Klinika (AI) Izohi:</h4>
+                                    <h4 className="font-bold text-blue-400 mb-2 text-sm"><i className="fa-solid fa-robot mr-2"></i> { { ru: 'Объяснение Клиники (ИИ):', uz: 'Klinika (AI) Izohi:', en: 'Clinic (AI) Explanation:' }[lang] || 'Klinika (AI) Izohi:' }</h4>
                                     <p className="text-slate-300 leading-relaxed text-xs sm:text-sm">{currentQ.explanation}</p>
                                     <button onClick={handleNext} className="mt-4 w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-colors text-sm">
-                                        {currentQuestion + 1 < quizData.length ? <>Keyingi bosqich <i className="fa-solid fa-arrow-right ml-1"></i></> : 'Yakunlash'}
+                                        {currentQuestion + 1 < quizData.length ? <>{ { ru: 'Следующий этап', uz: 'Keyingi bosqich', en: 'Next stage' }[lang] || 'Keyingi bosqich' } <i className="fa-solid fa-arrow-right ml-1"></i></> : ({ ru: 'Завершить', uz: 'Yakunlash', en: 'Finish' }[lang] || 'Yakunlash')}
                                     </button>
                                 </div>
                             )}
@@ -412,7 +414,7 @@ const QuizTaking = ({ onFinish, user }) => {
             {/* Right Sidebar — only on large screens */}
             <div className="w-72 bg-slate-800 border-l border-slate-700 p-5 hidden lg:flex flex-col">
                 <h3 className="font-bold text-white mb-4 uppercase tracking-widest text-xs flex items-center gap-2">
-                    <i className="fa-solid fa-tower-broadcast text-rose-500 animate-pulse"></i> Jonli Reyting
+                    <i className="fa-solid fa-tower-broadcast text-rose-500 animate-pulse"></i> { { ru: 'Живой Рейтинг', uz: 'Jonli Reyting', en: 'Live Leaderboard' }[lang] || 'Jonli Reyting' }
                 </h3>
                 
                 <div className="space-y-3 flex-1 overflow-y-auto">
@@ -429,12 +431,12 @@ const QuizTaking = ({ onFinish, user }) => {
                             </div>
                         ))
                     ) : (
-                        <div className="text-center py-8 text-slate-600 italic text-sm">Reyting yuklanmoqda...</div>
+                        <div className="text-center py-8 text-slate-600 italic text-sm">{ { ru: 'Рейтинг загружается...', uz: 'Reyting yuklanmoqda...', en: 'Loading leaderboard...' }[lang] || 'Reyting yuklanmoqda...' }</div>
                     )}
                 </div>
 
                 <div className="mt-4 p-3 bg-slate-900 rounded-xl border border-slate-700">
-                    <div className="text-[10px] text-slate-400 font-bold mb-2">Guruh nisbati</div>
+                    <div className="text-[10px] text-slate-400 font-bold mb-2">{ { ru: 'Соотношение группы', uz: 'Guruh nisbati', en: 'Group ratio' }[lang] || 'Guruh nisbati' }</div>
                     <div className="w-full bg-slate-800 rounded-full h-1.5">
                         <div className="bg-gradient-to-r from-blue-500 to-emerald-500 h-1.5 rounded-full w-[85%]"></div>
                     </div>

@@ -46,8 +46,17 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
       "Zakrytye i otkrytye travmy golovnogo mozga",
       "Vidy krovotechenij i metody ostanovki (nalozhenie zhguta)"
   ];
-  const medicalTopics = lang === 'ru' ? medicalTopicsRu : medicalTopicsUz;
-
+  const medicalTopicsEn = [
+      "Musculoskeletal fractures, transport immobilization, plaster technique",
+      "Chest and shoulder girdle injuries. Shoulder dislocations",
+      "Pelvic and spinal injuries. Shkolnikov anesthesia",
+      "Polytrauma and shock injuries. Resuscitation",
+      "Purulent diseases of bones and joints (Osteomyelitis)",
+      "Burn disease and frostbite. Principles of clinical care",
+      "Closed and open brain injuries",
+      "Types of bleeding and methods of stopping (tourniquet application)"
+  ];
+  const medicalTopics = { ru: medicalTopicsRu, uz: medicalTopicsUz, en: medicalTopicsEn }[lang] || medicalTopicsUz;
 
   const handleGenerateFromTopic = async (topicName) => {
       setIsUploading(true);
@@ -59,14 +68,14 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
           setProgress(80);
           if (!aiResult.success) {
               setProgress(0); setIsUploading(false);
-              setErrorMsg("AI qabul qilmadi: " + (aiResult.message || ""));
+              setErrorMsg({ ru: 'ИИ не принял: ', uz: 'AI qabul qilmadi: ', en: 'AI rejected: ' }[lang] + (aiResult.message || ""));
               return;
           }
           setGeneratedData(aiResult);
           setProgress(100);
       } catch (e) {
           setProgress(0); setIsUploading(false);
-          setErrorMsg(e.message || "AI tahlilida xato!");
+          setErrorMsg(e.message || { ru: 'Ошибка ИИ анализа!', uz: 'AI tahlilida xato!', en: 'AI analysis error!' }[lang]);
       }
   };
 
@@ -90,7 +99,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
         if (!aiResult.success) {
             setProgress(0);
             setIsUploading(false);
-            setErrorMsg(aiResult.message || "Tizim xatosi, fayl tibbiyotga oid emas!");
+            setErrorMsg(aiResult.message || { ru: 'Системная ошибка, файл не относится к медицине!', uz: "Tizim xatosi, fayl tibbiyotga oid emas!", en: 'System error, file is not related to medicine!' }[lang]);
             return;
         }
 
@@ -104,7 +113,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
         console.error("AI Service Error:", error);
         setProgress(0);
         setIsUploading(false);
-        setErrorMsg(error.message || "Faylni tahlil qilishda xatolik yuz berdi.");
+        setErrorMsg(error.message || { ru: 'Ошибка при анализе файла.', uz: 'Faylni tahlil qilishda xatolik yuz berdi.', en: 'An error occurred while analyzing the file.' }[lang]);
       }
     }
   };
@@ -123,13 +132,13 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
           });
           const link = `${window.location.origin}/test?id=${docRef.id}`;
           setPublishedLink(link);
-          alert(lang === 'ru' ? 'Учебный блок успешно сохранен на платформе!' : "O'quv bloki platformaga muvaffaqiyatli saqlandi!");
+          alert({ ru: 'Учебный блок успешно сохранен на платформе!', uz: "O'quv bloki platformaga muvaffaqiyatli saqlandi!", en: 'Study block successfully saved to platform!' }[lang] || "O'quv bloki platformaga muvaffaqiyatli saqlandi!");
           setProgress(0);
           setIsUploading(false);
           setGeneratedData(null);
       } catch (err) {
           console.error("Save error:", err);
-          alert(lang === 'ru' ? 'Ошибка сохранения!' : 'Saqlashda xatolik yuz berdi!');
+          alert({ ru: 'Ошибка сохранения!', uz: 'Saqlashda xatolik yuz berdi!', en: 'Error saving!' }[lang] || 'Saqlashda xatolik yuz berdi!');
       } finally {
           setIsSaving(false);
       }
@@ -172,7 +181,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
           setPublishedLink(link);
       } catch (err) {
           console.error("Publish local base error:", err);
-          alert("Bazani yuklashda xatolik!");
+          alert({ ru: 'Ошибка загрузки базы!', uz: 'Bazani yuklashda xatolik!', en: 'Error loading the database!' }[lang]);
       } finally {
           setIsPublishing(false);
       }
@@ -244,7 +253,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
               const aiResult = await generateMedicalContent(text);
 
               if (!aiResult.success) {
-                  results.push({ fileName: file.name, success: false, error: 'Tibbiy matn topilmadi' });
+                  results.push({ fileName: file.name, success: false, error: { ru: 'Медицинский текст не найден', uz: 'Tibbiy matn topilmadi', en: 'Medical text not found' }[lang] });
                   continue;
               }
 
@@ -290,26 +299,26 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
 
 
      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 max-w-7xl mx-auto">
-         <div className="bg-slate-800/80 backdrop-blur-xl p-6 rounded-xl border border-slate-700/50 shadow-lg">
+         <div className="bg-slate-900/80 backdrop-blur-xl p-6 rounded-xl border border-slate-700/50 shadow-lg hover:border-slate-500 transition-all">
             <div className="text-slate-400 text-sm font-bold uppercase mb-1">{t.tcStatsCourses}</div>
             <div className="text-3xl font-black text-white">12</div>
          </div>
-         <div className="bg-slate-800/80 backdrop-blur-xl p-6 rounded-xl border border-slate-700/50 shadow-lg">
+         <div className="bg-slate-900/80 backdrop-blur-xl p-6 rounded-xl border border-slate-700/50 shadow-lg hover:border-slate-500 transition-all">
             <div className="text-slate-400 text-sm font-bold uppercase mb-1">{t.tcStatsStudents}</div>
             <div className="text-3xl font-black text-blue-400">1,240</div>
          </div>
-         <div className="bg-slate-800/80 backdrop-blur-xl p-6 rounded-xl border border-slate-700/50 shadow-lg">
+         <div className="bg-slate-900/80 backdrop-blur-xl p-6 rounded-xl border border-slate-700/50 shadow-lg hover:border-slate-500 transition-all">
             <div className="text-slate-400 text-sm font-bold uppercase mb-1">{t.tcStatsCases}</div>
             <div className="text-3xl font-black text-indigo-400">45</div>
          </div>
-         <div className="bg-slate-800/80 backdrop-blur-xl p-6 rounded-xl border border-slate-700/50 shadow-lg">
+         <div className="bg-slate-900/80 backdrop-blur-xl p-6 rounded-xl border border-slate-700/50 shadow-lg hover:border-slate-500 transition-all">
             <div className="text-slate-400 text-sm font-bold uppercase mb-1">{t.tcStatsMastery}</div>
             <div className="text-3xl font-black text-emerald-400">82%</div>
          </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
-         <div className="bg-slate-800/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 shadow-lg">
+         <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 shadow-xl">
             <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-3">{t.tcSectionCreate}</h3>
             <div className="space-y-4">
                 {/* Topic Selection UI */}
@@ -364,9 +373,9 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                     <div className="bg-slate-900 rounded-lg p-6 border border-slate-700">
                         <div className="flex justify-between text-sm text-white font-bold mb-3">
                             <span>
-                                {progress < 50 ? <><i className="fa-solid fa-file-arrow-up text-blue-400 mr-2"></i> Fayl o'qilmoqda...</> :
-                                 progress < 100 ? <><i className="fa-solid fa-microchip text-indigo-400 mr-2"></i> AI Tahlil jarayoni (Test va Flashcardlar tuzilmoqda)...</> :
-                                 <><i className="fa-solid fa-check text-emerald-400 mr-2"></i> Jarayon muvaffaqiyatli yakunlandi!</>}
+                                {progress < 50 ? <><i className="fa-solid fa-file-arrow-up text-blue-400 mr-2"></i> { { ru: 'Чтение файла...', uz: 'Fayl o\'qilmoqda...', en: 'Reading file...' }[lang] || 'Fayl o\'qilmoqda...' }</> :
+                                 progress < 100 ? <><i className="fa-solid fa-microchip text-indigo-400 mr-2"></i> { { ru: 'Процесс ИИ Анализа...', uz: 'AI Tahlil jarayoni (Test va Flashcardlar tuzilmoqda)...', en: 'AI Analysis process...' }[lang] || 'AI Tahlil jarayoni (Test va Flashcardlar tuzilmoqda)...' }</> :
+                                 <><i className="fa-solid fa-check text-emerald-400 mr-2"></i> { { ru: 'Процесс успешно завершен!', uz: 'Jarayon muvaffaqiyatli yakunlandi!', en: 'Process successfully completed!' }[lang] || 'Jarayon muvaffaqiyatli yakunlandi!' }</>}
                             </span>
                             <span className={progress === 100 ? "text-emerald-400" : "text-blue-400"}>{progress}%</span>
                         </div>
@@ -376,23 +385,24 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                             </div>
                         </div>
                         <p className="text-xs text-slate-500 italic">
-                            {progress < 30 ? "Matn ajratilmoqda..." :
-                             progress < 70 ? "Parcha-parcha mantiqiy blolklarga bo'linmoqda..." :
-                             progress < 100 ? "Tibbiy atamalar boyitilib, mos xotira kartalari izlanmoqda..." :
-                             "Barcha platformaga yuklandi! Talabalar endi ushbu fayldan o'rganishlari mumkin."}
+                            {progress < 30 ? ({ ru: 'Извлечение текста...', uz: 'Matn ajratilmoqda...', en: 'Extracting text...' }[lang] || 'Matn ajratilmoqda...') :
+                             progress < 70 ? ({ ru: 'Разделение на логические блоки...', uz: 'Parcha-parcha mantiqiy blolklarga bo\'linmoqda...', en: 'Dividing into logical blocks...' }[lang] || 'Parcha-parcha mantiqiy blolklarga bo\'linmoqda...') :
+                             progress < 100 ? ({ ru: 'Обогащение медицинскими терминами...', uz: 'Tibbiy atamalar boyitilib, mos xotira kartalari izlanmoqda...', en: 'Enriching with medical terms...' }[lang] || 'Tibbiy atamalar boyitilib, mos xotira kartalari izlanmoqda...') :
+                             ({ ru: 'Все загружено на платформу! Студенты теперь могут изучать.', uz: 'Barcha platformaga yuklandi! Talabalar endi ushbu fayldan o\'rganishlari mumkin.', en: 'All uploaded to the platform! Students can now learn from this file.' }[lang] || 'Barcha platformaga yuklandi! Talabalar endi ushbu fayldan o\'rganishlari mumkin.')}
                         </p>
                         
                         {progress === 100 && (
                             <div className="mt-4 flex flex-wrap gap-3">
                                 <button onClick={() => {setProgress(0); setIsUploading(false); setGeneratedData(null);}} className="px-4 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-lg text-sm text-white transition-colors">
-                                    <i className="fa-solid fa-rotate-left mr-2"></i>Yangi boshlash
+                                    <i className="fa-solid fa-rotate-left mr-2"></i>{ { ru: 'Начать заново', uz: 'Yangi boshlash', en: 'Start over' }[lang] || 'Yangi boshlash' }
                                 </button>
                                 <button onClick={() => setShowLiveRoom(true)} className="px-5 py-2 bg-rose-600 hover:bg-rose-500 rounded-lg text-sm text-white font-bold transition-colors shadow-lg shadow-rose-900/40">
-                                    <i className="fa-solid fa-tower-broadcast mr-2 animate-pulse"></i>{lang === 'ru' ? 'Live Quiz (Аудитория)' : 'Live Quiz'}
+                                    <i className="fa-solid fa-tower-broadcast mr-2 animate-pulse"></i>
+                                    {{ ru: 'Live Quiz (Аудитория)', uz: 'Live Quiz', en: 'Live Quiz (Classroom)' }[lang] || 'Live Quiz'}
                                 </button>
                                 <button onClick={handleSaveToPlatform} disabled={isSaving} className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm text-white font-bold transition-colors shadow-lg shadow-emerald-900/40 ml-auto">
                                     {isSaving ? <i className="fa-solid fa-circle-notch fa-spin mr-2"></i> : <i className="fa-solid fa-cloud-arrow-up mr-2"></i>}
-                                    {lang === 'ru' ? 'Сохранить на Платформу' : 'Platformaga Saqlash'}
+                                    {{ ru: 'Сохранить на Платформу', uz: 'Platformaga Saqlash', en: 'Save to Platform' }[lang] || 'Platformaga Saqlash'}
                                 </button>
                             </div>
                         )}
@@ -403,14 +413,14 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                 {progress === 100 && generatedData && (
                     <div className="bg-slate-900 rounded-xl p-6 border-2 border-emerald-500 mt-4 max-h-[600px] overflow-y-auto custom-scrollbar">
                         <h4 className="text-emerald-400 font-black mb-4 text-xl border-b border-slate-700 pb-4">
-                           ✅ 15/2/2/1 Imtihon Bloki Tayyor!
+                           ✅ { { ru: '15/2/2/1 Экзаменационный Блок Готов!', uz: '15/2/2/1 Imtihon Bloki Tayyor!', en: '15/2/2/1 Exam Block Ready!' }[lang] || '15/2/2/1 Imtihon Bloki Tayyor!' }
                         </h4>
                         
                         <div className="space-y-8">
                             {/* TESTS */}
                             {generatedData.tests && (
                                 <div>
-                                    <h5 className="text-lg font-bold text-white mb-3 flex items-center"><span className="bg-blue-600 text-xs px-2 py-1 rounded mr-2">15 ta</span> Nazariy Testlar</h5>
+                                     <h5 className="text-lg font-bold text-white mb-3 flex items-center"><span className="bg-blue-600 text-xs px-2 py-1 rounded mr-2">15 ta</span> { { ru: 'Теоретические Тесты', uz: 'Nazariy Testlar', en: 'Theoretical Tests' }[lang] || 'Nazariy Testlar' }</h5>
                                     <div className="space-y-3">
                                         {generatedData.tests.map((quiz, idx) => (
                                             <div key={idx} className="bg-slate-800 p-4 rounded-lg border border-slate-700">
@@ -431,14 +441,14 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                             {/* CASES */}
                             {generatedData.cases && (
                                 <div>
-                                    <h5 className="text-lg font-bold text-white mb-3 flex items-center"><span className="bg-rose-600 text-xs px-2 py-1 rounded mr-2">2 ta</span> Vaziyatli Masalalar</h5>
+                                     <h5 className="text-lg font-bold text-white mb-3 flex items-center"><span className="bg-rose-600 text-xs px-2 py-1 rounded mr-2">2 ta</span> { { ru: 'Ситуационные Задачи', uz: 'Vaziyatli Masalalar', en: 'Case Studies' }[lang] || 'Vaziyatli Masalalar' }</h5>
                                     <div className="space-y-3">
                                         {generatedData.cases.map((c, idx) => (
                                             <div key={idx} className="bg-slate-800 p-4 rounded-lg border-l-4 border-l-rose-500">
                                                 <p className="text-rose-400 font-bold text-sm mb-1">{c.title}</p>
                                                 <p className="text-slate-300 text-xs italic mb-2">"{c.scenario}"</p>
-                                                <p className="text-slate-200 text-sm font-bold mb-2">S: {c.question}</p>
-                                                <p className="text-emerald-400 text-xs bg-emerald-900/40 p-2 rounded">J: {c.answer}</p>
+                                                 <p className="text-slate-200 text-sm font-bold mb-2">{ { ru: 'В:', uz: 'S:', en: 'Q:' }[lang] || 'S:' } {c.question}</p>
+                                                 <p className="text-emerald-400 text-xs bg-emerald-900/40 p-2 rounded">{ { ru: 'О:', uz: 'J:', en: 'A:' }[lang] || 'J:' } {c.answer}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -448,7 +458,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                             {/* X-RAYS */}
                             {generatedData.xrays && (
                                 <div>
-                                    <h5 className="text-lg font-bold text-white mb-3 flex items-center"><span className="bg-violet-600 text-xs px-2 py-1 rounded mr-2">2 ta</span> Rentgenogramma</h5>
+                                     <h5 className="text-lg font-bold text-white mb-3 flex items-center"><span className="bg-violet-600 text-xs px-2 py-1 rounded mr-2">2 ta</span> { { ru: 'Рентгенограмма', uz: 'Rentgenogramma', en: 'X-ray' }[lang] || 'Rentgenogramma' }</h5>
                                     <div className="grid grid-cols-1 gap-3">
                                         {generatedData.xrays.map((x, idx) => (
                                             <div key={idx} className="bg-slate-800 p-4 rounded-lg border border-slate-700 flex gap-4">
@@ -470,7 +480,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                             {/* PRACTICAL */}
                             {generatedData.practical && (
                                 <div>
-                                    <h5 className="text-lg font-bold text-white mb-3 flex items-center"><span className="bg-amber-600 text-xs px-2 py-1 rounded mr-2">1 ta</span> Amaliyot</h5>
+                                     <h5 className="text-lg font-bold text-white mb-3 flex items-center"><span className="bg-amber-600 text-xs px-2 py-1 rounded mr-2">1 ta</span> { { ru: 'Практика', uz: 'Amaliyot', en: 'Practice' }[lang] || 'Amaliyot' }</h5>
                                     <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
                                         <p className="text-amber-400 font-bold text-sm mb-3">{generatedData.practical.title}</p>
                                         <ul className="list-decimal list-inside text-xs text-slate-300 space-y-1">
@@ -487,16 +497,16 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
             </div>
          </div>
 
-         <div className="bg-slate-800/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 shadow-lg overflow-y-auto max-h-[90vh] custom-scrollbar">
+         <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 shadow-xl overflow-y-auto max-h-[90vh] custom-scrollbar">
             <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-3">{t.tcSectionStatsTitle}</h3>
 
             {/* === Ko'p Word/PDF Yuklash === */}
             <div className="mb-6 p-5 rounded-xl bg-blue-500/5 border border-blue-500/20">
                 <h4 className="text-sm font-black text-blue-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-                    <i className="fa-regular fa-file-word"></i> Ko'p Word / PDF Yuklash (AI)
+                    <i className="fa-regular fa-file-word"></i> { { ru: 'Массовая загрузка Word/PDF (ИИ)', uz: 'Ko\'p Word / PDF Yuklash (AI)', en: 'Bulk Word/PDF Upload (AI)' }[lang] || 'Ko\'p Word / PDF Yuklash (AI)' }
                 </h4>
                 <p className="text-slate-400 text-xs mb-4">
-                    Bir vaqtda bir necha <code className="bg-slate-900 px-1 rounded">.docx</code> yoki <code className="bg-slate-900 px-1 rounded">.pdf</code> fayl tanlang. Har biridan AI avtomatik exam yaratadi.
+                    { { ru: 'Выберите несколько файлов .docx или .pdf одновременно. ИИ автоматически создаст экзамен из каждого.', uz: 'Bir vaqtda bir necha .docx yoki .pdf fayl tanlang. Har biridan AI avtomatik exam yaratadi.', en: 'Select multiple .docx or .pdf files at once. AI will automatically create an exam from each.' }[lang] || 'Bir vaqtda bir necha .docx yoki .pdf fayl tanlang. Har biridan AI avtomatik exam yaratadi.' }
                 </p>
 
                 <label className={`w-full py-3 flex items-center justify-center gap-2 font-black text-sm rounded-xl transition-all cursor-pointer border-2 border-dashed ${isUploadingMultiDoc ? 'border-slate-600 text-slate-500 cursor-not-allowed' : 'border-blue-600 text-blue-400 hover:bg-blue-500/10'}`}>
@@ -506,7 +516,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                             {multiDocProgress.current}/{multiDocProgress.total} — <span className="text-slate-400 italic truncate max-w-[200px] inline-block align-bottom">{multiDocProgress.fileName}</span>
                         </div>
                     ) : (
-                        <><i className="fa-solid fa-plus"></i> Word / PDF Fayllarni Tanlash</>
+                        <><i className="fa-solid fa-plus"></i> { { ru: 'Выбрать файлы Word/PDF', uz: 'Word / PDF Fayllarni Tanlash', en: 'Select Word/PDF Files' }[lang] || 'Word / PDF Fayllarni Tanlash' }</>
                     )}
                     <input type="file" accept=".docx,.pdf,.pptx" multiple className="hidden" disabled={isUploadingMultiDoc} onChange={handleMultiDocUpload} />
                 </label>
@@ -514,7 +524,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                 {multiDocResults.length > 0 && (
                     <div className="mt-4 space-y-3">
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                            {multiDocResults.filter(r => r.success).length}/{multiDocResults.length} ta muvaffaqiyatli
+                            {multiDocResults.filter(r => r.success).length}/{multiDocResults.length} { { ru: 'успешно', uz: 'ta muvaffaqiyatli', en: 'successful' }[lang] || 'ta muvaffaqiyatli' }
                         </p>
                         {multiDocResults.map((r, i) => (
                             <div key={i} className={`p-3 rounded-xl border ${r.success ? 'bg-blue-500/5 border-blue-500/30' : 'bg-rose-500/10 border-rose-500/30'}`}>
@@ -544,7 +554,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                             </div>
                         ))}
                         <button onClick={() => setMultiDocResults([])} className="w-full py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold rounded-lg transition-colors">
-                            <i className="fa-solid fa-trash mr-1"></i> Natijalarni tozalash
+                            <i className="fa-solid fa-trash mr-1"></i> { { ru: 'Очистить результаты', uz: 'Natijalarni tozalash', en: 'Clear results' }[lang] || 'Natijalarni tozalash' }
                         </button>
                     </div>
                 )}
@@ -553,10 +563,10 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
             {/* Tayyor Baza yuklash */}
             <div className="mb-6 p-5 rounded-xl bg-indigo-500/5 border border-indigo-500/20">
                 <h4 className="text-sm font-black text-indigo-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-                    <i className="fa-solid fa-database"></i> Tayyor Ma'lumotlar Bazasi
+                    <i className="fa-solid fa-database"></i> { { ru: 'Готовая база данных', uz: 'Tayyor Ma\'lumotlar Bazasi', en: 'Ready Database' }[lang] || 'Tayyor Ma\'lumotlar Bazasi' }
                 </h4>
                 <p className="text-slate-400 text-xs mb-4">
-                    {methodologicalQuiz.length} ta nazariy test, {xrayCases.length} ta rentgen va {caseStudies.length} ta vaziyatli masaladan iborat tayyor bazani bir tugma bilan platformaga yuklab, talabalar uchun havola olish.
+                    { { ru: `Загрузить готовую базу из ${methodologicalQuiz.length} теор. тестов, ${xrayCases.length} рентгенов и ${caseStudies.length} сит. задач на платформу одним кликом и получить ссылку для студентов.`, uz: `${methodologicalQuiz.length} ta nazariy test, ${xrayCases.length} ta rentgen va ${caseStudies.length} ta vaziyatli masaladan iborat tayyor bazani bir tugma bilan platformaga yuklab, talabalar uchun havola olish.`, en: `Upload a ready database of ${methodologicalQuiz.length} theoretical tests, ${xrayCases.length} x-rays, and ${caseStudies.length} case studies to the platform with one click and get a link for students.` }[lang] || `${methodologicalQuiz.length} ta nazariy test, ${xrayCases.length} ta rentgen va ${caseStudies.length} ta vaziyatli masaladan iborat tayyor bazani bir tugma bilan platformaga yuklab, talabalar uchun havola olish.` }
                 </p>
                 <button
                     onClick={handlePublishLocalBase}

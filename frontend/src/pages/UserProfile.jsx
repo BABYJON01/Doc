@@ -13,9 +13,9 @@ const UserProfile = ({ user, role, onLogout }) => {
                         <i className="fa-solid fa-id-card"></i>
                     </div>
                     <div>
-                        <h2 className="text-2xl font-black text-white">{lang === 'ru' ? 'Профиль пользователя' : 'Foydalanuvchi profili'}</h2>
+                        <h2 className="text-2xl font-black text-white">{ { ru: 'Профиль пользователя', uz: 'Foydalanuvchi profili', en: 'User Profile' }[lang] || 'Foydalanuvchi profili' }</h2>
                         <p className="text-slate-400 text-sm mt-1">
-                            {lang === 'ru' ? 'Ваши личные данные и настройки' : 'Shaxsiy ma\'lumotlar va sozlamalar'}
+                            { { ru: 'Ваши личные данные и настройки', uz: 'Shaxsiy ma\'lumotlar va sozlamalar', en: 'Your personal information and settings' }[lang] || 'Shaxsiy ma\'lumotlar va sozlamalar' }
                         </p>
                     </div>
                 </div>
@@ -30,43 +30,43 @@ const UserProfile = ({ user, role, onLogout }) => {
                             className="w-32 h-32 rounded-full border-4 border-slate-900 shadow-xl object-cover"
                         />
                         <div className="text-center sm:text-left mb-2">
-                            <h3 className={`text-3xl font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{user?.displayName || "Foydalanuvchi"}</h3>
+                            <h3 className={`text-3xl font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{user?.displayName || ({ ru: 'Пользователь', uz: 'Foydalanuvchi', en: 'User' }[lang] || 'Foydalanuvchi')}</h3>
                             <p className="text-indigo-400 font-bold tracking-widest uppercase text-sm mt-1">
-                                {role === 'teacher' ? (lang === 'ru' ? 'ПРЕПОДАВАТЕЛЬ' : 'O\'QITUVCHI') : (role === 'admin' ? 'ADMIN' : (lang === 'ru' ? 'СТУДЕНТ' : 'TALABA'))}
+                                {role === 'teacher' ? ({ ru: 'ПРЕПОДАВАТЕЛЬ', uz: 'O\'QITUVCHI', en: 'TEACHER' }[lang] || 'O\'QITUVCHI') : (role === 'admin' ? 'ADMIN' : ({ ru: 'СТУДЕНТ', uz: 'TALABA', en: 'STUDENT' }[lang] || 'TALABA'))}
                             </p>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
                         <div className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
-                            <h4 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Aloqa ma'lumotlari</h4>
+                            <h4 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">{ { ru: 'Контактные данные', uz: 'Aloqa ma\'lumotlari', en: 'Contact Information' }[lang] || 'Aloqa ma\'lumotlari' }</h4>
                             
                             <div className="space-y-4">
                                 <div>
-                                    <p className="text-xs text-slate-500 mb-1">Elektron pochta</p>
-                                    <p className={`font-bold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>{user?.email || "Kiritilmagan"}</p>
+                                    <p className="text-xs text-slate-500 mb-1">{ { ru: 'Электронная почта', uz: 'Elektron pochta', en: 'Email' }[lang] || 'Elektron pochta' }</p>
+                                    <p className={`font-bold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>{user?.email || ({ ru: 'Не указан', uz: 'Kiritilmagan', en: 'Not provided' }[lang] || 'Kiritilmagan')}</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs text-slate-500 mb-1">Telefon raqam</p>
-                                    <p className={`font-bold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>{user?.phoneNumber || "Kiritilmagan"}</p>
+                                    <p className="text-xs text-slate-500 mb-1">{ { ru: 'Номер телефона', uz: 'Telefon raqam', en: 'Phone number' }[lang] || 'Telefon raqam' }</p>
+                                    <p className={`font-bold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>{user?.phoneNumber || ({ ru: 'Не указан', uz: 'Kiritilmagan', en: 'Not provided' }[lang] || 'Kiritilmagan')}</p>
                                 </div>
                             </div>
                         </div>
 
                         <div className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
-                            <h4 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Tizim holati</h4>
+                            <h4 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">{ { ru: 'Статус системы', uz: 'Tizim holati', en: 'System Status' }[lang] || 'Tizim holati' }</h4>
                             
                             <div className="space-y-4">
                                 <div>
-                                    <p className="text-xs text-slate-500 mb-1">Ro'yxatdan o'tgan sana</p>
+                                    <p className="text-xs text-slate-500 mb-1">{ { ru: 'Дата регистрации', uz: 'Ro\'yxatdan o\'tgan sana', en: 'Registration Date' }[lang] || 'Ro\'yxatdan o\'tgan sana' }</p>
                                     <p className={`font-bold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>
-                                        {user?.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : "Noma'lum"}
+                                        {user?.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : ({ ru: 'Неизвестно', uz: 'Noma\'lum', en: 'Unknown' }[lang] || 'Noma\'lum')}
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="text-xs text-slate-500 mb-1">Oxirgi kirish</p>
+                                    <p className="text-xs text-slate-500 mb-1">{ { ru: 'Последний вход', uz: 'Oxirgi kirish', en: 'Last login' }[lang] || 'Oxirgi kirish' }</p>
                                     <p className={`font-bold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>
-                                        {user?.metadata?.lastSignInTime ? new Date(user.metadata.lastSignInTime).toLocaleString() : "Noma'lum"}
+                                        {user?.metadata?.lastSignInTime ? new Date(user.metadata.lastSignInTime).toLocaleString() : ({ ru: 'Неизвестно', uz: 'Noma\'lum', en: 'Unknown' }[lang] || 'Noma\'lum')}
                                     </p>
                                 </div>
                             </div>
@@ -75,7 +75,7 @@ const UserProfile = ({ user, role, onLogout }) => {
                     
                     <div className="mt-8 flex justify-end">
                         <button onClick={onLogout} className="px-6 py-3 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white border border-rose-500/30 font-bold rounded-xl transition-all shadow-lg">
-                            <i className="fa-solid fa-right-from-bracket mr-2"></i> Tizimdan chiqish
+                            <i className="fa-solid fa-right-from-bracket mr-2"></i> { { ru: 'Выйти', uz: 'Tizimdan chiqish', en: 'Log out' }[lang] || 'Tizimdan chiqish' }
                         </button>
                     </div>
                 </div>

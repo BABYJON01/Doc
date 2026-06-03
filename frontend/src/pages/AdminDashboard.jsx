@@ -6,7 +6,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase';
 
 const AdminDashboard = ({ user, onLogout }) => {
-    const { theme } = useApp();
+    const { theme, lang } = useApp();
     const [teachers, setTeachers] = useState([]);
     const [loading, setLoading] = useState(true);
     
@@ -181,9 +181,9 @@ const AdminDashboard = ({ user, onLogout }) => {
             <div className="mb-8 flex justify-between items-end">
                 <div>
                     <h1 className={`text-2xl sm:text-3xl font-black mb-2 tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                        Boshqaruv Paneli
+                        {{ ru: 'Панель Управления', uz: 'Boshqaruv Paneli', en: 'Control Panel' }[lang] || 'Boshqaruv Paneli'}
                     </h1>
-                    <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Tizimdagi barcha o'qituvchilar va ma'lumotlar tahlili.</p>
+                    <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{{ ru: 'Все преподаватели и аналитика данных.', uz: 'Tizimdagi barcha o\'qituvchilar va ma\'lumotlar tahlili.', en: 'All teachers and data analytics in the system.' }[lang] || 'Tizimdagi barcha o\'qituvchilar va ma\'lumotlar tahlili.'}</p>
                 </div>
             </div>
 
@@ -191,7 +191,7 @@ const AdminDashboard = ({ user, onLogout }) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className={`p-6 rounded-2xl shadow-sm border ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className={`text-sm font-bold uppercase ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Jami O'qituvchilar</h3>
+                        <h3 className={`text-sm font-bold uppercase ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{{ ru: 'Всего Преподавателей', uz: 'Jami O\'qituvchilar', en: 'Total Teachers' }[lang] || 'Jami O\'qituvchilar'}</h3>
                         <div className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center">
                             <i className="fa-solid fa-users"></i>
                         </div>
@@ -207,7 +207,7 @@ const AdminDashboard = ({ user, onLogout }) => {
 
                 <div className={`p-6 rounded-2xl shadow-sm border ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className={`text-sm font-bold uppercase ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Yuklangan Ma'ruzalar</h3>
+                        <h3 className={`text-sm font-bold uppercase ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{{ ru: 'Загруженные Лекции', uz: 'Yuklangan Ma\'ruzalar', en: 'Uploaded Lectures' }[lang] || 'Yuklangan Ma\'ruzalar'}</h3>
                         <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
                             <i className="fa-solid fa-file-pdf"></i>
                         </div>
@@ -221,7 +221,7 @@ const AdminDashboard = ({ user, onLogout }) => {
 
                 <div className={`p-6 rounded-2xl shadow-sm border ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className={`text-sm font-bold uppercase ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Yaratilgan Testlar</h3>
+                        <h3 className={`text-sm font-bold uppercase ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{{ ru: 'Созданные Тесты', uz: 'Yaratilgan Testlar', en: 'Created Tests' }[lang] || 'Yaratilgan Testlar'}</h3>
                         <div className="w-10 h-10 rounded-full bg-purple-500/10 text-purple-500 flex items-center justify-center">
                             <i className="fa-solid fa-list-check"></i>
                         </div>
@@ -237,7 +237,7 @@ const AdminDashboard = ({ user, onLogout }) => {
             {/* Teachers Table Header */}
             <div className={`p-6 rounded-2xl shadow-sm border ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                    <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Ro'yxatdan o'tgan O'qituvchilar</h2>
+                    <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{{ ru: 'Зарегистрированные Преподаватели', uz: 'Ro\'yxatdan o\'tgan O\'qituvchilar', en: 'Registered Teachers' }[lang] || 'Ro\'yxatdan o\'tgan O\'qituvchilar'}</h2>
                     <div className="flex items-center gap-3">
                         <button 
                             onClick={handleClearAllTests}
@@ -262,11 +262,11 @@ const AdminDashboard = ({ user, onLogout }) => {
                     <table className="w-full text-left text-sm">
                         <thead className={`text-xs uppercase border-b ${isDark ? 'text-slate-400 border-slate-800' : 'text-slate-500 border-slate-200'}`}>
                             <tr>
-                                <th className="py-4 px-4 font-bold">O'qituvchi</th>
-                                <th className="py-4 px-4 font-bold">Mutaxassislik</th>
-                                <th className="py-4 px-4 font-bold text-center">Ma'ruzalar</th>
-                                <th className="py-4 px-4 font-bold text-center">Testlar</th>
-                                <th className="py-4 px-4 font-bold text-right">Amal</th>
+                                <th className="py-4 px-4 font-bold">{{ ru: 'Преподаватель', uz: 'O\'qituvchi', en: 'Teacher' }[lang] || 'O\'qituvchi'}</th>
+                                <th className="py-4 px-4 font-bold">{{ ru: 'Специальность', uz: 'Mutaxassislik', en: 'Specialty' }[lang] || 'Mutaxassislik'}</th>
+                                <th className="py-4 px-4 font-bold text-center">{{ ru: 'Лекции', uz: 'Ma\'ruzalar', en: 'Lectures' }[lang] || 'Ma\'ruzalar'}</th>
+                                <th className="py-4 px-4 font-bold text-center">{{ ru: 'Тесты', uz: 'Testlar', en: 'Tests' }[lang] || 'Testlar'}</th>
+                                <th className="py-4 px-4 font-bold text-right">{{ ru: 'Действие', uz: 'Amal', en: 'Action' }[lang] || 'Amal'}</th>
                             </tr>
                         </thead>
                         <tbody>

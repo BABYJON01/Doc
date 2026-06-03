@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import Groq from "groq-sdk";
 import mammoth from "mammoth";
 import * as pdfjsLib from "pdfjs-dist";
+import JSZip from "jszip";
 
 // ── PDF.js worker ─────────────────────────────────────────────────────────────
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
@@ -154,8 +155,33 @@ export const extractTextFromFile = async (file) => {
             fullText += textContent.items.map(item => item.str).join(" ") + "\n";
         }
         return fullText;
+    } else if (filename.endsWith(".pptx")) {
+        const zip = new JSZip();
+        const loadedZip = await zip.loadAsync(arrayBuffer);
+        let fullText = "";
+        const slideFiles = Object.keys(loadedZip.files).filter(name => name.startsWith("ppt/slides/slide") && name.endsWith(".xml"));
+        
+        // Sort slides numerically so they appear in order
+        slideFiles.sort((a, b) => {
+            const numA = parseInt(a.replace(/\D/g, '')) || 0;
+            const numB = parseInt(b.replace(/\D/g, '')) || 0;
+            return numA - numB;
+        });
+
+        for (const filename of slideFiles) {
+            const content = await loadedZip.file(filename).async("string");
+            const matches = content.match(/<a:t[^>]*>([\s\S]*?)<\/a:t>/g);
+            if (matches) {
+                for (const match of matches) {
+                    const textContent = match.replace(/<a:t[^>]*>/, '').replace(/<\/a:t>/, '');
+                    fullText += textContent + " ";
+                }
+                fullText += "\n\n";
+            }
+        }
+        return fullText;
     } else {
-        throw new Error("Faqat .docx va .pdf fayllar qo'llab-quvvatlanadi.");
+        throw new Error("Faqat .docx, .pdf va .pptx fayllar qo'llab-quvvatlanadi.");
     }
 };
 

@@ -357,23 +357,12 @@ const TeacherTests = ({ user, onLogout }) => {
             let testsArray = [];
             const fileNameLower = file.name.toLowerCase();
 
-            if (fileNameLower.endsWith(".json")) {
-                const text = await file.text();
-                const data = JSON.parse(text); 
-                
-                if (Array.isArray(data)) {
-                    testsArray = data;
-                } else if (data.tests && Array.isArray(data.tests)) {
-                    testsArray = data.tests;
-                } else {
-                    throw new Error("JSON faylida testlar topilmadi (array yoki {tests: []} kutilmoqda).");
-                }
-            } else if (fileNameLower.endsWith(".docx") || fileNameLower.endsWith(".pdf")) {
+            if (fileNameLower.endsWith(".docx") || fileNameLower.endsWith(".pdf") || fileNameLower.endsWith(".pptx")) {
                 const text = await extractTextFromFile(file);
                 setDebugText(text); // Save raw text for debugging
                 testsArray = parseDocumentTests(text);
             } else {
-                throw new Error("Faqat .json, .docx yoki .pdf fayllarni yuklashingiz mumkin.");
+                throw new Error("Faqat .docx, .pdf yoki .pptx fayllarni yuklashingiz mumkin.");
             }
 
             const totalTests = testsArray.length;
@@ -441,26 +430,26 @@ const TeacherTests = ({ user, onLogout }) => {
     };
 
     const handleDeleteExam = async (examId, title) => {
-        if (window.confirm(lang === 'ru' ? `Вы уверены, что хотите удалить "${title}"?` : `Haqiqatan ham "${title}" nomli bazani o'chirmoqchimisiz?`)) {
+        if (window.confirm({ ru: `Вы уверены, что хотите удалить "${title}"?`, uz: `Haqiqatan ham "${title}" nomli bazani o'chirmoqchimisiz?`, en: `Are you sure you want to delete "${title}"?` }[lang] || `Haqiqatan ham "${title}" nomli bazani o'chirmoqchimisiz?`)) {
             try {
                 await deleteDoc(doc(db, 'exams', examId));
                 setMyExams(prev => prev.filter(e => e.id !== examId));
             } catch (err) {
                 console.error("Error deleting exam:", err);
-                alert("O'chirishda xatolik yuz berdi!");
+                alert({ ru: 'Ошибка при удалении!', uz: 'O\'chirishda xatolik yuz berdi!', en: 'Error deleting!' }[lang] || "O'chirishda xatolik yuz berdi!");
             }
         }
     };
 
     const handleEditTitle = async (examId, currentTitle) => {
-        const newTitle = window.prompt(lang === 'ru' ? 'Введите новое название:' : 'Yangi nomni kiriting:', currentTitle);
+        const newTitle = window.prompt({ ru: 'Введите новое название:', uz: 'Yangi nomni kiriting:', en: 'Enter new title:' }[lang] || 'Yangi nomni kiriting:', currentTitle);
         if (newTitle && newTitle.trim() !== "" && newTitle !== currentTitle) {
             try {
                 await updateDoc(doc(db, 'exams', examId), { title: newTitle.trim() });
                 setMyExams(prev => prev.map(e => e.id === examId ? { ...e, title: newTitle.trim() } : e));
             } catch (err) {
                 console.error("Error updating exam title:", err);
-                alert("Yangilashda xatolik!");
+                alert({ ru: 'Ошибка при обновлении!', uz: 'Yangilashda xatolik!', en: 'Error updating!' }[lang] || "Yangilashda xatolik!");
             }
         }
     };
@@ -473,8 +462,8 @@ const TeacherTests = ({ user, onLogout }) => {
             
             if (newStatus === 'published') {
                 await addDoc(collection(db, 'notifications'), {
-                    title: lang === 'ru' ? "Новый тест открыт!" : "Yangi test ochildi!",
-                    desc: lang === 'ru' ? `Тест "${examTitle}" теперь доступен для студентов.` : `O'qituvchi "${examTitle}" testiga ruxsat berdi.`,
+                    title: { ru: "Новый тест открыт!", uz: "Yangi test ochildi!", en: "New test opened!" }[lang] || "Yangi test ochildi!",
+                    desc: { ru: `Тест "${examTitle}" теперь доступен для студентов.`, uz: `O'qituvchi "${examTitle}" testiga ruxsat berdi.`, en: `Test "${examTitle}" is now available for students.` }[lang] || `O'qituvchi "${examTitle}" testiga ruxsat berdi.`,
                     type: 'upload',
                     targetRole: 'student',
                     createdAt: serverTimestamp()
@@ -482,12 +471,12 @@ const TeacherTests = ({ user, onLogout }) => {
             }
         } catch (err) {
             console.error("Error updating exam status:", err);
-            alert("Holatni o'zgartirishda xatolik yuz berdi!");
+            alert({ ru: 'Ошибка при изменении статуса!', uz: 'Holatni o\'zgartirishda xatolik yuz berdi!', en: 'Error changing status!' }[lang] || "Holatni o'zgartirishda xatolik yuz berdi!");
         }
     };
 
     const handleSetLimit = async (examId, currentLimit, totalTests) => {
-        const input = window.prompt(lang === 'ru' ? `Введите количество вопросов для теста (Макс: ${totalTests}):` : `Talabalarga beriladigan savollar sonini kiriting (Maksimal: ${totalTests}):`, currentLimit || totalTests);
+        const input = window.prompt({ ru: `Введите количество вопросов для теста (Макс: ${totalTests}):`, uz: `Talabalarga beriladigan savollar sonini kiriting (Maksimal: ${totalTests}):`, en: `Enter the number of questions for the test (Max: ${totalTests}):` }[lang] || `Talabalarga beriladigan savollar sonini kiriting (Maksimal: ${totalTests}):`, currentLimit || totalTests);
         if (input !== null) {
             const limit = parseInt(input);
             if (!isNaN(limit) && limit > 0) {
@@ -496,10 +485,10 @@ const TeacherTests = ({ user, onLogout }) => {
                     setMyExams(prev => prev.map(e => e.id === examId ? { ...e, limit: limit } : e));
                 } catch (err) {
                     console.error("Error updating limit:", err);
-                    alert("Cheklovni o'rnatishda xatolik!");
+                    alert({ ru: 'Ошибка при установке лимита!', uz: 'Cheklovni o\'rnatishda xatolik!', en: 'Error setting limit!' }[lang] || "Cheklovni o'rnatishda xatolik!");
                 }
             } else {
-                alert(lang === 'ru' ? "Пожалуйста, введите правильное число!" : "Iltimos, to'g'ri son kiriting!");
+                alert({ ru: "Пожалуйста, введите правильное число!", uz: "Iltimos, to'g'ri son kiriting!", en: "Please enter a valid number!" }[lang] || "Iltimos, to'g'ri son kiriting!");
             }
         }
     };
@@ -512,40 +501,36 @@ const TeacherTests = ({ user, onLogout }) => {
                         <i className="fa-solid fa-list-check"></i>
                     </div>
                     <div>
-                        <h2 className="text-2xl font-black text-white">{lang === 'ru' ? 'База тестов' : 'Testlar bazasi'}</h2>
-                        <p className="text-slate-400 text-sm mt-1">
-                            {lang === 'ru' 
-                                ? 'Управляйте тестами и загружайте массово (JSON).'
-                                : 'Testlarni boshqarish va ommaviy yuklash (JSON formatida).'}
-                        </p>
-                    </div>
-                </div>
-
-                {/* YUKLASH BO'LIMI */}
-                <div className="bg-slate-900 rounded-2xl p-6 md:p-8 border border-slate-700 shadow-xl mb-8">
-                    <h3 className="text-lg font-bold text-white mb-2">{lang === 'ru' ? 'Массовая загрузка (до 3000 тестов)' : 'Ommaviy yuklash (3000 tagacha test)'}</h3>
-                    <p className="text-slate-400 text-sm mb-6">
-                        {lang === 'ru' 
-                            ? 'Выберите JSON, Word (.docx) или PDF файл с вопросами. Система автоматически разобьет их на части (по 500 тестов) для безопасности загрузки.'
-                            : 'Testlar bilan to\'la JSON, Word (.docx) yoki PDF faylini tanlang. Tizim avtomatik ravishda testlarni o\'qib, 500 tadan bo\'lib bazaga yuklaydi.'}
+                        <h2 className="text-2xl font-black text-white">{ { ru: 'База тестов', uz: 'Testlar bazasi', en: 'Tests Database' }[lang] || 'Testlar bazasi' }</h2>
+                    <p className="text-slate-400 text-sm mt-1">
+                        { { ru: 'Управляйте тестами и загружайте массово (Word, PDF, PPTX).', uz: 'Testlarni boshqarish va ommaviy yuklash (Word, PDF, PPTX formatida).', en: 'Manage tests and upload in bulk (Word, PDF, PPTX).' }[lang] || 'Testlarni boshqarish va ommaviy yuklash (Word, PDF, PPTX formatida).' }
                     </p>
+                </div>
+            </div>
+
+            {/* YUKLASH BO'LIMI */}
+            <div className="bg-slate-900 rounded-2xl p-6 md:p-8 border border-slate-700 shadow-xl mb-8">
+                <h3 className="text-lg font-bold text-white mb-2">{ { ru: 'Массовая загрузка (до 3000 тестов)', uz: 'Ommaviy yuklash (3000 tagacha test)', en: 'Bulk upload (up to 3000 tests)' }[lang] || 'Ommaviy yuklash (3000 tagacha test)' }</h3>
+                <p className="text-slate-400 text-sm mb-6">
+                    { { ru: 'Выберите Word (.docx), PDF или PPTX файл с вопросами. Система автоматически разобьет их на части (по 500 тестов) для безопасности загрузки.', uz: 'Testlar bilan to\'la Word (.docx), PDF yoki PPTX faylini tanlang. Tizim avtomatik ravishda testlarni o\'qib, 500 tadan bo\'lib bazaga yuklaydi.', en: 'Select a Word (.docx), PDF or PPTX file full of questions. The system will automatically split them into parts (500 tests each) for safe upload.' }[lang] || 'Testlar bilan to\'la Word (.docx), PDF yoki PPTX faylini tanlang. Tizim avtomatik ravishda testlarni o\'qib, 500 tadan bo\'lib bazaga yuklaydi.' }
+                </p>
 
                     <label className={`w-full py-10 flex flex-col items-center justify-center gap-3 font-bold text-sm rounded-2xl transition-all cursor-pointer border-2 border-dashed ${isUploading ? 'border-slate-600 bg-slate-800/50 cursor-not-allowed' : 'border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-500/5'}`}>
                         {isUploading ? (
                             <>
                                 <i className="fa-solid fa-circle-notch fa-spin text-4xl text-emerald-500 mb-2"></i>
-                                <span className="text-emerald-400">Yuklanmoqda... {progress.current} / {progress.total} qism</span>
+                                <span className="text-emerald-400">{ { ru: 'Загрузка...', uz: 'Yuklanmoqda...', en: 'Uploading...' }[lang] || 'Yuklanmoqda...' } {progress.current} / {progress.total}</span>
                             </>
                         ) : (
                             <>
                                 <i className="fa-solid fa-cloud-arrow-up text-4xl text-emerald-500 mb-2"></i>
-                                <span className="text-emerald-400 text-lg">JSON, Word yoki PDF faylni tanlang</span>
-                                <span className="text-slate-500 text-xs mt-1">.json, .docx yoki .pdf formatidagi tayyor testlar</span>
+                                <span className="text-emerald-400 text-lg">{ { ru: 'Выберите файл Word, PDF или PPTX', uz: 'Word, PDF yoki PPTX faylini tanlang', en: 'Select Word, PDF or PPTX file' }[lang] || 'Word, PDF yoki PPTX faylini tanlang' }</span>
+                                <span className="text-slate-500 text-xs mt-1">{ { ru: 'готовые тесты в формате .docx, .pdf или .pptx', uz: '.docx, .pdf yoki .pptx formatidagi tayyor testlar', en: 'ready-made tests in .docx, .pdf or .pptx format' }[lang] || '.docx, .pdf yoki .pptx formatidagi tayyor testlar' }</span>
                             </>
                         )}
                         <input 
                             type="file" 
-                            accept=".json,.docx,.pdf" 
+                            accept=".docx,.pdf,.pptx" 
                             className="hidden" 
                             disabled={isUploading} 
                             onChange={handleBulkTestUpload} 
@@ -554,22 +539,22 @@ const TeacherTests = ({ user, onLogout }) => {
 
                     {uploadResults.length > 0 && (
                         <div className="mt-8 space-y-3">
-                            <h4 className="text-sm font-bold text-slate-300 uppercase tracking-widest mb-3">Yuklash natijalari:</h4>
+                            <h4 className="text-sm font-bold text-slate-300 uppercase tracking-widest mb-3">{ { ru: 'Результаты загрузки:', uz: 'Yuklash natijalari:', en: 'Upload results:' }[lang] || 'Yuklash natijalari:' }</h4>
                             {uploadResults.map((res, idx) => (
                                 <div key={idx} className={`p-4 rounded-xl border flex justify-between items-center ${res.success ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-rose-500/10 border-rose-500/30'}`}>
                                     <div>
                                         <p className={`font-bold text-sm ${res.success ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                            {res.success ? <><i className="fa-solid fa-check-circle mr-2"></i> {res.title}</> : <><i className="fa-solid fa-triangle-exclamation mr-2"></i> Xatolik</>}
+                                            {res.success ? <><i className="fa-solid fa-check-circle mr-2"></i> {res.title}</> : <><i className="fa-solid fa-triangle-exclamation mr-2"></i> { { ru: 'Ошибка', uz: 'Xatolik', en: 'Error' }[lang] || 'Xatolik' }</>}
                                         </p>
                                         {res.success ? (
-                                            <p className="text-xs text-slate-400 mt-1">{res.testsCount} ta test joylandi</p>
+                                            <p className="text-xs text-slate-400 mt-1">{res.testsCount} { { ru: 'тестов размещено', uz: 'ta test joylandi', en: 'tests placed' }[lang] || 'ta test joylandi' }</p>
                                         ) : (
                                             <p className="text-xs text-rose-300 mt-1">{res.error}</p>
                                         )}
                                     </div>
                                     {res.success && (
-                                        <button onClick={() => {navigator.clipboard.writeText(res.link); alert("Havola nusxalandi!")}} className="text-emerald-400 hover:text-white hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-500/30 transition-all">
-                                            {lang === 'ru' ? 'Копировать' : 'Nusxa olish'}
+                                        <button onClick={() => {navigator.clipboard.writeText(res.link); alert({ ru: 'Ссылка скопирована!', uz: 'Havola nusxalandi!', en: 'Link copied!' }[lang] || "Havola nusxalandi!")}} className="text-emerald-400 hover:text-white hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-500/30 transition-all">
+                                            { { ru: 'Копировать', uz: 'Nusxa olish', en: 'Copy' }[lang] || 'Nusxa olish' }
                                         </button>
                                     )}
                                 </div>
@@ -581,7 +566,7 @@ const TeacherTests = ({ user, onLogout }) => {
                                     className="w-full mt-4 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 rounded-xl py-3 px-4 font-semibold transition-all flex items-center justify-center gap-2"
                                 >
                                     <i className="fa-solid fa-bug"></i>
-                                    {lang === 'ru' ? 'Скачать LOG файл для анализа ошибок (Debug)' : 'Xatoliklarni tahlil qilish uchun LOG faylni yuklab olish (Debug)'}
+                                    { { ru: 'Скачать LOG файл для анализа ошибок (Debug)', uz: 'Xatoliklarni tahlil qilish uchun LOG faylni yuklab olish (Debug)', en: 'Download LOG file for error analysis (Debug)' }[lang] || 'Xatoliklarni tahlil qilish uchun LOG faylni yuklab olish (Debug)' }
                                 </button>
                             )}
                         </div>
@@ -592,18 +577,18 @@ const TeacherTests = ({ user, onLogout }) => {
                 <div className="bg-slate-900 rounded-2xl p-6 md:p-8 border border-slate-700 shadow-xl mb-8">
                     <h3 className="text-lg font-bold text-white mb-6 border-b border-slate-800 pb-4">
                         <i className="fa-solid fa-folder-open text-blue-500 mr-2"></i> 
-                        {lang === 'ru' ? 'Мои тесты' : 'Mening Testlarim'}
+                        { { ru: 'Мои тесты', uz: 'Mening Testlarim', en: 'My Tests' }[lang] || 'Mening Testlarim' }
                     </h3>
                     
                     {isLoadingExams ? (
                         <div className="flex flex-col items-center py-10">
                             <i className="fa-solid fa-circle-notch fa-spin text-3xl text-slate-500 mb-3"></i>
-                            <p className="text-slate-400 text-sm">Testlar yuklanmoqda...</p>
+                            <p className="text-slate-400 text-sm">{ { ru: 'Загрузка тестов...', uz: 'Testlar yuklanmoqda...', en: 'Loading tests...' }[lang] || 'Testlar yuklanmoqda...' }</p>
                         </div>
                     ) : myExams.length === 0 ? (
                         <div className="text-center py-10 bg-slate-800/50 rounded-xl border border-slate-700/50">
                             <i className="fa-regular fa-folder-open text-4xl text-slate-600 mb-3 block"></i>
-                            <p className="text-slate-400 text-sm">Hali hech qanday test yuklanmagan.</p>
+                            <p className="text-slate-400 text-sm">{ { ru: 'Тесты еще не загружены.', uz: 'Hali hech qanday test yuklanmagan.', en: 'No tests uploaded yet.' }[lang] || 'Hali hech qanday test yuklanmagan.' }</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-4">
@@ -612,13 +597,13 @@ const TeacherTests = ({ user, onLogout }) => {
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-1">
                                             <h4 className="font-bold text-white text-base">{exam.title}</h4>
-                                            <button onClick={() => handleEditTitle(exam.id, exam.title)} className="text-slate-500 hover:text-blue-400 text-xs px-2" title="Nomini o'zgartirish">
+                                            <button onClick={() => handleEditTitle(exam.id, exam.title)} className="text-slate-500 hover:text-blue-400 text-xs px-2" title={ { ru: 'Изменить имя', uz: 'Nomini o\'zgartirish', en: 'Change name' }[lang] || 'Nomini o\'zgartirish' }>
                                                 <i className="fa-solid fa-pen"></i>
                                             </button>
                                         </div>
                                         <div className="flex items-center gap-4 text-xs text-slate-400">
-                                            <span><i className="fa-solid fa-calendar-alt mr-1"></i> {exam.createdAt ? new Date(exam.createdAt.toMillis()).toLocaleDateString() : 'Yangi'}</span>
-                                            <span><i className="fa-solid fa-list-check mr-1"></i> {exam.data?.tests?.length || 0} ta savol</span>
+                                            <span><i className="fa-solid fa-calendar-alt mr-1"></i> {exam.createdAt ? new Date(exam.createdAt.toMillis()).toLocaleDateString() : ({ ru: 'Новый', uz: 'Yangi', en: 'New' }[lang] || 'Yangi')}</span>
+                                            <span><i className="fa-solid fa-list-check mr-1"></i> {exam.data?.tests?.length || 0} { { ru: 'вопросов', uz: 'ta savol', en: 'questions' }[lang] || 'ta savol' }</span>
                                         </div>
                                     </div>
                                     
@@ -630,36 +615,36 @@ const TeacherTests = ({ user, onLogout }) => {
                                                 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500 hover:text-white' 
                                                 : 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500 hover:text-white'
                                             }`}
-                                            title="Talabalarga ko'rinishini yoqish/o'chirish (Dopusk)"
+                                            title={ { ru: 'Включить/выключить видимость', uz: 'Talabalarga ko\'rinishini yoqish/o\'chirish (Dopusk)', en: 'Toggle visibility for students' }[lang] || 'Talabalarga ko\'rinishini yoqish/o\'chirish (Dopusk)' }
                                         >
                                             <i className={`fa-solid ${exam.status === 'published' ? 'fa-eye' : 'fa-eye-slash'} mr-1`}></i> 
-                                            {exam.status === 'published' ? 'Ochiq' : 'Yopiq'}
+                                            {exam.status === 'published' ? ({ ru: 'Открыт', uz: 'Ochiq', en: 'Open' }[lang] || 'Ochiq') : ({ ru: 'Закрыт', uz: 'Yopiq', en: 'Closed' }[lang] || 'Yopiq')}
                                         </button>
                                         <button 
                                             onClick={() => handleSetLimit(exam.id, exam.limit, exam.data?.tests?.length || 0)}
                                             className="px-3 py-1.5 bg-purple-500/10 text-purple-400 hover:bg-purple-500 hover:text-white rounded-lg text-xs font-bold border border-purple-500/30 transition-all"
-                                            title="Talabaga tushadigan savollar sonini belgilash"
+                                            title={ { ru: 'Установить количество вопросов', uz: 'Talabaga tushadigan savollar sonini belgilash', en: 'Set number of questions for students' }[lang] || 'Talabaga tushadigan savollar sonini belgilash' }
                                         >
-                                            <i className="fa-solid fa-filter mr-1"></i> {exam.limit ? `Limit: ${exam.limit}` : 'Cheklov'}
+                                            <i className="fa-solid fa-filter mr-1"></i> {exam.limit ? `Limit: ${exam.limit}` : ({ ru: 'Лимит', uz: 'Cheklov', en: 'Limit' }[lang] || 'Cheklov')}
                                         </button>
                                         <button 
                                             onClick={() => setSelectedExam(exam)}
                                             className="px-3 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg text-xs font-bold border border-blue-500/30 transition-all"
                                         >
-                                            <i className="fa-solid fa-eye mr-1"></i> Ko'rish
+                                            <i className="fa-solid fa-eye mr-1"></i> { { ru: 'Посмотреть', uz: 'Ko\'rish', en: 'View' }[lang] || 'Ko\'rish' }
                                         </button>
                                         <button 
                                             onClick={() => handleViewResults(exam)}
                                             className="px-3 py-1.5 bg-violet-500/10 text-violet-400 hover:bg-violet-500 hover:text-white rounded-lg text-xs font-bold border border-violet-500/30 transition-all"
-                                            title="Talabalar natijalarini ko'rish"
+                                            title={ { ru: 'Посмотреть результаты студентов', uz: 'Talabalar natijalarini ko\'rish', en: 'View student results' }[lang] || 'Talabalar natijalarini ko\'rish' }
                                         >
-                                            <i className="fa-solid fa-chart-simple mr-1"></i> Natijalar
+                                            <i className="fa-solid fa-chart-simple mr-1"></i> { { ru: 'Результаты', uz: 'Natijalar', en: 'Results' }[lang] || 'Natijalar' }
                                         </button>
                                         <button 
-                                            onClick={() => {navigator.clipboard.writeText(`${window.location.origin}/test?id=${exam.id}`); alert("Havola nusxalandi!")}} 
+                                            onClick={() => {navigator.clipboard.writeText(`${window.location.origin}/test?id=${exam.id}`); alert({ ru: 'Ссылка скопирована!', uz: 'Havola nusxalandi!', en: 'Link copied!' }[lang] || "Havola nusxalandi!")}} 
                                             className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white rounded-lg text-xs font-bold border border-emerald-500/30 transition-all"
                                         >
-                                            <i className="fa-solid fa-link mr-1"></i> Link olish
+                                            <i className="fa-solid fa-link mr-1"></i> { { ru: 'Получить ссылку', uz: 'Link olish', en: 'Get link' }[lang] || 'Link olish' }
                                         </button>
                                         <button 
                                             onClick={() => handleDeleteExam(exam.id, exam.title)}
@@ -687,7 +672,7 @@ const TeacherTests = ({ user, onLogout }) => {
                         </div>
                         <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-slate-900">
                             {(!selectedExam.data?.tests || selectedExam.data.tests.length === 0) ? (
-                                <p className="text-slate-400 text-center py-10">Bu bazada savollar topilmadi.</p>
+                                <p className="text-slate-400 text-center py-10">{ { ru: 'Вопросы не найдены в этой базе.', uz: 'Bu bazada savollar topilmadi.', en: 'No questions found in this base.' }[lang] || 'Bu bazada savollar topilmadi.' }</p>
                             ) : (
                                 <div className="space-y-6">
                                     {selectedExam.data.tests.map((test, i) => (
@@ -716,7 +701,7 @@ const TeacherTests = ({ user, onLogout }) => {
                     <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
                         <div className="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-800/50">
                             <div>
-                                <h3 className="font-bold text-white text-lg pr-4">Test Natijalari</h3>
+                                <h3 className="font-bold text-white text-lg pr-4">{ { ru: 'Результаты Теста', uz: 'Test Natijalari', en: 'Test Results' }[lang] || 'Test Natijalari' }</h3>
                                 <p className="text-xs text-slate-400 mt-1">{showResultsExam.title}</p>
                             </div>
                             <button onClick={() => setShowResultsExam(null)} className="w-8 h-8 rounded-full bg-slate-700 text-slate-300 hover:bg-rose-500 hover:text-white flex items-center justify-center transition-colors">
@@ -731,7 +716,7 @@ const TeacherTests = ({ user, onLogout }) => {
                             ) : examResultsData.length === 0 ? (
                                 <p className="text-slate-400 text-center py-10">
                                     <i className="fa-solid fa-ghost text-4xl mb-4 block opacity-50"></i>
-                                    Hozircha hech qanday talaba bu testni yechmagan.
+                                    { { ru: 'Пока ни один студент не решил этот тест.', uz: 'Hozircha hech qanday talaba bu testni yechmagan.', en: 'No student has solved this test yet.' }[lang] || 'Hozircha hech qanday talaba bu testni yechmagan.' }
                                 </p>
                             ) : (
                                 <div className="space-y-3">
@@ -748,7 +733,7 @@ const TeacherTests = ({ user, onLogout }) => {
                                             </div>
                                             <div className="text-right">
                                                 <div className="text-2xl font-black text-emerald-400">{res.score || 0} <span className="text-sm text-slate-500">/ {res.total || 0}</span></div>
-                                                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{res.percent || 0}% O'zlashtirish</div>
+                                                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{res.percent || 0}% { { ru: 'Усвоение', uz: 'O\'zlashtirish', en: 'Mastery' }[lang] || 'O\'zlashtirish' }</div>
                                             </div>
                                         </div>
                                     ))}

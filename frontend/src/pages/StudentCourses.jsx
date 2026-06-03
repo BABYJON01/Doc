@@ -102,7 +102,7 @@ const StudentCourses = ({ user }) => {
             {t('title')}
           </h2>
           <p className="text-slate-400 text-sm mt-1 ml-12">
-            {loading ? '...' : `${exams.length} ${lang === 'ru' ? 'экзамен доступно' : lang === 'en' ? 'exams available' : 'ta imtihon mavjud'}`}
+            {loading ? '...' : `${exams.length} ${ { ru: 'экзамен доступно', uz: 'ta imtihon mavjud', en: 'exams available' }[lang] || 'ta imtihon mavjud' }`}
           </p>
         </div>
 
@@ -131,7 +131,7 @@ const StudentCourses = ({ user }) => {
           </div>
           <p className="text-slate-400 text-lg font-medium">{t('empty')}</p>
           <p className="text-slate-600 text-sm mt-2">
-            {lang === 'ru' ? 'Преподаватель ещё не загрузил материалы.' : "O'qituvchi hali material yuklamagan."}
+            { { ru: 'Преподаватель ещё не загрузил материалы.', uz: "O'qituvchi hali material yuklamagan.", en: 'The teacher has not uploaded any materials yet.' }[lang] || "O'qituvchi hali material yuklamagan." }
           </p>
         </div>
       ) : (
@@ -142,7 +142,7 @@ const StudentCourses = ({ user }) => {
             const xrayCount = exam.data?.xrays?.length || 0;
             const diff = getDifficulty(testCount);
             const estMin = Math.round((testCount * 1.2 + caseCount * 2 + xrayCount * 1.5));
-            const category = lang === 'ru' ? 'БАЗА ТЕСТОВ' : 'TEST BAZASI';
+            const category = { ru: 'БАЗА ТЕСТОВ', uz: 'TEST BAZASI', en: 'TEST DATABASE' }[lang] || 'TEST BAZASI';
 
             return (
               <div

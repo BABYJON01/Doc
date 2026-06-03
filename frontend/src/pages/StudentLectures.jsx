@@ -27,28 +27,38 @@ const lecturesRu = [
 const StudentLectures = ({ user, onLogout }) => {
     const { lang, theme } = useApp();
     const [selectedVideo, setSelectedVideo] = useState(null);
-    const topics = lang === 'ru' ? lecturesRu : lecturesUz;
+    const lecturesEn = [
+        { id: 1, title: "Musculoskeletal fractures, transport immobilization, plaster technique", videoId: "EuCYMa1JwHw" },
+        { id: 2, title: "Chest and shoulder girdle injuries. Shoulder dislocations", videoId: "9mtKZlf6O9k" },
+        { id: 3, title: "Pelvic and spinal injuries. Shkolnikov anesthesia", videoId: "ERUvPf2I3Jo" },
+        { id: 4, title: "Polytrauma and shock injuries. Resuscitation", videoId: "asG7joCxBG8" },
+        { id: 5, title: "Purulent diseases of bones and joints (Osteomyelitis)", videoId: "x4AEKDCGHpA" },
+        { id: 6, title: "Burn disease and frostbite. Principles of clinical care", videoId: "D1O9z6WJ1iQ" },
+        { id: 7, title: "Closed and open brain injuries", videoId: "Loc2KPwul9U" },
+        { id: 8, title: "Types of bleeding and methods of stopping (tourniquet application)", videoId: "EmmSJxAWVKM" }
+    ];
+    const topics = { ru: lecturesRu, uz: lecturesUz, en: lecturesEn }[lang] || lecturesUz;
     // Always use dark styles for student dashboard because the background image is dark
     const isDark = true;
 
     return (
         <DashboardLayout role="student" user={user} onLogout={onLogout}>
-            <div className="max-w-6xl mx-auto animate-[fadeInUp_0.4s_ease-out]">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-                    <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-2xl flex items-center justify-center text-2xl shadow-lg">
-                            <i className="fa-brands fa-youtube"></i>
-                        </div>
-                        <div>
-                            <h2 className={`text-2xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                {lang === 'ru' ? 'Видео лекции' : 'Video Ma\'ruzalar'}
-                            </h2>
-                            <p className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                                {lang === 'ru' 
-                                    ? 'Обучающие видеоматериалы по учебному плану'
-                                    : 'O\'quv rejasi asosidagi maxsus video darsliklar'}
-                            </p>
-                        </div>
+            <div className="max-w-5xl mx-auto animate-[fadeInUp_0.4s_ease-out]">
+                <div className="flex items-center gap-4 mb-8">
+                    <div className="w-14 h-14 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-2xl flex items-center justify-center text-2xl shadow-lg">
+                        <i className="fa-solid fa-play-circle"></i>
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-black text-white">
+                            {{ ru: 'Онлайн лекции и материалы', uz: 'Onlayn Video Ma\'ruzalar', en: 'Online Video Lectures' }[lang] || 'Onlayn Video Ma\'ruzalar'}
+                        </h2>
+                        <p className="text-slate-400 text-sm mt-1">
+                            {{ 
+                                ru: 'Изучайте темы и просматривайте видеоуроки.', 
+                                uz: 'Mavzularni o\'zlashtirish uchun biriktirilgan video va fayllarni ko\'ring.', 
+                                en: 'Watch attached videos and files to master the topics.' 
+                            }[lang] || 'Mavzularni o\'zlashtirish uchun biriktirilgan video va fayllarni ko\'ring.'}
+                        </p>
                     </div>
                 </div>
 
@@ -76,7 +86,7 @@ const StudentLectures = ({ user, onLogout }) => {
                                     </div>
                                 </div>
                                 <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded-md border border-slate-700">
-                                    Mavzu {index + 1}
+                                    { { ru: 'Тема', uz: 'Mavzu', en: 'Topic' }[lang] || 'Mavzu' } {index + 1}
                                 </div>
                             </div>
                             
@@ -85,7 +95,7 @@ const StudentLectures = ({ user, onLogout }) => {
                                     {topic.title}
                                 </h3>
                                 <p className="text-xs text-slate-500 mt-2 flex items-center gap-2">
-                                    <i className="fa-solid fa-tv"></i> Video darslik
+                                    <i className="fa-solid fa-tv"></i> { { ru: 'Видеоурок', uz: 'Video darslik', en: 'Video lesson' }[lang] || 'Video darslik' }
                                 </p>
                             </div>
                         </div>
@@ -119,7 +129,7 @@ const StudentLectures = ({ user, onLogout }) => {
                         <div className="w-full mt-4 bg-slate-900 p-5 rounded-2xl border border-slate-800 text-white">
                             <h2 className="text-xl font-bold">{selectedVideo.title}</h2>
                             <p className="text-sm text-slate-400 mt-2">
-                                O'zgartirish uchun o'qituvchi bilan bog'laning. (Hozircha barcha mavzularga namuna sifatida standart tibbiyot videosi qo'yilgan).
+                                { { ru: 'Свяжитесь с преподавателем для изменений. (Сейчас везде стоит стандартное медицинское видео)', uz: "O'zgartirish uchun o'qituvchi bilan bog'laning. (Hozircha barcha mavzularga namuna sifatida standart tibbiyot videosi qo'yilgan).", en: 'Contact the teacher for changes. (Currently, a standard medical video is set as an example for all topics).' }[lang] || "O'zgartirish uchun o'qituvchi bilan bog'laning. (Hozircha barcha mavzularga namuna sifatida standart tibbiyot videosi qo'yilgan)." }
                             </p>
                         </div>
                     </div>

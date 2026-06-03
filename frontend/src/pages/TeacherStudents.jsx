@@ -31,20 +31,26 @@ const TeacherStudents = ({ user, onLogout }) => {
     }, [user]);
 
     const handleToggleBlock = async (studentId, currentStatus, studentName) => {
-        if (window.confirm(lang === 'ru' ? `Изменить статус доступа для ${studentName}?` : `${studentName} ning test yechish huquqini o'zgartirmoqchimisiz?`)) {
+        const confirmMsg = {
+            ru: `Изменить статус доступа для ${studentName}?`,
+            uz: `${studentName} ning test yechish huquqini o'zgartirmoqchimisiz?`,
+            en: `Change access status for ${studentName}?`
+        }[lang] || `${studentName} ning test yechish huquqini o'zgartirmoqchimisiz?`;
+
+        if (window.confirm(confirmMsg)) {
             try {
                 await updateDoc(doc(db, "latest_users", studentId), {
                     isBlocked: !currentStatus
                 });
             } catch (err) {
                 console.error("Error updating block status", err);
-                alert("Xatolik yuz berdi!");
+                alert({ ru: 'Ошибка!', uz: 'Xatolik yuz berdi!', en: 'An error occurred!' }[lang]);
             }
         }
     };
 
     const isOnline = (lastLogin) => {
-        if (!lastLogin) return false;
+        if (!lastLogin || !lastLogin.toDate) return false;
         const now = new Date();
         const loginTime = lastLogin.toDate();
         const diffMinutes = (now - loginTime) / (1000 * 60);
@@ -52,7 +58,7 @@ const TeacherStudents = ({ user, onLogout }) => {
     };
 
     const formatLastActive = (lastLogin) => {
-        if (!lastLogin) return "Noma'lum";
+        if (!lastLogin || !lastLogin.toDate) return { ru: 'Неизвестно', uz: "Noma'lum", en: 'Unknown' }[lang];
         return lastLogin.toDate().toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     };
 
@@ -64,11 +70,15 @@ const TeacherStudents = ({ user, onLogout }) => {
                         <i className="fa-solid fa-users"></i>
                     </div>
                     <div>
-                        <h2 className="text-2xl font-black text-white">{lang === 'ru' ? 'Список студентов' : 'Talabalar ro\'yxati'}</h2>
+                        <h2 className="text-2xl font-black text-white">
+                            {{ ru: 'Список студентов', uz: 'Talabalar ro\'yxati', en: 'Students List' }[lang] || 'Talabalar ro\'yxati'}
+                        </h2>
                         <p className="text-slate-400 text-sm mt-1">
-                            {lang === 'ru' 
-                                ? 'Управление студентами, онлайн статус и доступ к тестам.'
-                                : 'Talabalarni boshqarish, faollik nazorati va testlarga ruxsat berish.'}
+                            {{ 
+                                ru: 'Управление студентами, онлайн статус и доступ к тестам.', 
+                                uz: 'Talabalarni boshqarish, faollik nazorati va testlarga ruxsat berish.', 
+                                en: 'Manage students, monitor online status, and control test access.' 
+                            }[lang] || 'Talabalarni boshqarish, faollik nazorati va testlarga ruxsat berish.'}
                         </p>
                     </div>
                 </div>
@@ -77,22 +87,22 @@ const TeacherStudents = ({ user, onLogout }) => {
                     <h3 className="text-lg font-bold text-white mb-6 border-b border-slate-800 pb-4 flex justify-between items-center">
                         <span>
                             <i className="fa-solid fa-users-viewfinder text-indigo-500 mr-2"></i> 
-                            {lang === 'ru' ? 'Все зарегистрированные пользователи' : 'Barcha ro\'yxatdan o\'tganlar'}
+                            {{ ru: 'Все зарегистрированные пользователи', uz: 'Barcha ro\'yxatdan o\'tganlar', en: 'All Registered Users' }[lang] || 'Barcha ro\'yxatdan o\'tganlar'}
                         </span>
                         <span className="text-xs bg-slate-800 px-3 py-1 rounded-full text-slate-400 border border-slate-700">
-                            Jami: {students.length}
+                            {{ ru: 'Всего', uz: 'Jami', en: 'Total' }[lang] || 'Jami'}: {students.length}
                         </span>
                     </h3>
                     
                     {isLoading ? (
                         <div className="flex flex-col items-center py-10">
                             <i className="fa-solid fa-circle-notch fa-spin text-3xl text-slate-500 mb-3"></i>
-                            <p className="text-slate-400 text-sm">Talabalar yuklanmoqda...</p>
+                            <p className="text-slate-400 text-sm">{{ ru: 'Загрузка студентов...', uz: 'Talabalar yuklanmoqda...', en: 'Loading students...' }[lang] || 'Talabalar yuklanmoqda...'}</p>
                         </div>
                     ) : students.length === 0 ? (
                         <div className="text-center py-10 bg-slate-800/50 rounded-xl border border-slate-700/50">
                             <i className="fa-regular fa-id-badge text-4xl text-slate-600 mb-3 block"></i>
-                            <p className="text-slate-400 text-sm">Hali hech kim ro'yxatdan o'tmagan.</p>
+                            <p className="text-slate-400 text-sm">{{ ru: 'Пока никто не зарегистрировался.', uz: 'Hali hech kim ro\'yxatdan o\'tmagan.', en: 'No users registered yet.' }[lang] || 'Hali hech kim ro\'yxatdan o\'tmagan.'}</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-4 max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
@@ -108,11 +118,11 @@ const TeacherStudents = ({ user, onLogout }) => {
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <h4 className="font-bold text-white text-base">{student.displayName || "Noma'lum"}</h4>
-                                                    {blocked && <span className="bg-rose-500/10 text-rose-500 text-[9px] px-2 py-0.5 rounded uppercase font-black border border-rose-500/20">Bloklangan</span>}
+                                                    <h4 className="font-bold text-white text-base">{student.displayName || { ru: "Неизвестно", uz: "Noma'lum", en: "Unknown" }[lang]}</h4>
+                                                    {blocked && <span className="bg-rose-500/10 text-rose-500 text-[9px] px-2 py-0.5 rounded uppercase font-black border border-rose-500/20">{{ ru: 'Заблокирован', uz: 'Bloklangan', en: 'Blocked' }[lang] || 'Bloklangan'}</span>}
                                                 </div>
                                                 <div className="flex items-center gap-4 text-xs text-slate-400">
-                                                    <span><i className="fa-solid fa-clock mr-1"></i> {online ? <span className="text-emerald-400 font-bold">Hozir Onlayn</span> : formatLastActive(student.lastLogin)}</span>
+                                                    <span><i className="fa-solid fa-clock mr-1"></i> {online ? <span className="text-emerald-400 font-bold">{{ ru: 'Сейчас Онлайн', uz: 'Hozir Onlayn', en: 'Online Now' }[lang] || 'Hozir Onlayn'}</span> : formatLastActive(student.lastLogin)}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -127,9 +137,9 @@ const TeacherStudents = ({ user, onLogout }) => {
                                                 }`}
                                             >
                                                 {blocked ? (
-                                                    <><i className="fa-solid fa-unlock"></i> Ruxsat berish</>
+                                                    <><i className="fa-solid fa-unlock"></i> {{ ru: 'Разрешить', uz: 'Ruxsat berish', en: 'Unblock' }[lang] || 'Ruxsat berish'}</>
                                                 ) : (
-                                                    <><i className="fa-solid fa-lock"></i> Bloklash (Test)</>
+                                                    <><i className="fa-solid fa-lock"></i> {{ ru: 'Заблокировать (Тест)', uz: 'Bloklash (Test)', en: 'Block (Test)' }[lang] || 'Bloklash (Test)'}</>
                                                 )}
                                             </button>
                                         </div>

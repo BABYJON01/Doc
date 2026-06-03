@@ -29,10 +29,10 @@ class ErrorBoundary extends React.Component {
       return (
         <div className="min-h-screen bg-slate-900 flex items-center justify-center p-10 font-sans text-slate-100">
           <div className="bg-slate-800 rounded-2xl p-8 border-l-4 border-red-500 shadow-xl max-w-lg mx-auto text-center">
-            <h1 className="text-2xl font-bold text-red-400 mb-4">Xatolik yuz berdi</h1>
-            <p className="text-slate-400 mb-6">Ilovada kutilmagan to'qnashuv bo'ldi.</p>
-            <button onClick={() => window.location.reload()} className="px-6 py-2 bg-blue-600 rounded-xl hover:bg-blue-500 transition-colors font-medium">
-                Qayta yuklash
+            <h1 className="text-2xl font-bold text-red-400 mb-4">System Error</h1>
+            <p className="text-slate-400 mb-6">An unexpected error occurred in the application.</p>
+            <button onClick={() => window.location.href = '/'} className="px-6 py-2 bg-blue-600 rounded-xl hover:bg-blue-500 transition-colors font-medium">
+                Reload
             </button>
           </div>
         </div>
@@ -75,7 +75,7 @@ const LoginSelector = ({ user, role }) => {
             }
         } catch (error) {
             console.error("Google Sign-In Error:", error);
-            alert("Tizimga kirishda xatolik yuz berdi.");
+            alert({ ru: 'Ошибка при входе в систему.', uz: 'Tizimga kirishda xatolik yuz berdi.', en: 'An error occurred while logging in.' }[lang] || 'Tizimga kirishda xatolik yuz berdi.');
         } finally {
             setIsLoggingIn(false);
         }
@@ -128,7 +128,7 @@ const LoginSelector = ({ user, role }) => {
                                 <div className="flex -space-x-3">
                                     {recentUsers.length > 0 ? recentUsers.map((u, i) => <img key={i} className="w-10 h-10 object-cover rounded-full border-2 border-slate-900" src={u.photoURL}/>) : null}
                                 </div>
-                                <p>{t.recentUsers}<br/><span className="text-emerald-400 text-xs">Ayni damda onlayn...</span></p>
+                                <p>{t.recentUsers}<br/><span className="text-emerald-400 text-xs">{{ ru: 'Сейчас онлайн...', uz: 'Ayni damda onlayn...', en: 'Online now...' }[lang] || 'Ayni damda onlayn...'}</span></p>
                             </div>
                         </div>
 
@@ -149,7 +149,7 @@ const LoginSelector = ({ user, role }) => {
                                                 <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
                                                 <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                                             </svg>
-                                            Google orqali kirish
+                                            {{ ru: 'Войти через Google', uz: 'Google orqali kirish', en: 'Sign in with Google' }[lang] || 'Google orqali kirish'}
                                         </>
                                     )}
                                 </button>
@@ -165,8 +165,8 @@ const LoginSelector = ({ user, role }) => {
                                      <div className="mb-2 p-4 rounded-xl bg-rose-500/20 border border-rose-500 text-rose-400 flex items-center gap-3 animate-pulse">
                                          <i className="fa-solid fa-shield-halved text-2xl"></i>
                                          <div>
-                                             <h4 className="font-bold">Kirish taqiqlangan!</h4>
-                                             <p className="text-sm">Sizda O'qituvchilar paneliga kirish uchun ruxsat yo'q. Faqat admin tomonidan tasdiqlangan o'qituvchilar kira oladi.</p>
+                                             <h4 className="font-bold">{{ ru: 'Доступ запрещен!', uz: 'Kirish taqiqlangan!', en: 'Access Denied!' }[lang] || 'Kirish taqiqlangan!'}</h4>
+                                             <p className="text-sm">{{ ru: 'У вас нет доступа к панели преподавателя. Доступ имеют только преподаватели, подтвержденные администратором.', uz: 'Sizda O\'qituvchilar paneliga kirish uchun ruxsat yo\'q. Faqat admin tomonidan tasdiqlangan o\'qituvchilar kira oladi.', en: 'You do not have access to the Teacher Panel. Only admin-approved teachers can access it.' }[lang] || 'Sizda O\'qituvchilar paneliga kirish uchun ruxsat yo\'q.'}</p>
                                          </div>
                                      </div>
                                  )}
@@ -176,8 +176,8 @@ const LoginSelector = ({ user, role }) => {
                                         <div className="flex items-center gap-4">
                                             <i className="fa-solid fa-shield-cat text-3xl text-purple-500 w-10 text-center"></i>
                                             <div>
-                                                <h2 className="text-lg font-bold mb-1">Boshqaruv (Admin)</h2>
-                                                <p className={`text-xs ${theme === 'dark' ? 'opacity-70' : 'text-slate-500'}`}>O'qituvchilarni boshqarish va nazorat.</p>
+                                                <h2 className="text-lg font-bold mb-1">{{ ru: 'Управление (Админ)', uz: 'Boshqaruv (Admin)', en: 'Management (Admin)' }[lang] || 'Boshqaruv (Admin)'}</h2>
+                                                <p className={`text-xs ${theme === 'dark' ? 'opacity-70' : 'text-slate-500'}`}>{{ ru: 'Управление преподавателями и контроль.', uz: 'O\'qituvchilarni boshqarish va nazorat.', en: 'Teacher management and control.' }[lang] || 'O\'qituvchilarni boshqarish va nazorat.'}</p>
                                             </div>
                                         </div>
                                     </button>

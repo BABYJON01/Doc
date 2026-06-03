@@ -26,11 +26,22 @@ const medicalTopicsRu = [
 
 const TeacherLectures = ({ user, onLogout }) => {
     const { t, lang, theme } = useApp();
-    const topics = lang === 'ru' ? medicalTopicsRu : medicalTopicsUz;
+    const medicalTopicsEn = [
+        "Musculoskeletal fractures, transport immobilization, plaster technique",
+        "Chest and shoulder girdle injuries. Shoulder dislocations",
+        "Pelvic and spinal injuries. Shkolnikov anesthesia",
+        "Polytrauma and shock injuries. Resuscitation",
+        "Purulent diseases of bones and joints (Osteomyelitis)",
+        "Burn disease and frostbite. Principles of clinical care",
+        "Closed and open brain injuries",
+        "Types of bleeding and methods of stopping (tourniquet application)"
+    ];
+
+    const topics = { ru: medicalTopicsRu, uz: medicalTopicsUz, en: medicalTopicsEn }[lang] || medicalTopicsUz;
     const isDark = true; // Always dark to match dashboard background
 
     const handleTopicClick = (topic) => {
-        alert(lang === 'ru' ? `Раздел "${topic}" пока находится в разработке.` : `"${topic}" bo'limi ustida ishlanmoqda.`);
+        alert({ ru: `Раздел "${topic}" пока находится в разработке.`, uz: `"${topic}" bo'limi ustida ishlanmoqda.`, en: `Section "${topic}" is under development.` }[lang] || `"${topic}" bo'limi ustida ishlanmoqda.`);
     };
 
     return (
@@ -41,11 +52,9 @@ const TeacherLectures = ({ user, onLogout }) => {
                         <i className="fa-solid fa-folder-open"></i>
                     </div>
                     <div>
-                        <h2 className="text-2xl font-black text-white">{lang === 'ru' ? 'Темы по учебному плану (Лекции)' : 'O\'quv rejasidagi mavzular (Ma\'ruzalar)'}</h2>
+                        <h2 className="text-2xl font-black text-white">{ { ru: 'Темы по учебному плану (Лекции)', uz: "O'quv rejasidagi mavzular (Ma'ruzalar)", en: 'Syllabus Topics (Lectures)' }[lang] || "O'quv rejasidagi mavzular (Ma'ruzalar)" }</h2>
                         <p className="text-slate-400 text-sm mt-1">
-                            {lang === 'ru' 
-                                ? 'Выберите тему для просмотра лекций и добавления материалов.'
-                                : 'Ma\'ruzalarni ko\'rish yoki yangi fayl biriktirish uchun mavzuni tanlang.'}
+                            { { ru: 'Выберите тему для просмотра лекций и добавления материалов.', uz: "Ma'ruzalarni ko'rish yoki yangi fayl biriktirish uchun mavzuni tanlang.", en: 'Select a topic to view lectures and add materials.' }[lang] || "Ma'ruzalarni ko'rish yoki yangi fayl biriktirish uchun mavzuni tanlang." }
                         </p>
                     </div>
                 </div>
@@ -71,10 +80,10 @@ const TeacherLectures = ({ user, onLogout }) => {
                                     </h3>
                                     <div className="flex gap-2">
                                         <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                                            {lang === 'ru' ? 'Активно' : 'Faol'}
+                                            { { ru: 'Активно', uz: 'Faol', en: 'Active' }[lang] || 'Faol' }
                                         </span>
                                         <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded bg-slate-800 text-slate-400 border border-slate-700 group-hover:bg-blue-500/20 group-hover:text-blue-400 group-hover:border-blue-500/30 transition-all">
-                                            {lang === 'ru' ? 'Подробнее' : "Batafsil"} <i className="fa-solid fa-arrow-right ml-1"></i>
+                                            { { ru: 'Подробнее', uz: 'Batafsil', en: 'Details' }[lang] || 'Batafsil' } <i className="fa-solid fa-arrow-right ml-1"></i>
                                         </span>
                                     </div>
                                 </div>

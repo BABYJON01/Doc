@@ -164,9 +164,9 @@ const StudentDashboard = ({ user, onLogout }) => {
             <div className={`rounded-2xl p-10 text-center border shadow-xl max-w-2xl mx-auto mt-10 ${isDark ? 'bg-slate-800/80 backdrop-blur-xl border-slate-700/50' : 'bg-white/50 backdrop-blur-xl border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]'}`}>
                 <div className="mt-2 flex items-center justify-center gap-3 mb-2">
                   <i className="fa-solid fa-graduation-cap text-2xl text-emerald-500 drop-shadow-sm"></i>
-                  <h3 className={`text-xl font-black drop-shadow-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>{lang === 'ru' ? 'Ваши Достижения' : 'Sizning Yutuqlaringiz'}</h3>
+                  <h3 className={`text-xl font-black drop-shadow-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>{{ ru: 'Ваши Достижения', uz: 'Sizning Yutuqlaringiz', en: 'Your Achievements' }[lang] || 'Sizning Yutuqlaringiz'}</h3>
                 </div>
-                <p className={`${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{lang === 'ru' ? 'Эта страница находится в разработке.' : 'Ushbu sahifa tez kunda aktivlashadi.'}</p>
+                <p className={`${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{{ ru: 'Эта страница находится в разработке.', uz: 'Ushbu sahifa tez kunda aktivlashadi.', en: 'This page is coming soon.' }[lang] || 'Ushbu sahifa tez kunda aktivlashadi.'}</p>
             </div>
         )}
 
@@ -177,10 +177,10 @@ const StudentDashboard = ({ user, onLogout }) => {
                       <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-600 flex items-center justify-center text-lg">
                         <i className="fa-solid fa-users-viewfinder"></i>
                       </div>
-                      <h3 className={`font-black text-lg ${isDark ? 'text-white' : 'text-slate-900'}`}>Live Quiz'ga ulanish</h3>
+                      <h3 className={`font-black text-lg ${isDark ? 'text-white' : 'text-slate-900'}`}>{ { ru: 'Подключиться к Live Quiz', uz: 'Live Quiz\'ga ulanish', en: 'Connect to Live Quiz' }[lang] || 'Live Quiz\'ga ulanish' }</h3>
                     </div>
                     <p className={`text-center text-sm font-semibold mb-6 text-slate-400 px-6`}>
-                      O'qituvchi aytgan 6 xonali maxsus PIN kodni kiriting va poygaga qo'shiling.
+                      { { ru: 'Введите 6-значный PIN-код, который дал преподаватель, и присоединяйтесь к гонке.', uz: 'O\'qituvchi aytgan 6 xonali maxsus PIN kodni kiriting va poygaga qo\'shiling.', en: 'Enter the 6-digit PIN code provided by the teacher and join the race.' }[lang] || 'O\'qituvchi aytgan 6 xonali maxsus PIN kodni kiriting va poygaga qo\'shiling.' }
                     </p>
                     <div className="p-6 pt-0">
                         <div
@@ -230,12 +230,16 @@ const StudentDashboard = ({ user, onLogout }) => {
                   : <div className="w-12 h-12 rounded-full bg-blue-500/20 border-2 border-blue-500/40 flex items-center justify-center text-blue-400 text-xl shrink-0"><i className="fa-solid fa-user-graduate"></i></div>
                 }
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-xl sm:text-2xl font-black text-white drop-shadow-md">Xush kelibsiz, {user?.displayName || 'Talaba'}! 👋</h2>
-                  <p className="text-white/90 text-sm mt-1 font-semibold drop-shadow">Avval to'xtatgan joyingizdan davom eting.</p>
+                  <h2 className="text-xl sm:text-2xl font-black text-white drop-shadow-md">
+                      {{ ru: 'Добро пожаловать', uz: 'Xush kelibsiz', en: 'Welcome' }[lang] || 'Xush kelibsiz'}, {user?.displayName || 'Talaba'}! 👋
+                  </h2>
+                  <p className="text-white/90 text-sm mt-1 font-semibold drop-shadow">
+                      {{ ru: 'Продолжайте с того места, где остановились.', uz: 'Avval to\'xtatgan joyingizdan davom eting.', en: 'Continue where you left off.' }[lang] || 'Avval to\'xtatgan joyingizdan davom eting.'}
+                  </p>
                 </div>
                 <div className="hidden sm:flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-3 py-2 shrink-0">
                   <i className="fa-solid fa-circle text-[6px] text-emerald-400 animate-pulse"></i>
-                  <span className="text-emerald-400 text-xs font-bold">{lang === 'ru' ? 'Онлайн' : 'Online'}</span>
+                  <span className="text-emerald-400 text-xs font-bold">{{ ru: 'Онлайн', uz: 'Onlayn', en: 'Online' }[lang] || 'Onlayn'}</span>
                 </div>
             </div>
 
@@ -245,8 +249,16 @@ const StudentDashboard = ({ user, onLogout }) => {
                         <i className="fa-solid fa-lock"></i>
                     </div>
                     <div>
-                        <h3 className="text-rose-400 font-bold text-lg">Test ishlash huquqingiz cheklangan</h3>
-                        <p className="text-slate-400 text-sm mt-0.5">O'qituvchingiz vaqtincha test ishlash huquqingizni bloklagan. Qo'shimcha ma'lumot uchun ustozingizga murojaat qiling.</p>
+                        <h3 className="text-rose-400 font-bold text-lg">
+                            {{ ru: 'Доступ к тестам ограничен', uz: 'Test ishlash huquqingiz cheklangan', en: 'Test access restricted' }[lang] || 'Test ishlash huquqingiz cheklangan'}
+                        </h3>
+                        <p className="text-slate-400 text-sm mt-0.5">
+                            {{ 
+                                ru: 'Ваш преподаватель временно заблокировал ваш доступ к тестам. Для получения дополнительной информации обратитесь к преподавателю.', 
+                                uz: 'O\'qituvchingiz vaqtincha test ishlash huquqingizni bloklagan. Qo\'shimcha ma\'lumot uchun ustozingizga murojaat qiling.', 
+                                en: 'Your teacher has temporarily blocked your access to tests. Please contact your teacher for more information.' 
+                            }[lang] || 'O\'qituvchingiz vaqtincha test ishlash huquqingizni bloklagan. Qo\'shimcha ma\'lumot uchun ustozingizga murojaat qiling.'}
+                        </p>
                     </div>
                 </div>
             )}
@@ -301,7 +313,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-widest ${isDark ? 'text-emerald-400 bg-emerald-900/30' : 'text-emerald-600 bg-emerald-50'}`}>
-                        {history.dateText || history.date || "Bugun"}
+                        {history.dateText || history.date || ({ ru: 'Сегодня', uz: 'Bugun', en: 'Today' }[lang] || 'Bugun')}
                       </span>
                       <h3 className={`text-base font-bold mt-1 leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>{history.topic}</h3>
                     </div>
@@ -328,7 +340,7 @@ const StudentDashboard = ({ user, onLogout }) => {
             ) : (
               <div className={`mt-4 min-h-[160px] rounded-2xl border border-dashed flex flex-col items-center justify-center p-6 ${isDark ? 'border-slate-700 bg-slate-800/30 text-slate-400' : 'border-slate-300 bg-white/70 text-slate-600'}`}>
                 <i className="fa-solid fa-file-invoice text-3xl mb-3 opacity-50"></i>
-                <p className="text-sm font-bold">Hali hech qanday imtihon topshirmadingiz.</p>
+                <p className="text-sm font-bold">{ { ru: 'Вы еще не сдали ни одного экзамена.', uz: 'Hali hech qanday imtihon topshirmadingiz.', en: 'You haven\'t taken any exams yet.' }[lang] || 'Hali hech qanday imtihon topshirmadingiz.' }</p>
               </div>
             )}
           </div>

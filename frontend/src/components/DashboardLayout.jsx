@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { db } from '../firebase';
 import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AIChatbot from './AIChatbot';
 
 const DashboardLayout = ({ children, role, user, onLogout }) => {
@@ -9,6 +10,8 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState([]);
+    const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         if (!user) return;
@@ -20,7 +23,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                 // Tizimli yoki o'sha roldagi foydalanuvchilar o'qishi uchun:
                 if (!data.targetRole || data.targetRole === role || data.targetRole === 'all') {
                     // Calculate time string locally
-                    let timeStr = 'Hozirgina';
+                    let timeStr = { ru: 'Только что', uz: 'Hozirgina', en: 'Just now' }[lang] || 'Hozirgina';
                     if (data.createdAt) {
                         try {
                             const date = data.createdAt.toDate();
@@ -56,9 +59,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
         const menus = {
             uz: {
                 admin: [
-                    { name: 'Dashboard', icon: 'fa-solid fa-chart-pie', path: '/admin' },
-                    { name: 'O\'qituvchilar', icon: 'fa-solid fa-chalkboard-user', path: '/admin/teachers' },
-                    { name: 'Tizim Jurnali', icon: 'fa-solid fa-clipboard-list', path: '/admin/logs' },
+                    { name: 'Dashboard', icon: 'fa-solid fa-chart-pie', path: '/admin' }
                 ],
                 teacher: [
                     { name: 'Dashboard', icon: 'fa-solid fa-house', path: '/teacher' },
@@ -68,18 +69,16 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                     { name: 'Profil', icon: 'fa-solid fa-user-doctor', path: '/teacher/profile' },
                 ],
                 student: [
-                    { name: lang === 'ru' ? 'Главная' : 'Bosh Sahifa', icon: 'fa-solid fa-house', path: '/student' },
-                    { name: lang === 'ru' ? 'Видео лекции' : 'Video Ma\'ruzalar', icon: 'fa-brands fa-youtube', path: '/student/lectures' },
-                    { name: lang === 'ru' ? 'Экзамены' : 'Kurslar (Test)', icon: 'fa-solid fa-graduation-cap', path: '/student/courses' },
-                    { name: lang === 'ru' ? 'Достижения' : 'Yutuqlar', icon: 'fa-solid fa-ranking-star', path: '/student/portfolio' },
-                    { name: lang === 'ru' ? 'Live Викторина' : 'Live Quiz', icon: 'fa-solid fa-tower-broadcast', path: '/student/live' },
+                    { name: 'Bosh Sahifa', icon: 'fa-solid fa-house', path: '/student' },
+                    { name: 'Video Ma\'ruzalar', icon: 'fa-brands fa-youtube', path: '/student/lectures' },
+                    { name: 'Kurslar (Test)', icon: 'fa-solid fa-graduation-cap', path: '/student/courses' },
+                    { name: 'Yutuqlar', icon: 'fa-solid fa-ranking-star', path: '/student/portfolio' },
+                    { name: 'Live Quiz', icon: 'fa-solid fa-tower-broadcast', path: '/student/live' },
                 ]
             },
             ru: {
                 admin: [
-                    { name: 'Дашборд', icon: 'fa-solid fa-chart-pie', path: '/admin' },
-                    { name: 'Преподаватели', icon: 'fa-solid fa-chalkboard-user', path: '/admin/teachers' },
-                    { name: 'Журнал Системы', icon: 'fa-solid fa-clipboard-list', path: '/admin/logs' },
+                    { name: 'Дашборд', icon: 'fa-solid fa-chart-pie', path: '/admin' }
                 ],
                 teacher: [
                     { name: 'Дашборд', icon: 'fa-solid fa-house', path: '/teacher' },
@@ -98,9 +97,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
             },
             en: {
                 admin: [
-                    { name: 'Dashboard', icon: 'fa-solid fa-chart-pie', path: '/admin' },
-                    { name: 'Teachers', icon: 'fa-solid fa-chalkboard-user', path: '/admin/teachers' },
-                    { name: 'System Logs', icon: 'fa-solid fa-clipboard-list', path: '/admin/logs' },
+                    { name: 'Dashboard', icon: 'fa-solid fa-chart-pie', path: '/admin' }
                 ],
                 teacher: [
                     { name: 'Dashboard', icon: 'fa-solid fa-house', path: '/teacher' },
@@ -124,7 +121,12 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
     
     const menu = getMenu(role);
     
-    const isActive = (path) => window.location.pathname === path;
+    const isActive = (path) => {
+        if (path === '/admin' && location.pathname !== '/admin') return false;
+        if (path === '/teacher' && location.pathname !== '/teacher') return false;
+        if (path === '/student' && location.pathname !== '/student') return false;
+        return location.pathname.startsWith(path);
+    };
 
     // Close notifications when clicking outside (simple hack)
     const toggleNotifications = () => setShowNotifications(!showNotifications);
@@ -190,7 +192,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                     {menu.map((item, idx) => (
                         <button
                             key={idx}
-                            onClick={() => { window.location.href = item.path; }}
+                            onClick={() => { navigate(item.path); setIsSidebarOpen(false); }}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-semibold 
                             ${sidebarLinkClass(isActive(item.path))}`}
                         >
@@ -268,16 +270,18 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                                     <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)}></div>
                                     <div className={`absolute right-0 mt-3 w-72 rounded-2xl shadow-2xl z-50 overflow-hidden border animate-[fadeInUp_0.2s_ease-out] ${isDarkUI ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`}>
                                         <div className={`p-4 border-b font-bold text-sm ${isDarkUI ? 'border-slate-800 text-white' : 'border-slate-100 text-slate-800'}`}>
-                                            Bildirishnomalar 
+                                            {{ ru: 'Уведомления', uz: 'Bildirishnomalar', en: 'Notifications' }[lang] || 'Bildirishnomalar'}
                                             {notifications.length > 0 && (
-                                                <span className="ml-2 bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full">Yangi</span>
+                                                <span className="ml-2 bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full">
+                                                    {{ ru: 'Новые', uz: 'Yangi', en: 'New' }[lang] || 'Yangi'}
+                                                </span>
                                             )}
                                         </div>
                                         <div className="max-h-64 overflow-y-auto">
                                             {notifications.length === 0 ? (
                                                 <div className={`p-8 text-center text-sm font-bold opacity-60 ${isDarkUI ? 'text-slate-400' : 'text-slate-500'}`}>
                                                     <i className="fa-regular fa-bell-slash text-3xl mb-3 block opacity-50"></i>
-                                                    Hozircha yangi xabarlar yo'q
+                                                    {{ ru: 'Пока нет новых уведомлений', uz: 'Hozircha yangi xabarlar yo\'q', en: 'No new notifications yet' }[lang] || 'Hozircha yangi xabarlar yo\'q'}
                                                 </div>
                                             ) : (
                                                 notifications.map((n, i) => (
@@ -296,7 +300,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                                         </div>
                                         {notifications.length > 0 && (
                                             <div onClick={() => setNotifications([])} className={`p-3 text-center text-xs font-bold cursor-pointer transition-colors ${isDarkUI ? 'bg-slate-800/50 hover:bg-slate-800 text-blue-400' : 'bg-slate-50 hover:bg-slate-100 text-blue-600'}`}>
-                                                Barchasini o'qilgan deb belgilash
+                                                {{ ru: 'Отметить все как прочитанные', uz: 'Barchasini o\'qilgan deb belgilash', en: 'Mark all as read' }[lang] || 'Barchasini o\'qilgan deb belgilash'}
                                             </div>
                                         )}
                                     </div>
@@ -305,7 +309,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                         </div>
                         
                         <div 
-                            onClick={() => window.location.href = `/${role}/profile`}
+                            onClick={() => navigate(`/${role}/profile`)}
                             className="flex items-center gap-3 pl-2 sm:pl-4 border-l border-slate-700/30 cursor-pointer hover:opacity-80 transition-opacity"
                         >
                             <img 
