@@ -140,13 +140,14 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                         backgroundSize: 'cover', 
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat',
-                        opacity: theme === 'dark' ? 0.3 : 0.8
+                        opacity: theme === 'dark' ? 0.3 : 0.6
                     }}
                 >
                     {/* Dark mode overlay to ensure readability */}
                     {theme === 'dark' && <div className="absolute inset-0 bg-slate-950/80"></div>}
                     {/* Light mode gradient overlay for a beautiful fade to white at the bottom */}
-                    {theme !== 'dark' && <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white/90"></div>}
+                    {theme !== 'dark' && <div className="absolute inset-0 bg-white/60"></div>}
+                    {theme !== 'dark' && <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/70 to-white/95"></div>}
                 </div>
             ) : (
                 <div 
