@@ -110,7 +110,7 @@ const LoginSelector = ({ user, role }) => {
             )}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-700/20 blur-[120px] rounded-full pointer-events-none z-0"></div>
 
-            <div className="max-w-6xl w-full flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20 relative z-10">
+            <div className={`w-full flex flex-col md:flex-row items-center relative z-10 ${!user ? 'max-w-6xl justify-between gap-12 lg:gap-20' : 'h-full justify-end w-full'}`}>
                  {!user ? (
                      <>
                         <div className="md:w-1/2 text-left animate-[fadeInLeft_0.8s_ease-out]">
