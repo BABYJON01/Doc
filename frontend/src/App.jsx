@@ -258,7 +258,6 @@ const App = () => {
                     <Routes>
                         <Route path="/" element={<LoginSelector user={user} role={role} />} />
                         
-                        <Route path="/student/portfolio" element={<UserProfile user={user} onLogout={() => signOut(auth)} />} />
                         <Route path="/student/lectures" element={<StudentLectures user={user} onLogout={() => signOut(auth)} />} />
                         
                         {/* Protected Routes */}
