@@ -152,8 +152,10 @@ const StudentDashboard = ({ user, onLogout }) => {
         
         {path === '/student/portfolio' && (
             <div className={`rounded-2xl p-10 text-center border shadow-xl max-w-2xl mx-auto mt-10 ${isDark ? 'bg-slate-800/80 backdrop-blur-xl border-slate-700/50' : 'bg-white/50 backdrop-blur-xl border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]'}`}>
-                <i className="fa-solid fa-ranking-star text-6xl text-blue-500 mb-6 drop-shadow-lg"></i>
-                <h2 className={`text-2xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>{lang === 'ru' ? 'Ваши Достижения' : 'Sizning Yutuqlaringiz'}</h2>
+                <div className="mt-2 flex items-center justify-center gap-3 mb-2">
+                  <i className="fa-solid fa-graduation-cap text-2xl text-emerald-500 drop-shadow-sm"></i>
+                  <h3 className={`text-xl font-black drop-shadow-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>{lang === 'ru' ? 'Ваши Достижения' : 'Sizning Yutuqlaringiz'}</h3>
+                </div>
                 <p className={`${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{lang === 'ru' ? 'Эта страница находится в разработке.' : 'Ushbu sahifa tez kunda aktivlashadi.'}</p>
             </div>
         )}
@@ -161,17 +163,16 @@ const StudentDashboard = ({ user, onLogout }) => {
         {path === '/student/live' && (
             <div className="max-w-lg mx-auto mt-10">
                 <div className="rounded-2xl border border-emerald-500/30 overflow-hidden shadow-[0_0_35px_rgba(16,185,129,0.12)]" style={{ background: 'linear-gradient(135deg, rgba(6,78,59,0.4) 0%, rgba(15,23,42,0.95) 100%)' }}>
-                    <div className="flex items-center gap-3 px-6 py-5 border-b border-emerald-500/20 bg-emerald-600/10">
-                        <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                            <i className="fa-solid fa-tower-broadcast text-emerald-400 animate-pulse text-xl"></i>
-                        </div>
-                        <div>
-                            <h2 className="font-black text-white text-lg">{t.liveQuizTitle}</h2>
-                            <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Med-Zukkoo Live</div>
-                        </div>
+                    <div className="flex items-center justify-center gap-3 mb-4 px-6 pt-6">
+                      <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-600 flex items-center justify-center text-lg">
+                        <i className="fa-solid fa-users-viewfinder"></i>
+                      </div>
+                      <h3 className={`font-black text-lg ${isDark ? 'text-white' : 'text-slate-900'}`}>Live Quiz'ga ulanish</h3>
                     </div>
-                    <div className="p-6">
-                        <p className="text-sm text-slate-400 mb-6 text-center">{t.liveQuizDesc}</p>
+                    <p className={`text-center text-sm font-semibold mb-6 text-slate-400 px-6`}>
+                      O'qituvchi aytgan 6 xonali maxsus PIN kodni kiriting va poygaga qo'shiling.
+                    </p>
+                    <div className="p-6 pt-0">
                         <div
                             className="flex rounded-xl overflow-hidden mb-3 shadow-inner border transition-all"
                             style={{
@@ -219,12 +220,8 @@ const StudentDashboard = ({ user, onLogout }) => {
                   : <div className="w-12 h-12 rounded-full bg-blue-500/20 border-2 border-blue-500/40 flex items-center justify-center text-blue-400 text-xl shrink-0"><i className="fa-solid fa-user-graduate"></i></div>
                 }
                 <div className="flex-1 min-w-0">
-                  <h2 className={`font-black text-base sm:text-lg truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    {{ uz: 'Xush kelibsiz,', ru: 'Добро пожаловать,', en: 'Welcome,' }[lang] || 'Xush kelibsiz,'} {user?.displayName?.split(' ')[0] || 'Talaba'}! 👋
-                  </h2>
-                  <p className={`text-xs sm:text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                    {{ uz: 'Avval to\'xtatgan joyingizdan davom eting.', ru: 'Продолжайте обучение с того места, где остановились.', en: 'Continue your learning right where you left off.' }[lang] || 'Avval to\'xtatgan joyingizdan davom eting.'}
-                  </p>
+                  <h2 className="text-xl sm:text-2xl font-black text-white drop-shadow-md">Xush kelibsiz, {user?.displayName || 'Talaba'}! 👋</h2>
+                  <p className="text-white/90 text-sm mt-1 font-semibold drop-shadow">Avval to'xtatgan joyingizdan davom eting.</p>
                 </div>
                 <div className="hidden sm:flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-3 py-2 shrink-0">
                   <i className="fa-solid fa-circle text-[6px] text-emerald-400 animate-pulse"></i>
@@ -307,9 +304,9 @@ const StudentDashboard = ({ user, onLogout }) => {
                 </div>
               ))
             ) : (
-              <div className={`rounded-2xl p-8 border border-dashed text-center ${isDark ? 'bg-slate-800/50 border-slate-700 text-slate-500' : 'bg-slate-50 border-slate-300 text-slate-500'}`}>
-                <i className="fa-solid fa-file-medical mb-3 text-3xl opacity-50 block"></i>
-                <p className="font-medium text-sm">{t.noResults}</p>
+              <div className={`mt-4 min-h-[160px] rounded-2xl border border-dashed flex flex-col items-center justify-center p-6 ${isDark ? 'border-slate-700 bg-slate-800/30 text-slate-400' : 'border-slate-300 bg-white/70 text-slate-600'}`}>
+                <i className="fa-solid fa-file-invoice text-3xl mb-3 opacity-50"></i>
+                <p className="text-sm font-bold">Hali hech qanday imtihon topshirmadingiz.</p>
               </div>
             )}
           </div>
