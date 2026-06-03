@@ -158,7 +158,7 @@ const LoginSelector = ({ user, role }) => {
                  ) : (
                      <>
                          {/* Role Cards Container */}
-                         <div className="w-full flex justify-end animate-[fadeInRight_0.6s_ease-out] relative z-10 lg:pr-10">
+                         <div className="w-full flex justify-end animate-[fadeInRight_0.6s_ease-out] relative z-10 lg:-mr-16 xl:-mr-32">
                              <div className="w-full max-w-sm flex flex-col gap-4">
                                  {showAccessDenied && (
                                      <div className="mb-2 p-4 rounded-xl bg-rose-500/20 border border-rose-500 text-rose-400 flex items-center gap-3 animate-pulse">
