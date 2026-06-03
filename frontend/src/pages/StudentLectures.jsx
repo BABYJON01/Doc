@@ -28,7 +28,8 @@ const StudentLectures = ({ user, onLogout }) => {
     const { lang, theme } = useApp();
     const [selectedVideo, setSelectedVideo] = useState(null);
     const topics = lang === 'ru' ? lecturesRu : lecturesUz;
-    const isDark = theme === 'dark';
+    // Always use dark styles for student dashboard because the background image is dark
+    const isDark = true;
 
     return (
         <DashboardLayout role="student" user={user} onLogout={onLogout}>
@@ -57,7 +58,7 @@ const StudentLectures = ({ user, onLogout }) => {
                             key={topic.id}
                             className={`group rounded-2xl border overflow-hidden transition-all duration-300 hover:-translate-y-1 shadow-lg ${
                                 isDark 
-                                    ? 'bg-slate-900 border-slate-700 hover:border-rose-500/50 hover:shadow-rose-500/10' 
+                                    ? 'bg-slate-900/80 backdrop-blur-xl border-slate-700 hover:border-rose-500/50 hover:shadow-rose-500/10' 
                                     : 'bg-white border-slate-200 hover:border-rose-400 hover:shadow-rose-500/20'
                             }`}
                         >
