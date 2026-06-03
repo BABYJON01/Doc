@@ -62,10 +62,11 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                     { name: 'Profil', icon: 'fa-solid fa-user-doctor', path: '/teacher/profile' },
                 ],
                 student: [
-                    { name: 'Dashboard', icon: 'fa-solid fa-house', path: '/student' },
-                    { name: 'Kurslar (Test)', icon: 'fa-solid fa-graduation-cap', path: '/student/courses' },
-                    { name: 'Yutuqlar', icon: 'fa-solid fa-ranking-star', path: '/student/portfolio' },
-                    { name: 'Live Quiz', icon: 'fa-solid fa-tower-broadcast', path: '/student/live' },
+                    { name: lang === 'ru' ? 'Главная' : 'Bosh Sahifa', icon: 'fa-solid fa-house', path: '/student' },
+                    { name: lang === 'ru' ? 'Видео лекции' : 'Video Ma\'ruzalar', icon: 'fa-brands fa-youtube', path: '/student/lectures' },
+                    { name: lang === 'ru' ? 'Экзамены' : 'Kurslar (Test)', icon: 'fa-solid fa-graduation-cap', path: '/student/courses' },
+                    { name: lang === 'ru' ? 'Достижения' : 'Yutuqlar', icon: 'fa-solid fa-ranking-star', path: '/student/portfolio' },
+                    { name: lang === 'ru' ? 'Live Викторина' : 'Live Quiz', icon: 'fa-solid fa-tower-broadcast', path: '/student/live' },
                 ]
             },
             ru: {
@@ -83,6 +84,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                 ],
                 student: [
                     { name: 'Дашборд', icon: 'fa-solid fa-house', path: '/student' },
+                    { name: 'Видео лекции', icon: 'fa-brands fa-youtube', path: '/student/lectures' },
                     { name: 'Курсы (Тесты)', icon: 'fa-solid fa-graduation-cap', path: '/student/courses' },
                     { name: 'Достижения', icon: 'fa-solid fa-ranking-star', path: '/student/portfolio' },
                     { name: 'Live Quiz', icon: 'fa-solid fa-tower-broadcast', path: '/student/live' },
@@ -103,6 +105,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                 ],
                 student: [
                     { name: 'Dashboard', icon: 'fa-solid fa-house', path: '/student' },
+                    { name: 'Video Lectures', icon: 'fa-brands fa-youtube', path: '/student/lectures' },
                     { name: 'Courses (Test)', icon: 'fa-solid fa-graduation-cap', path: '/student/courses' },
                     { name: 'Achievements', icon: 'fa-solid fa-ranking-star', path: '/student/portfolio' },
                     { name: 'Live Quiz', icon: 'fa-solid fa-tower-broadcast', path: '/student/live' },

@@ -9,6 +9,7 @@ import UserProfile from './pages/UserProfile';
 import AdminDashboard from './pages/AdminDashboard';
 import QuizTaking from './pages/QuizTaking';
 import Methodology from './pages/Methodology';
+import StudentLectures from './pages/StudentLectures';
 import { AppProvider, AppToolbar, useApp } from './context/AppContext';
 
 import { auth, googleProvider, db } from './firebase';
@@ -246,6 +247,9 @@ const App = () => {
                     <AppToolbar user={user} role={role} onLogout={() => signOut(auth)} />
                     <Routes>
                         <Route path="/" element={<LoginSelector user={user} role={role} />} />
+                        
+                        <Route path="/student/portfolio" element={<UserProfile user={user} onLogout={handleLogout} />} />
+                        <Route path="/student/lectures" element={<StudentLectures user={user} onLogout={handleLogout} />} />
                         
                         {/* Protected Routes */}
                         <Route path="/admin" element={(role === 'admin' && user) ? <AdminDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
