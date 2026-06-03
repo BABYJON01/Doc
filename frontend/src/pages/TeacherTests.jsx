@@ -288,6 +288,28 @@ const TeacherTests = ({ user, onLogout }) => {
     const [myExams, setMyExams] = useState([]);
     const [isLoadingExams, setIsLoadingExams] = useState(true);
     const [selectedExam, setSelectedExam] = useState(null);
+    const [showResultsExam, setShowResultsExam] = useState(null);
+    const [examResultsData, setExamResultsData] = useState([]);
+    const [isLoadingResults, setIsLoadingResults] = useState(false);
+
+    const handleViewResults = async (exam) => {
+        setShowResultsExam(exam);
+        setIsLoadingResults(true);
+        try {
+            const leaderboardRef = collection(db, "exams", exam.id, "leaderboard");
+            const q = query(leaderboardRef, orderBy("score", "desc"));
+            const snap = await getDocs(q);
+            const results = [];
+            snap.forEach(doc => {
+                results.push({ id: doc.id, ...doc.data() });
+            });
+            setExamResultsData(results);
+        } catch (error) {
+            console.error("Error fetching results:", error);
+        } finally {
+            setIsLoadingResults(false);
+        }
+    };
 
     const fetchMyExams = async () => {
         if (!user) return;
@@ -627,6 +649,13 @@ const TeacherTests = ({ user, onLogout }) => {
                                             <i className="fa-solid fa-eye mr-1"></i> Ko'rish
                                         </button>
                                         <button 
+                                            onClick={() => handleViewResults(exam)}
+                                            className="px-3 py-1.5 bg-violet-500/10 text-violet-400 hover:bg-violet-500 hover:text-white rounded-lg text-xs font-bold border border-violet-500/30 transition-all"
+                                            title="Talabalar natijalarini ko'rish"
+                                        >
+                                            <i className="fa-solid fa-chart-simple mr-1"></i> Natijalar
+                                        </button>
+                                        <button 
                                             onClick={() => {navigator.clipboard.writeText(`${window.location.origin}/test?id=${exam.id}`); alert("Havola nusxalandi!")}} 
                                             className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white rounded-lg text-xs font-bold border border-emerald-500/30 transition-all"
                                         >
@@ -671,6 +700,55 @@ const TeacherTests = ({ user, onLogout }) => {
                                                         {j === test.answer && <i className="fa-solid fa-check float-right mt-0.5"></i>}
                                                     </div>
                                                 ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Exam Results Modal */}
+            {showResultsExam && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]">
+                    <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+                        <div className="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-800/50">
+                            <div>
+                                <h3 className="font-bold text-white text-lg pr-4">Test Natijalari</h3>
+                                <p className="text-xs text-slate-400 mt-1">{showResultsExam.title}</p>
+                            </div>
+                            <button onClick={() => setShowResultsExam(null)} className="w-8 h-8 rounded-full bg-slate-700 text-slate-300 hover:bg-rose-500 hover:text-white flex items-center justify-center transition-colors">
+                                <i className="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-slate-900">
+                            {isLoadingResults ? (
+                                <div className="flex justify-center items-center py-10">
+                                    <i className="fa-solid fa-circle-notch fa-spin text-3xl text-slate-500"></i>
+                                </div>
+                            ) : examResultsData.length === 0 ? (
+                                <p className="text-slate-400 text-center py-10">
+                                    <i className="fa-solid fa-ghost text-4xl mb-4 block opacity-50"></i>
+                                    Hozircha hech qanday talaba bu testni yechmagan.
+                                </p>
+                            ) : (
+                                <div className="space-y-3">
+                                    {examResultsData.map((res, i) => (
+                                        <div key={i} className="flex justify-between items-center p-4 bg-slate-800 rounded-xl border border-slate-700 hover:border-slate-600 transition-colors">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-lg border border-blue-500/40">
+                                                    {i + 1}
+                                                </div>
+                                                <div>
+                                                    <div className="font-bold text-white text-base">{res.displayName || 'Noma\'lum Talaba'}</div>
+                                                    <div className="text-xs text-slate-400">{res.email || ''} • {res.updatedAt ? new Date(res.updatedAt.toDate()).toLocaleString('en-GB') : ''}</div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-2xl font-black text-emerald-400">{res.score || 0} <span className="text-sm text-slate-500">/ {res.total || 0}</span></div>
+                                                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{res.percent || 0}% O'zlashtirish</div>
                                             </div>
                                         </div>
                                     ))}

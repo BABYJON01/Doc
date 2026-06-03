@@ -149,7 +149,7 @@ const QuizTaking = ({ onFinish, user }) => {
                 const xpEarned = score * 10;
                 
                 // Add to student_results collection
-                addDoc(collection(db, 'student_results'), {
+                const resultData = {
                     userId: user.uid,
                     topic: currentQ.topic || "Mavzulashtirilgan Diagnostika",
                     score: score,
@@ -158,7 +158,12 @@ const QuizTaking = ({ onFinish, user }) => {
                     xpEarned: xpEarned,
                     createdAt: serverTimestamp(),
                     dateText: new Date().toLocaleDateString("en-GB")
-                }).catch(err => console.error("Error saving result:", err));
+                };
+                if (examId) {
+                    resultData.examId = examId;
+                }
+
+                addDoc(collection(db, 'student_results'), resultData).catch(err => console.error("Error saving result:", err));
 
                 // Update total stats in user_stats
                 setDoc(doc(db, 'user_stats', user.uid), {
@@ -170,11 +175,19 @@ const QuizTaking = ({ onFinish, user }) => {
                 }, { merge: true }).catch(err => console.error("Error updating stats:", err));
 
                 // Submit final score status for exam leaderboard
-                const leaderboardRef = examId ? collection(db, "exams", examId, "leaderboard") : collection(db, "leaderboard");
-                setDoc(doc(leaderboardRef, user.uid), {
-                    status: "tugatdi",
-                    updatedAt: serverTimestamp()
-                }, { merge: true });
+                if (examId) {
+                    const leaderboardRef = collection(db, "exams", examId, "leaderboard");
+                    setDoc(doc(leaderboardRef, user.uid), {
+                        userId: user.uid,
+                        displayName: user.displayName || "Talaba",
+                        email: user.email || "",
+                        score: score,
+                        total: totalQ,
+                        percent: percent,
+                        status: "tugatdi",
+                        updatedAt: serverTimestamp()
+                    }, { merge: true });
+                }
             }
         }
     };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, query, orderBy, getDocs, limit } from 'firebase/firestore';
+import { collection, query, orderBy, getDocs, limit, where } from 'firebase/firestore';
 import { useApp } from '../context/AppContext';
 
 const CATEGORIES = {
@@ -31,12 +31,20 @@ const SkeletonCard = () => (
 const StudentCourses = ({ user }) => {
   const { lang } = useApp();
   const [exams, setExams] = useState([]);
+  const [completedExams, setCompletedExams] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     const fetchExams = async () => {
       try {
+        if (user?.uid) {
+            const resultsQuery = query(collection(db, 'student_results'), where('userId', '==', user.uid));
+            const resultsSnap = await getDocs(resultsQuery);
+            const completed = new Set(resultsSnap.docs.map(doc => doc.data().examId).filter(id => id));
+            setCompletedExams(completed);
+        }
+
         const q = query(collection(db, 'exams'), orderBy('createdAt', 'desc'), limit(50));
         const snap = await getDocs(q);
         const fetched = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(e => e.status !== 'hidden');
@@ -48,7 +56,7 @@ const StudentCourses = ({ user }) => {
       }
     };
     fetchExams();
-  }, []);
+  }, [user]);
 
   const labels = {
     title: { uz: 'Kurslar va Imtihonlar', ru: 'Курсы и Экзамены', en: 'Courses & Exams' },
@@ -58,12 +66,29 @@ const StudentCourses = ({ user }) => {
     cases: { uz: 'Case', ru: 'Кейс', en: 'Case' },
     xrays: { uz: "Rasm", ru: 'Снимок', en: 'X-ray' },
     filterAll: { uz: 'Barchasi', ru: 'Все', en: 'All' },
+    filterCompleted: { uz: 'Yechilganlar', ru: 'Завершенные', en: 'Completed' },
     by: { uz: "tomonidan", ru: "от", en: "by" },
     estTime: { uz: 'daqiqa', ru: 'мин', en: 'min' },
+    completedBtn: { uz: 'Yechilgan', ru: 'Завершено', en: 'Completed' },
   };
   const t = (key) => labels[key]?.[lang] ?? labels[key]?.uz;
 
-  const filteredExams = filter === 'all' ? exams : exams.filter(e => (e.data?.tests?.length || 0) >= (filter === 'hard' ? 15 : filter === 'medium' ? 8 : 0) && (e.data?.tests?.length || 0) < (filter === 'medium' ? 15 : filter === 'easy' ? 8 : 999));
+  const filteredExams = exams.filter(e => {
+    const testCount = e.data?.tests?.length || 0;
+    const isCompleted = completedExams.has(e.id);
+
+    if (filter === 'completed') {
+        return isCompleted;
+    }
+    
+    if (isCompleted) return false;
+
+    if (filter === 'all') return true;
+    if (filter === 'hard') return testCount >= 15;
+    if (filter === 'medium') return testCount >= 8 && testCount < 15;
+    if (filter === 'easy') return testCount < 8;
+    return true;
+  });
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -82,8 +107,8 @@ const StudentCourses = ({ user }) => {
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-xl p-1 text-xs font-bold">
-          {[['all', t('filterAll')], ['easy', '🟢'], ['medium', '🟡'], ['hard', '🔴']].map(([key, label]) => (
+        <div className="flex flex-wrap items-center gap-1 bg-slate-800 border border-slate-700 rounded-xl p-1 text-xs font-bold">
+          {[['all', t('filterAll')], ['easy', '🟢'], ['medium', '🟡'], ['hard', '🔴'], ['completed', t('filterCompleted')]].map(([key, label]) => (
             <button
               key={key}
               onClick={() => setFilter(key)}
@@ -177,13 +202,23 @@ const StudentCourses = ({ user }) => {
                   <div className="flex-1"></div>
 
                   {/* Start button */}
-                  <button
-                    onClick={() => (window.location.href = `/test?id=${exam.id}`)}
-                    className="w-full bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold py-3 rounded-xl transition-all shadow-lg group-hover:shadow-blue-500/30 flex items-center justify-center gap-2 text-sm"
-                  >
-                    <i className="fa-solid fa-play text-xs"></i>
-                    {t('startBtn')}
-                  </button>
+                  {completedExams.has(exam.id) ? (
+                      <button
+                        disabled
+                        className="w-full bg-slate-700 text-slate-400 font-bold py-3 rounded-xl shadow-inner flex items-center justify-center gap-2 text-sm cursor-not-allowed border border-slate-600"
+                      >
+                        <i className="fa-solid fa-check text-emerald-500"></i>
+                        {t('completedBtn')}
+                      </button>
+                  ) : (
+                      <button
+                        onClick={() => (window.location.href = `/test?id=${exam.id}`)}
+                        className="w-full bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold py-3 rounded-xl transition-all shadow-lg group-hover:shadow-blue-500/30 flex items-center justify-center gap-2 text-sm"
+                      >
+                        <i className="fa-solid fa-play text-xs"></i>
+                        {t('startBtn')}
+                      </button>
+                  )}
                 </div>
               </div>
             );
