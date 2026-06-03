@@ -136,7 +136,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                 <div 
                     className="absolute inset-0 z-0 pointer-events-none transition-all duration-500"
                     style={{ 
-                        backgroundImage: "url('https://images.unsplash.com/photo-1576091160550-2173ff9e5ee4?q=80&w=2000&auto=format&fit=crop')", 
+                        backgroundImage: "url('/assets/piron-guillaume-U4FyCp3-KzY-unsplash.jpg')", 
                         backgroundSize: 'cover', 
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat',
