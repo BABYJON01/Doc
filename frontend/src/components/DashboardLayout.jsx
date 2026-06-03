@@ -136,17 +136,17 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                 <div 
                     className="absolute inset-0 z-0 pointer-events-none transition-all duration-500"
                     style={{ 
-                        backgroundImage: "url('/assets/piron-guillaume-U4FyCp3-KzY-unsplash.jpg')", 
+                        backgroundImage: "url('/assets/fon.jpg')", 
                         backgroundSize: 'cover', 
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat',
-                        opacity: theme === 'dark' ? 0.2 : 0.6
+                        opacity: theme === 'dark' ? 0.3 : 1
                     }}
                 >
                     {/* Dark mode overlay to ensure readability */}
                     {theme === 'dark' && <div className="absolute inset-0 bg-slate-950/80"></div>}
                     {/* Light mode gradient overlay for a beautiful fade to white at the bottom */}
-                    {theme !== 'dark' && <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/70 to-white"></div>}
+                    {theme !== 'dark' && <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white/90"></div>}
                 </div>
             ) : (
                 /* Decorative Background Orbs for Light Mode (Admin/Teacher) */
