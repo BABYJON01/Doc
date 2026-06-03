@@ -173,21 +173,21 @@ const LoginSelector = ({ user, role }) => {
 
                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                              {role === 'admin' && (
-                                <button onClick={() => window.location.href = '/admin'} className="p-8 block border-t-4 border-purple-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-y-1" style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
+                                <button onClick={() => window.location.href = '/admin'} className={`p-8 block border-t-4 border-purple-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-y-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`} style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
                                     <i className="fa-solid fa-shield-cat text-4xl text-purple-500 mb-4 block"></i>
                                     <h2 className="text-xl font-bold mb-2">Boshqaruv (Admin)</h2>
-                                    <p className="text-sm opacity-70">O'qituvchilarni boshqarish va nazorat.</p>
+                                    <p className={`text-sm ${theme === 'dark' ? 'opacity-70' : 'text-slate-500'}`}>O'qituvchilarni boshqarish va nazorat.</p>
                                 </button>
                              )}
-                             <button onClick={handleTeacherClick} className="p-8 block border-t-4 border-blue-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-y-1" style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
+                             <button onClick={handleTeacherClick} className={`p-8 block border-t-4 border-blue-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-y-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`} style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
                                  <i className="fa-solid fa-chalkboard-teacher text-4xl text-blue-500 mb-4 block"></i>
                                  <h2 className="text-xl font-bold mb-2">{t.teacherPanel}</h2>
-                                 <p className="text-sm opacity-70">{t.teacherDesc}</p>
+                                 <p className={`text-sm ${theme === 'dark' ? 'opacity-70' : 'text-slate-500'}`}>{t.teacherDesc}</p>
                              </button>
-                             <button onClick={() => window.location.href = '/student'} className="p-8 block border-t-4 border-emerald-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-y-1" style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
+                             <button onClick={() => window.location.href = '/student'} className={`p-8 block border-t-4 border-emerald-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-y-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`} style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
                                  <i className="fa-solid fa-user-graduate text-4xl text-emerald-500 mb-4 block"></i>
                                  <h2 className="text-xl font-bold mb-2">{t.studentPanel}</h2>
-                                 <p className="text-sm opacity-70">{t.studentDesc}</p>
+                                 <p className={`text-sm ${theme === 'dark' ? 'opacity-70' : 'text-slate-500'}`}>{t.studentDesc}</p>
                              </button>
                          </div>
                      </div>
