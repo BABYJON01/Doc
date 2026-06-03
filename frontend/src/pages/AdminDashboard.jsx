@@ -154,19 +154,19 @@ const AdminDashboard = ({ user, onLogout }) => {
     };
 
     const handleClearAllTests = async () => {
-        const password = window.prompt("DIQQAT! Bu butun tizimdagi BARCHA TESTLARNI o'chirib yuboradi. Buni ortga qaytarib bo'lmaydi. Tasdiqlash uchun parolni kiriting (parol: admin123):");
+        const password = window.prompt("Tasdiqlash: Bu tugma tizimdagi barcha testlarni talabalar ekranidan yashiradi (Yopiq holatga o'tkazadi). Testlar o'qituvchilarda saqlanib qoladi. Parolni kiriting (parol: admin123):");
         if (password === 'admin123') {
             try {
                 const examsSnap = await getDocs(collection(db, "exams"));
                 let count = 0;
                 for (const examDoc of examsSnap.docs) {
-                    await deleteDoc(examDoc.ref);
+                    await updateDoc(examDoc.ref, { status: 'hidden' });
                     count++;
                 }
-                alert(`Muvaffaqiyatli! ${count} ta test bazasi butunlay o'chirildi.`);
+                alert(`Muvaffaqiyatli! ${count} ta test talabalar ekranidan yashirildi (Yopiq holatga o'tdi).`);
                 fetchTeachers(); // Optionally refresh stats
             } catch (error) {
-                console.error("Error clearing tests:", error);
+                console.error("Error hiding tests:", error);
                 alert("Xatolik yuz berdi!");
             }
         } else if (password !== null) {
@@ -241,10 +241,10 @@ const AdminDashboard = ({ user, onLogout }) => {
                     <div className="flex items-center gap-3">
                         <button 
                             onClick={handleClearAllTests}
-                            className={`px-4 py-2 font-bold text-sm rounded-lg flex items-center gap-2 transition-all bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/30`}
-                            title="Tizimdagi barcha testlarni butunlay o'chirib yuborish"
+                            className={`px-4 py-2 font-bold text-sm rounded-lg flex items-center gap-2 transition-all bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/30`}
+                            title="Barcha testlarni talabalar ekranidan yashirish"
                         >
-                            <i className="fa-solid fa-dumpster-fire"></i> Eski testlarni tozalash
+                            <i className="fa-solid fa-eye-slash"></i> Talabalardan yashirish
                         </button>
                         <button 
                             onClick={handleOpenAdd}
