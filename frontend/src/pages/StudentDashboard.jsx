@@ -35,8 +35,9 @@ const proficiencyData = {
 };
 
 const StudentDashboard = ({ user, onLogout }) => {
-  const { t, lang, theme } = useApp();
-  const isDark = theme === 'dark';
+  const { t, lang } = useApp();
+  // Always use dark transparent cards for student dashboard because the background image is dark
+  const isDark = true;
   const isAdmin = user?.email === 'rahmonjonwarrior@gmail.com';
   const location = useLocation();
   const path = location.pathname;

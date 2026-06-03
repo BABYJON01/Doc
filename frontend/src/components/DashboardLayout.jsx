@@ -143,10 +143,8 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                         opacity: theme === 'dark' ? 0.8 : 0.9
                     }}
                 >
-                    {/* Dark mode overlay to ensure readability */}
-                    {theme === 'dark' && <div className="absolute inset-0 bg-slate-950/60"></div>}
-                    {/* Light mode gradient overlay for a beautiful fade to white at the bottom */}
-                    {theme !== 'dark' && <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white/90"></div>}
+                    {/* Always use dark overlay for student dashboard to contrast with white text */}
+                    <div className="absolute inset-0 bg-slate-950/60"></div>
                 </div>
             ) : (
                 <div 
