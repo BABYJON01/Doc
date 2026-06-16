@@ -87,7 +87,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
               }
               const searchQuery = encodeURIComponent(finalQuery);
               const wikiUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${searchQuery}&gsrnamespace=6&gsrlimit=10&prop=imageinfo&iiprop=url&format=json&origin=*`;
-              const wikiRes = await fetchWithTimeout(wikiUrl, { timeout: 10000 }); // 10s timeout
+              const wikiRes = await fetchWithTimeout(wikiUrl, { timeout: 10000 });
               const wikiData = await wikiRes.json();
               if (wikiData.query && wikiData.query.pages) {
                   wikiResults = Object.values(wikiData.query.pages)
@@ -98,8 +98,26 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
               console.warn("Wikimedia search failed or timed out", err);
           }
 
+          // 4. Search Wikipedia Semantic Images (Extra Fallback)
+          let wikipediaResults = [];
+          try {
+              let finalQuery = englishQuery;
+              if (type === 'xray') finalQuery += " x-ray";
+              const searchQuery = encodeURIComponent(finalQuery);
+              const wikipediaUrl = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${searchQuery}&prop=pageimages&pithumbsize=500&format=json&origin=*`;
+              const wpRes = await fetchWithTimeout(wikipediaUrl, { timeout: 10000 });
+              const wpData = await wpRes.json();
+              if (wpData.query && wpData.query.pages) {
+                  wikipediaResults = Object.values(wpData.query.pages)
+                      .map(page => page.thumbnail?.source)
+                      .filter(url => url);
+              }
+          } catch(err) {
+              console.warn("Wikipedia Semantic search failed", err);
+          }
+
           // Merge results
-          let fetchedResults = [...nihResults, ...wikiResults];
+          let fetchedResults = [...nihResults, ...wikiResults, ...wikipediaResults];
           // Remove duplicates
           fetchedResults = [...new Set(fetchedResults)];
           setImageSearchModal(prev => ({ ...prev, results: fetchedResults, isLoading: false }));
