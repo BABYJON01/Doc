@@ -24,6 +24,35 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
   const [generatedData, setGeneratedData] = useState(null);
   const [showLiveRoom, setShowLiveRoom] = useState(false);
   const [xrayImages, setXrayImages] = useState({});
+  const [imageSearchModal, setImageSearchModal] = useState({ isOpen: false, idx: null, query: '', results: [], isLoading: false });
+
+  const handleSearchImage = async (idx, initialQuery) => {
+      setImageSearchModal({ isOpen: true, idx, query: initialQuery, results: [], isLoading: true });
+      try {
+          // Translate or use initial query directly. Adding 'xray' to get better results.
+          const searchQuery = encodeURIComponent(initialQuery + " xray");
+          const url = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${searchQuery}&gsrnamespace=6&gsrlimit=12&prop=imageinfo&iiprop=url&format=json&origin=*`;
+          const response = await fetch(url);
+          const data = await response.json();
+          let fetchedResults = [];
+          if (data.query && data.query.pages) {
+              fetchedResults = Object.values(data.query.pages)
+                  .map(page => page.imageinfo?.[0]?.url)
+                  .filter(url => url && (url.toLowerCase().endsWith('.jpg') || url.toLowerCase().endsWith('.png') || url.toLowerCase().endsWith('.jpeg') || url.toLowerCase().endsWith('.gif')));
+          }
+          setImageSearchModal(prev => ({ ...prev, results: fetchedResults, isLoading: false }));
+      } catch (e) {
+          console.error("Image search error", e);
+          setImageSearchModal(prev => ({ ...prev, isLoading: false }));
+      }
+  };
+
+  const handleSelectSearchedImage = (url) => {
+      if (imageSearchModal.idx !== null) {
+          setXrayImages(prev => ({...prev, [imageSearchModal.idx]: url}));
+      }
+      setImageSearchModal({ isOpen: false, idx: null, query: '', results: [], isLoading: false });
+  };
 
   const handleXrayImageUpload = (idx, e) => {
       const file = e.target.files[0];
@@ -482,19 +511,29 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                                      <h5 className="text-lg font-bold text-white mb-3 flex items-center"><span className="bg-violet-600 text-xs px-2 py-1 rounded mr-2">2 ta</span> { { ru: 'Рентгенограмма', uz: 'Rentgenogramma', en: 'X-ray' }[lang] || 'Rentgenogramma' }</h5>
                                     <div className="grid grid-cols-1 gap-3">
                                         {generatedData.xrays.map((x, idx) => (
-                                            <div key={idx} className="bg-slate-800 p-4 rounded-lg border border-slate-700 flex gap-4">
-                                                <div className="w-16 h-16 bg-slate-700 rounded shrink-0 border border-dashed border-slate-500 overflow-hidden relative group cursor-pointer hover:border-violet-500 transition-colors">
-                                                    <input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onChange={(e) => handleXrayImageUpload(idx, e)} />
-                                                    {xrayImages[idx] ? (
-                                                        <img src={xrayImages[idx]} alt="xray" className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 text-xs text-center p-1 group-hover:text-violet-400">
-                                                            <i className="fa-solid fa-cloud-arrow-up text-lg block mb-1"></i>
-                                                            Rasm yuklash
-                                                        </div>
-                                                    )}
+                                            <div key={idx} className="bg-slate-800 p-4 rounded-lg border border-slate-700 flex flex-col sm:flex-row gap-4">
+                                                <div className="flex gap-2 shrink-0">
+                                                    <div className="w-16 h-16 bg-slate-700 rounded shrink-0 border border-dashed border-slate-500 overflow-hidden relative group cursor-pointer hover:border-violet-500 transition-colors">
+                                                        <input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onChange={(e) => handleXrayImageUpload(idx, e)} />
+                                                        {xrayImages[idx] ? (
+                                                            <img src={xrayImages[idx]} alt="xray" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 text-[10px] text-center p-1 group-hover:text-violet-400">
+                                                                <i className="fa-solid fa-cloud-arrow-up text-base block mb-1"></i>
+                                                                Yuklash
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => handleSearchImage(idx, x.title)}
+                                                        className="w-16 h-16 bg-slate-700 hover:bg-slate-600 rounded border border-slate-600 text-slate-300 text-[10px] flex flex-col items-center justify-center transition-colors shrink-0"
+                                                        title="Internetdan qidirish"
+                                                    >
+                                                        <i className="fa-solid fa-magnifying-glass text-base mb-1 text-sky-400"></i>
+                                                        Qidirish
+                                                    </button>
                                                 </div>
-                                                <div>
+                                                <div className="flex-1">
                                                     <p className="text-violet-400 font-bold text-sm mb-1">{x.title}</p>
                                                     <p className="text-slate-300 text-xs mb-2">{x.question}</p>
                                                     <p className="text-emerald-400 text-xs bg-emerald-900/40 p-1 px-2 rounded inline-block">To'g'ri tashxis: {x.options && x.options[x.answer] ? x.options[x.answer] : x.answer}</p>
@@ -640,6 +679,68 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
             </div>
          </div>
       </div>
+
+      {/* Image Search Modal */}
+      {imageSearchModal.isOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[85vh]">
+                  <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800">
+                      <h3 className="text-white font-bold flex items-center gap-2"><i className="fa-solid fa-globe text-sky-400"></i> Internetdan Rasm Qidirish</h3>
+                      <button onClick={() => setImageSearchModal({ isOpen: false, idx: null, query: '', results: [], isLoading: false })} className="text-slate-400 hover:text-white transition-colors w-8 h-8 rounded-full hover:bg-slate-700 flex items-center justify-center">
+                          <i className="fa-solid fa-xmark text-xl"></i>
+                      </button>
+                  </div>
+                  <div className="p-4 flex gap-2 border-b border-slate-800 bg-slate-800/50">
+                      <input 
+                          type="text" 
+                          value={imageSearchModal.query}
+                          onChange={(e) => setImageSearchModal(prev => ({...prev, query: e.target.value}))}
+                          className="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all"
+                          placeholder="Qidiruv so'zi (inglizcha kiritish tavsiya etiladi, masalan: bone fracture xray)..."
+                          onKeyDown={(e) => { if(e.key === 'Enter') handleSearchImage(imageSearchModal.idx, imageSearchModal.query); }}
+                      />
+                      <button 
+                          onClick={() => handleSearchImage(imageSearchModal.idx, imageSearchModal.query)}
+                          className="bg-sky-600 hover:bg-sky-500 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-all hover:shadow-lg hover:shadow-sky-500/20 flex items-center gap-2"
+                      >
+                          <i className="fa-solid fa-magnifying-glass"></i> Qidirish
+                      </button>
+                  </div>
+                  <div className="p-4 overflow-y-auto flex-1 custom-scrollbar bg-slate-900">
+                      {imageSearchModal.isLoading ? (
+                          <div className="flex flex-col justify-center items-center h-48 space-y-3">
+                              <i className="fa-solid fa-circle-notch fa-spin text-4xl text-sky-500"></i>
+                              <p className="text-slate-400 text-sm">Internetdan qidirilmoqda...</p>
+                          </div>
+                      ) : imageSearchModal.results.length > 0 ? (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                              {imageSearchModal.results.map((url, i) => (
+                                  <div 
+                                      key={i} 
+                                      onClick={() => handleSelectSearchedImage(url)}
+                                      className="cursor-pointer bg-slate-800 border border-slate-700 rounded-xl overflow-hidden hover:border-sky-500 hover:ring-4 hover:ring-sky-500/30 transition-all h-36 relative group"
+                                  >
+                                      <img src={url} alt="Search result" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-2">
+                                          <span className="text-white text-xs font-bold bg-sky-600/90 px-3 py-1 rounded-full"><i className="fa-solid fa-check mr-1"></i> Tanlash</span>
+                                      </div>
+                                  </div>
+                              ))}
+                          </div>
+                      ) : (
+                          <div className="text-center text-slate-500 py-12">
+                              <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-700">
+                                  <i className="fa-solid fa-image text-3xl text-slate-600"></i>
+                              </div>
+                              <h4 className="text-slate-300 font-bold mb-1">Rasmlar topilmadi</h4>
+                              <p className="text-xs">Boshqa so'z bilan qidirib ko'ring (masalan: "bone fracture xray")</p>
+                          </div>
+                      )}
+                  </div>
+              </div>
+          </div>
+      )}
+
     </DashboardLayout>
   );
 };
