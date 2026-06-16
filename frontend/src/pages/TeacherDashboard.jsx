@@ -24,10 +24,10 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
   const [generatedData, setGeneratedData] = useState(null);
   const [showLiveRoom, setShowLiveRoom] = useState(false);
   const [xrayImages, setXrayImages] = useState({});
-  const [imageSearchModal, setImageSearchModal] = useState({ isOpen: false, idx: null, query: '', results: [], isLoading: false });
+  const [imageSearchModal, setImageSearchModal] = useState({ isOpen: false, idx: null, query: '', results: [], isLoading: false, searchType: 'xray' });
 
-  const handleSearchImage = async (idx, initialQuery) => {
-      setImageSearchModal({ isOpen: true, idx, query: initialQuery, results: [], isLoading: true });
+  const handleSearchImage = async (idx, initialQuery, type = 'xray') => {
+      setImageSearchModal(prev => ({ ...prev, isOpen: true, idx, query: initialQuery, searchType: type, results: [], isLoading: true }));
       try {
           // 1. Translate query to English for better Wikimedia Commons results
           let englishQuery = initialQuery;
@@ -42,10 +42,18 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
           }
 
           // 2. Search Wikimedia Commons
-          // Always append 'x-ray' to ensure we get medical images, unless the user already typed it
-          const finalQuery = englishQuery.toLowerCase().includes('x-ray') || englishQuery.toLowerCase().includes('xray') 
-              ? englishQuery 
-              : englishQuery + " x-ray";
+          // Append based on search type
+          let finalQuery = englishQuery;
+          if (type === 'xray') {
+              if (!englishQuery.toLowerCase().includes('x-ray') && !englishQuery.toLowerCase().includes('xray')) {
+                  finalQuery += " x-ray";
+              }
+          } else if (type === 'medical') {
+              if (!englishQuery.toLowerCase().includes('medical') && !englishQuery.toLowerCase().includes('clinical') && !englishQuery.toLowerCase().includes('disease')) {
+                  finalQuery += " medical";
+              }
+          }
+
           const searchQuery = encodeURIComponent(finalQuery);
           const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${searchQuery}&gsrnamespace=6&gsrlimit=20&prop=imageinfo&iiprop=url&format=json&origin=*`;
           const response = await fetch(url);
@@ -700,9 +708,23 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
       {imageSearchModal.isOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
               <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[85vh]">
-                  <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800">
+                  <div className="p-4 border-b border-slate-700 flex flex-col sm:flex-row justify-between items-center bg-slate-800 gap-4">
                       <h3 className="text-white font-bold flex items-center gap-2"><i className="fa-solid fa-globe text-sky-400"></i> Internetdan Rasm Qidirish</h3>
-                      <button onClick={() => setImageSearchModal({ isOpen: false, idx: null, query: '', results: [], isLoading: false })} className="text-slate-400 hover:text-white transition-colors w-8 h-8 rounded-full hover:bg-slate-700 flex items-center justify-center">
+                      <div className="flex bg-slate-900 rounded-lg p-1 border border-slate-700">
+                          <button 
+                              onClick={() => setImageSearchModal(prev => ({...prev, searchType: 'xray'}))}
+                              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${imageSearchModal.searchType === 'xray' ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                          >
+                              <i className="fa-solid fa-x-ray mr-1"></i> X-Ray
+                          </button>
+                          <button 
+                              onClick={() => setImageSearchModal(prev => ({...prev, searchType: 'medical'}))}
+                              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${imageSearchModal.searchType === 'medical' ? 'bg-sky-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                          >
+                              <i className="fa-solid fa-briefcase-medical mr-1"></i> Umumiy Tibbiy
+                          </button>
+                      </div>
+                      <button onClick={() => setImageSearchModal({ isOpen: false, idx: null, query: '', results: [], isLoading: false, searchType: 'xray' })} className="text-slate-400 hover:text-white transition-colors w-8 h-8 rounded-full hover:bg-slate-700 flex items-center justify-center shrink-0">
                           <i className="fa-solid fa-xmark text-xl"></i>
                       </button>
                   </div>
@@ -712,11 +734,11 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                           value={imageSearchModal.query}
                           onChange={(e) => setImageSearchModal(prev => ({...prev, query: e.target.value}))}
                           className="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all"
-                          placeholder="Qidiruv so'zi (inglizcha kiritish tavsiya etiladi, masalan: bone fracture xray)..."
-                          onKeyDown={(e) => { if(e.key === 'Enter') handleSearchImage(imageSearchModal.idx, imageSearchModal.query); }}
+                          placeholder="Qidiruv so'zi..."
+                          onKeyDown={(e) => { if(e.key === 'Enter') handleSearchImage(imageSearchModal.idx, imageSearchModal.query, imageSearchModal.searchType); }}
                       />
                       <button 
-                          onClick={() => handleSearchImage(imageSearchModal.idx, imageSearchModal.query)}
+                          onClick={() => handleSearchImage(imageSearchModal.idx, imageSearchModal.query, imageSearchModal.searchType)}
                           className="bg-sky-600 hover:bg-sky-500 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-all hover:shadow-lg hover:shadow-sky-500/20 flex items-center gap-2"
                       >
                           <i className="fa-solid fa-magnifying-glass"></i> Qidirish
