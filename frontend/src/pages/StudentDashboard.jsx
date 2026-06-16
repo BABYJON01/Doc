@@ -171,13 +171,13 @@ const StudentDashboard = ({ user, onLogout }) => {
         )}
 
         {path === '/student/live' && (
-            <div className="max-w-lg mx-auto mt-10">
-                <div className="rounded-2xl border border-emerald-500/30 overflow-hidden shadow-[0_0_35px_rgba(16,185,129,0.12)]" style={{ background: 'linear-gradient(135deg, rgba(6,78,59,0.4) 0%, rgba(15,23,42,0.95) 100%)' }}>
+            <div className="max-w-lg mx-auto mt-10 animate-[slideUp_0.5s_ease-out]">
+                <div className="rounded-2xl border border-emerald-500/30 overflow-hidden shadow-[0_0_35px_rgba(16,185,129,0.2)] backdrop-blur-2xl" style={{ background: 'linear-gradient(135deg, rgba(6,78,59,0.6) 0%, rgba(15,23,42,0.85) 100%)' }}>
                     <div className="flex items-center justify-center gap-3 mb-4 px-6 pt-6">
-                      <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-600 flex items-center justify-center text-lg">
-                        <i className="fa-solid fa-users-viewfinder"></i>
+                      <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 flex items-center justify-center text-xl shadow-[0_0_15px_rgba(16,185,129,0.3)] animate-pulse-slow">
+                        <i className="fa-solid fa-bolt"></i>
                       </div>
-                      <h3 className={`font-black text-lg ${isDark ? 'text-white' : 'text-slate-900'}`}>{ { ru: 'Подключиться к Live Quiz', uz: 'Live Quiz\'ga ulanish', en: 'Connect to Live Quiz' }[lang] || 'Live Quiz\'ga ulanish' }</h3>
+                      <h3 className={`font-black text-xl text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200 drop-shadow-sm`}>{ { ru: 'Live Quiz - Дуэль', uz: 'Live Quiz - Duel', en: 'Live Quiz - Duel' }[lang] || 'Live Quiz - Duel' }</h3>
                     </div>
                     <p className={`text-center text-sm font-semibold mb-6 text-slate-400 px-6`}>
                       { { ru: 'Введите 6-значный PIN-код, который дал преподаватель, и присоединяйтесь к гонке.', uz: 'O\'qituvchi aytgan 6 xonali maxsus PIN kodni kiriting va poygaga qo\'shiling.', en: 'Enter the 6-digit PIN code provided by the teacher and join the race.' }[lang] || 'O\'qituvchi aytgan 6 xonali maxsus PIN kodni kiriting va poygaga qo\'shiling.' }
@@ -224,22 +224,25 @@ const StudentDashboard = ({ user, onLogout }) => {
         {path === '/student' && (
           <div className="max-w-7xl mx-auto">
             {/* Welcome Banner */}
-            <div className={`mb-6 p-5 rounded-2xl flex items-center gap-4 border shadow-lg ${isDark ? 'bg-slate-800/80 backdrop-blur-xl border-slate-700/50' : 'bg-white/90 backdrop-blur-xl border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]'}`} style={{ background: isDark ? 'linear-gradient(135deg, rgba(30,41,59,0.7) 0%, rgba(15,23,42,0.6) 100%)' : '' }}>
-                {user?.photoURL
-                  ? <img src={user.photoURL} alt="avatar" className="w-12 h-12 rounded-full border-2 border-blue-500/60 shrink-0" />
-                  : <div className="w-12 h-12 rounded-full bg-blue-500/20 border-2 border-blue-500/40 flex items-center justify-center text-blue-400 text-xl shrink-0"><i className="fa-solid fa-user-graduate"></i></div>
-                }
+            <div className="mb-8 p-6 rounded-3xl flex items-center gap-5 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-xl hover:border-blue-500/30 transition-all duration-500 group animate-[slideUp_0.4s_ease-out]" style={{ background: 'linear-gradient(135deg, rgba(30,41,59,0.4) 0%, rgba(15,23,42,0.6) 100%)' }}>
+                <div className="relative">
+                  <div className="absolute inset-0 bg-blue-500/40 blur-xl rounded-full group-hover:bg-blue-400/60 transition-all duration-500"></div>
+                  {user?.photoURL
+                    ? <img src={user.photoURL} alt="avatar" className="relative w-16 h-16 rounded-full border-2 border-blue-400/80 shrink-0 shadow-lg" />
+                    : <div className="relative w-16 h-16 rounded-full bg-blue-500/20 border-2 border-blue-400/80 flex items-center justify-center text-blue-400 text-2xl shrink-0 shadow-lg"><i className="fa-solid fa-user-astronaut"></i></div>
+                  }
+                </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-xl sm:text-2xl font-black text-white drop-shadow-md">
-                      {{ ru: 'Добро пожаловать', uz: 'Xush kelibsiz', en: 'Welcome' }[lang] || 'Xush kelibsiz'}, {user?.displayName || 'Talaba'}! 👋
+                  <h2 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-300 drop-shadow-sm">
+                      {{ ru: 'Добро пожаловать', uz: 'Xush kelibsiz', en: 'Welcome' }[lang] || 'Xush kelibsiz'}, <span className="text-blue-400">{user?.displayName || 'Talaba'}</span>! 👋
                   </h2>
-                  <p className="text-white/90 text-sm mt-1 font-semibold drop-shadow">
-                      {{ ru: 'Продолжайте с того места, где остановились.', uz: 'Avval to\'xtatgan joyingizdan davom eting.', en: 'Continue where you left off.' }[lang] || 'Avval to\'xtatgan joyingizdan davom eting.'}
+                  <p className="text-slate-300 text-sm mt-1 font-medium">
+                      {{ ru: 'Продолжайте с того места, где остановились.', uz: 'Yangi bilimlarni kashf etishga tayyormisiz?', en: 'Ready to discover new knowledge?' }[lang] || 'Yangi bilimlarni kashf etishga tayyormisiz?'}
                   </p>
                 </div>
-                <div className="hidden sm:flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-3 py-2 shrink-0">
-                  <i className="fa-solid fa-circle text-[6px] text-emerald-400 animate-pulse"></i>
-                  <span className="text-emerald-400 text-xs font-bold">{{ ru: 'Онлайн', uz: 'Onlayn', en: 'Online' }[lang] || 'Onlayn'}</span>
+                <div className="hidden sm:flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl px-4 py-2 shrink-0 backdrop-blur-md shadow-inner">
+                  <i className="fa-solid fa-circle text-[8px] text-emerald-400 animate-pulse"></i>
+                  <span className="text-emerald-400 text-xs font-black tracking-widest uppercase">{{ ru: 'Онлайн', uz: 'Onlayn', en: 'Online' }[lang] || 'Onlayn'}</span>
                 </div>
             </div>
 
@@ -267,35 +270,35 @@ const StudentDashboard = ({ user, onLogout }) => {
         {/* ── LEFT COLUMN ───────────────────────────────── */}
         <div className="lg:col-span-2 space-y-6">
 
-          {/* Simplified Stats Row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
-              <div className={`p-5 rounded-2xl border shadow-lg flex items-center gap-4 hover:border-blue-500/50 transition-colors cursor-pointer group ${isDark ? 'bg-slate-800/80 backdrop-blur-xl border-slate-700/50' : 'bg-white/90 backdrop-blur-xl border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]'}`}>
-                  <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 text-xl group-hover:scale-110 transition-transform">
+          {/* Simplified Stats Row with Strong Glassmorphism */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-2">
+              <div className="p-5 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] bg-slate-900/40 backdrop-blur-xl flex items-center gap-4 hover:-translate-y-2 hover:shadow-[0_15px_40px_rgba(37,99,235,0.2)] hover:border-blue-500/40 transition-all duration-300 cursor-pointer group">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/5 border border-blue-500/20 flex items-center justify-center text-blue-400 text-2xl group-hover:scale-110 group-hover:rotate-3 transition-transform shadow-inner">
                       <i className="fa-solid fa-layer-group"></i>
                   </div>
                   <div>
-                      <h4 className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{{ uz: 'Yechilgan Testlar', ru: 'Завершенные тесты', en: 'Tests Completed' }[lang] || 'Yechilgan Testlar'}</h4>
-                      <p className={`text-xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{stats.totalTests}</p>
+                      <h4 className="text-[10px] font-black uppercase tracking-widest mb-1 text-slate-400">{{ uz: 'Yechilgan Testlar', ru: 'Завершенные тесты', en: 'Tests Completed' }[lang] || 'Yechilgan Testlar'}</h4>
+                      <p className="text-2xl font-black text-white">{stats.totalTests}</p>
                   </div>
               </div>
               
-              <div className={`p-5 rounded-2xl border shadow-lg flex items-center gap-4 hover:border-emerald-500/50 transition-colors cursor-pointer group ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white/90 border-slate-200'}`}>
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-xl group-hover:scale-110 transition-transform">
-                      <i className="fa-solid fa-fire"></i>
+              <div className="p-5 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] bg-slate-900/40 backdrop-blur-xl flex items-center gap-4 hover:-translate-y-2 hover:shadow-[0_15px_40px_rgba(16,185,129,0.2)] hover:border-emerald-500/40 transition-all duration-300 cursor-pointer group">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/5 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-2xl group-hover:scale-110 group-hover:-rotate-3 transition-transform shadow-inner">
+                      <i className="fa-solid fa-fire animate-pulse-slow"></i>
                   </div>
                   <div>
-                      <h4 className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{{ uz: 'Jami tajriba (XP)', ru: 'Общий опыт (XP)', en: 'Total Experience (XP)' }[lang] || 'Jami tajriba (XP)'}</h4>
-                      <p className="text-xl font-black text-emerald-500">{stats.totalXP.toLocaleString()}</p>
+                      <h4 className="text-[10px] font-black uppercase tracking-widest mb-1 text-slate-400">{{ uz: 'Jami tajriba (XP)', ru: 'Общий опыт (XP)', en: 'Total Experience (XP)' }[lang] || 'Jami tajriba (XP)'}</h4>
+                      <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">{stats.totalXP.toLocaleString()}</p>
                   </div>
               </div>
               
-              <div className={`p-5 rounded-2xl border shadow-lg flex items-center gap-4 hover:border-violet-500/50 transition-colors cursor-pointer group ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white/90 border-slate-200'}`}>
-                  <div className="w-12 h-12 rounded-xl bg-violet-500/10 flex items-center justify-center text-violet-500 text-xl group-hover:scale-110 transition-transform">
+              <div className="p-5 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] bg-slate-900/40 backdrop-blur-xl flex items-center gap-4 hover:-translate-y-2 hover:shadow-[0_15px_40px_rgba(139,92,246,0.2)] hover:border-violet-500/40 transition-all duration-300 cursor-pointer group">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/20 to-violet-600/5 border border-violet-500/20 flex items-center justify-center text-violet-400 text-2xl group-hover:scale-110 group-hover:rotate-12 transition-transform shadow-inner">
                       <i className="fa-solid fa-brain"></i>
                   </div>
                   <div>
-                      <h4 className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{{ uz: 'O\'rtacha Natija', ru: 'Успеваемость', en: 'Average Score' }[lang] || 'O\'rtacha Natija'}</h4>
-                      <p className={`text-xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{stats.avgScore}%</p>
+                      <h4 className="text-[10px] font-black uppercase tracking-widest mb-1 text-slate-400">{{ uz: 'O\'rtacha Natija', ru: 'Успеваемость', en: 'Average Score' }[lang] || 'O\'rtacha Natija'}</h4>
+                      <p className="text-2xl font-black text-white">{stats.avgScore}%</p>
                   </div>
               </div>
           </div>

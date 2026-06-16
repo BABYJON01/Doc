@@ -400,39 +400,54 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
 
 
      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 max-w-7xl mx-auto">
-         <div className="bg-slate-900/80 backdrop-blur-xl p-6 rounded-xl border border-slate-700/50 shadow-lg hover:border-slate-500 transition-all">
-            <div className="text-slate-400 text-sm font-bold uppercase mb-1">{t.tcStatsCourses}</div>
-            <div className="text-3xl font-black text-white">12</div>
+         <div className="bg-slate-900/40 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:-translate-y-2 hover:shadow-[0_15px_40px_rgba(37,99,235,0.2)] hover:border-blue-500/40 transition-all duration-300">
+            <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center"><i className="fa-solid fa-layer-group"></i></div>
+                <div className="text-slate-400 text-xs font-black uppercase tracking-widest">{t.tcStatsCourses}</div>
+            </div>
+            <div className="text-4xl font-black text-white ml-1">12</div>
          </div>
-         <div className="bg-slate-900/80 backdrop-blur-xl p-6 rounded-xl border border-slate-700/50 shadow-lg hover:border-slate-500 transition-all">
-            <div className="text-slate-400 text-sm font-bold uppercase mb-1">{t.tcStatsStudents}</div>
-            <div className="text-3xl font-black text-blue-400">1,240</div>
+         <div className="bg-slate-900/40 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:-translate-y-2 hover:shadow-[0_15px_40px_rgba(56,189,248,0.2)] hover:border-sky-500/40 transition-all duration-300">
+            <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center"><i className="fa-solid fa-users"></i></div>
+                <div className="text-slate-400 text-xs font-black uppercase tracking-widest">{t.tcStatsStudents}</div>
+            </div>
+            <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-300 ml-1">1,240</div>
          </div>
-         <div className="bg-slate-900/80 backdrop-blur-xl p-6 rounded-xl border border-slate-700/50 shadow-lg hover:border-slate-500 transition-all">
-            <div className="text-slate-400 text-sm font-bold uppercase mb-1">{t.tcStatsCases}</div>
-            <div className="text-3xl font-black text-indigo-400">45</div>
+         <div className="bg-slate-900/40 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:-translate-y-2 hover:shadow-[0_15px_40px_rgba(139,92,246,0.2)] hover:border-violet-500/40 transition-all duration-300">
+            <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-full bg-violet-500/20 text-violet-400 flex items-center justify-center"><i className="fa-solid fa-stethoscope"></i></div>
+                <div className="text-slate-400 text-xs font-black uppercase tracking-widest">{t.tcStatsCases}</div>
+            </div>
+            <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-300 ml-1">45</div>
          </div>
-         <div className="bg-slate-900/80 backdrop-blur-xl p-6 rounded-xl border border-slate-700/50 shadow-lg hover:border-slate-500 transition-all">
-            <div className="text-slate-400 text-sm font-bold uppercase mb-1">{t.tcStatsMastery}</div>
-            <div className="text-3xl font-black text-emerald-400">82%</div>
+         <div className="bg-slate-900/40 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:-translate-y-2 hover:shadow-[0_15px_40px_rgba(16,185,129,0.2)] hover:border-emerald-500/40 transition-all duration-300">
+            <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center"><i className="fa-solid fa-chart-line"></i></div>
+                <div className="text-slate-400 text-xs font-black uppercase tracking-widest">{t.tcStatsMastery}</div>
+            </div>
+            <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300 ml-1">82%</div>
          </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
-         <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 shadow-xl">
-            <h3 className="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-3">{t.tcSectionCreate}</h3>
-            <div className="space-y-4">
+         <div className="bg-slate-900/40 backdrop-blur-2xl rounded-3xl p-8 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] relative overflow-hidden">
+            {/* Glow effect background */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 rounded-full blur-[80px] pointer-events-none"></div>
+            
+            <h3 className="text-xl font-black text-white mb-6 border-b border-white/10 pb-4">{t.tcSectionCreate}</h3>
+            <div className="space-y-6">
                 {/* Topic Selection UI */}
                 {!isUploading && progress === 0 && (
                     <div className="mb-6">
-                        <h4 className="text-sm text-slate-400 font-bold uppercase mb-3"><i className="fa-solid fa-list-check mr-2 text-indigo-400"></i>{t.tcSectionTopics}</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <h4 className="text-xs text-slate-400 font-black uppercase mb-4 tracking-widest"><i className="fa-solid fa-list-check mr-2 text-indigo-400"></i>{t.tcSectionTopics}</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {medicalTopics.map((topic, idx) => (
-                                <button key={idx} onClick={() => handleGenerateFromTopic(topic)} className="text-left bg-slate-900 border border-slate-700 hover:border-indigo-500 hover:bg-slate-800 p-3 rounded-xl transition-all group flex items-start gap-3 shadow-lg">
-                                    <div className="w-8 h-8 rounded-full bg-slate-800 group-hover:bg-indigo-500 text-slate-400 group-hover:text-white flex items-center justify-center shrink-0 border border-slate-600 transition-colors">
+                                <button key={idx} onClick={() => handleGenerateFromTopic(topic)} className="text-left bg-slate-900/50 border border-white/5 hover:border-indigo-500/50 hover:bg-slate-800/80 p-4 rounded-2xl transition-all duration-300 group flex items-start gap-4 shadow-lg hover:-translate-y-1">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 group-hover:from-indigo-500 group-hover:to-purple-600 text-slate-400 group-hover:text-white flex items-center justify-center shrink-0 border border-white/5 transition-all shadow-inner">
                                         <i className="fa-solid fa-wand-magic-sparkles"></i>
                                     </div>
-                                    <span className="text-sm text-slate-300 group-hover:text-white font-medium pt-1 leading-snug">{topic}</span>
+                                    <span className="text-sm text-slate-300 group-hover:text-white font-bold pt-1.5 leading-snug">{topic}</span>
                                 </button>
                             ))}
                         </div>
@@ -443,7 +458,8 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                 {!isUploading && progress === 0 && (
                     <div 
                         onClick={() => document.getElementById('file-upload').click()}
-                        className={`w-full bg-slate-900 border-2 border-dashed ${errorMsg ? 'border-rose-500' : 'border-slate-600'} rounded-xl p-8 hover:border-blue-500 hover:bg-slate-800/80 transition-all flex flex-col items-center justify-center cursor-pointer group mb-4`}>
+                        className={`w-full bg-slate-900/50 border-2 border-dashed ${errorMsg ? 'border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.2)]' : 'border-white/20 hover:border-blue-400 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]'} rounded-3xl p-10 transition-all duration-300 flex flex-col items-center justify-center cursor-pointer group mb-4 relative overflow-hidden`}>
+                        <div className="absolute inset-0 bg-blue-500/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <input 
                             type="file" 
                             id="file-upload" 

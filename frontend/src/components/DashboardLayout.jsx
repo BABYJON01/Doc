@@ -47,12 +47,13 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
     // Derived styles based on theme
     const isDarkUI = role === 'student' || role === 'teacher' || theme === 'dark';
     const bgClass = theme === 'dark' ? 'bg-slate-950 text-slate-100' : ((role === 'student' || role === 'teacher') ? 'bg-[#0f172a] text-slate-200' : 'bg-slate-50 text-slate-800');
-    const sidebarBg = isDarkUI ? 'bg-[#0f172a]/50 backdrop-blur-2xl border-r border-slate-800/50 text-slate-200' : 'bg-white/60 backdrop-blur-2xl border-r border-slate-200/50 shadow-sm text-slate-800';
-    const headerBg = isDarkUI ? 'bg-[#0f172a]/50 border-b border-slate-800/50 text-slate-200 backdrop-blur-2xl' : 'bg-white/60 border-b border-slate-200/50 shadow-sm text-slate-800 backdrop-blur-2xl';
+    // Strong Glassmorphism
+    const sidebarBg = isDarkUI ? 'bg-slate-900/40 backdrop-blur-xl border-r border-white/10 text-slate-200 shadow-[4px_0_24px_-4px_rgba(0,0,0,0.5)]' : 'bg-white/40 backdrop-blur-xl border-r border-white/40 shadow-[4px_0_24px_-4px_rgba(0,0,0,0.1)] text-slate-800';
+    const headerBg = isDarkUI ? 'bg-slate-900/40 border-b border-white/10 text-slate-200 backdrop-blur-xl shadow-[0_4px_24px_-4px_rgba(0,0,0,0.5)]' : 'bg-white/40 border-b border-white/40 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.1)] text-slate-800 backdrop-blur-xl';
     
     const sidebarLinkClass = (isActive) => isActive 
-        ? (isDarkUI ? 'bg-blue-600/10 text-blue-400 font-bold' : 'bg-blue-50 text-blue-600 font-bold')
-        : (isDarkUI ? 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800');
+        ? (isDarkUI ? 'bg-gradient-to-r from-blue-600/20 to-blue-400/5 text-blue-400 font-bold border-l-4 border-blue-500 shadow-inner' : 'bg-gradient-to-r from-blue-100 to-transparent text-blue-700 font-bold border-l-4 border-blue-600 shadow-inner')
+        : (isDarkUI ? 'text-slate-400 hover:bg-white/5 hover:text-white transition-all duration-300 border-l-4 border-transparent hover:border-slate-700' : 'text-slate-500 hover:bg-black/5 hover:text-slate-800 transition-all duration-300 border-l-4 border-transparent hover:border-slate-300');
 
     
     const getMenu = (type) => {
