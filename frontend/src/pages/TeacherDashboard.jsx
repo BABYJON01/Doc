@@ -42,7 +42,11 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
           }
 
           // 2. Search Wikimedia Commons
-          const searchQuery = encodeURIComponent(englishQuery);
+          // Always append 'x-ray' to ensure we get medical images, unless the user already typed it
+          const finalQuery = englishQuery.toLowerCase().includes('x-ray') || englishQuery.toLowerCase().includes('xray') 
+              ? englishQuery 
+              : englishQuery + " x-ray";
+          const searchQuery = encodeURIComponent(finalQuery);
           const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${searchQuery}&gsrnamespace=6&gsrlimit=20&prop=imageinfo&iiprop=url&format=json&origin=*`;
           const response = await fetch(url);
           const data = await response.json();
