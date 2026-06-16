@@ -23,6 +23,18 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
   const [progress, setProgress] = useState(0);
   const [generatedData, setGeneratedData] = useState(null);
   const [showLiveRoom, setShowLiveRoom] = useState(false);
+  const [xrayImages, setXrayImages] = useState({});
+
+  const handleXrayImageUpload = (idx, e) => {
+      const file = e.target.files[0];
+      if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+              setXrayImages(prev => ({...prev, [idx]: reader.result}));
+          };
+          reader.readAsDataURL(file);
+      }
+  };
   const [currentTopic, setCurrentTopic] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -122,12 +134,20 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
       if (!generatedData) return;
       setIsSaving(true);
       try {
+          const dataToSave = { ...generatedData };
+          if (dataToSave.xrays) {
+              dataToSave.xrays = dataToSave.xrays.map((x, idx) => ({
+                  ...x,
+                  image: xrayImages[idx] || null
+              }));
+          }
+
           const docRef = await addDoc(collection(db, 'exams'), {
               teacherId: user?.uid || 'unknown',
               teacherName: user?.displayName || user?.email || 'O\'qituvchi',
               title: currentTopic || 'Yangi Imtihon',
               createdAt: serverTimestamp(),
-              data: generatedData,
+              data: dataToSave,
               status: 'published'
           });
           const link = `${window.location.origin}/test?id=${docRef.id}`;
@@ -136,6 +156,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
           setProgress(0);
           setIsUploading(false);
           setGeneratedData(null);
+          setXrayImages({});
       } catch (err) {
           console.error("Save error:", err);
           alert({ ru: 'Ошибка сохранения!', uz: 'Saqlashda xatolik yuz berdi!', en: 'Error saving!' }[lang] || 'Saqlashda xatolik yuz berdi!');
@@ -462,9 +483,16 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                                     <div className="grid grid-cols-1 gap-3">
                                         {generatedData.xrays.map((x, idx) => (
                                             <div key={idx} className="bg-slate-800 p-4 rounded-lg border border-slate-700 flex gap-4">
-                                                <div className="w-16 h-16 bg-slate-700 rounded flex items-center justify-center shrink-0 border border-dashed border-slate-500 text-slate-500 text-xs text-center p-1 cursor-pointer hover:bg-slate-600 transition-colors">
-                                                    <i className="fa-solid fa-cloud-arrow-up text-lg block mb-1"></i>
-                                                    Rasm yuklash
+                                                <div className="w-16 h-16 bg-slate-700 rounded shrink-0 border border-dashed border-slate-500 overflow-hidden relative group cursor-pointer hover:border-violet-500 transition-colors">
+                                                    <input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onChange={(e) => handleXrayImageUpload(idx, e)} />
+                                                    {xrayImages[idx] ? (
+                                                        <img src={xrayImages[idx]} alt="xray" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 text-xs text-center p-1 group-hover:text-violet-400">
+                                                            <i className="fa-solid fa-cloud-arrow-up text-lg block mb-1"></i>
+                                                            Rasm yuklash
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <p className="text-violet-400 font-bold text-sm mb-1">{x.title}</p>
