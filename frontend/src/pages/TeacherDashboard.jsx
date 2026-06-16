@@ -15,6 +15,8 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishedLink, setPublishedLink] = useState(null);
+  const [isAutoFetchingNIH, setIsAutoFetchingNIH] = useState(false);
+  const [nihFetchResult, setNihFetchResult] = useState(null);
   const [isUploadingJson, setIsUploadingJson] = useState(false);
   const [jsonUploadResults, setJsonUploadResults] = useState([]);
   const [isUploadingMultiDoc, setIsUploadingMultiDoc] = useState(false);
@@ -294,6 +296,73 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
           alert({ ru: 'Ошибка загрузки базы!', uz: 'Bazani yuklashda xatolik!', en: 'Error loading the database!' }[lang]);
       } finally {
           setIsPublishing(false);
+      }
+  };
+
+  const handleAutoFetchNIH = async () => {
+      setIsAutoFetchingNIH(true);
+      setNihFetchResult(null);
+      try {
+          // Fetch up to 25 items from NIH Open-i for 'orthopedics x-ray'
+          const queryUrl = `https://openi.nlm.nih.gov/api/search?query=orthopedics&it=x&m=1&n=25`;
+          const res = await fetch(queryUrl);
+          const data = await res.json();
+          
+          if (!data || !data.list || data.list.length === 0) {
+              throw new Error("Ma'lumot topilmadi");
+          }
+
+          const localXrays = data.list
+              .filter(item => item.imgLarge || item.image?.imageURL)
+              .map(item => {
+                  const imgPath = item.imgLarge || item.image?.imageURL;
+                  const fullImgPath = imgPath.startsWith('http') ? imgPath : `https://openi.nlm.nih.gov${imgPath}`;
+                  // Clean up title and extract some basic info
+                  const cleanTitle = (item.title || "Orthopedic X-Ray Case").replace(/<\/?[^>]+(>|$)/g, "");
+                  const abstractText = (item.abstract || "Detailed findings not provided. Analyze the image to identify the pathology.").replace(/<\/?[^>]+(>|$)/g, "").substring(0, 300) + "...";
+                  
+                  return {
+                      id: item.uid || Math.random().toString(),
+                      title: cleanTitle,
+                      image: fullImgPath,
+                      question: { uz: "Ushbu rentgen tasvirida qanday asosiy patologiya kuzatilmoqda?", ru: "Какая основная патология наблюдается на этом рентгеновском снимке?", en: "What is the primary pathology observed in this X-ray?" }[lang] || "Ushbu rentgen tasvirida qanday asosiy patologiya kuzatilmoqda?",
+                      options: [
+                          "Normal anatomik tuzilish",
+                          "Suyak sinishi (Fracture)",
+                          "Bo'g'im yallig'lanishi (Arthritis)",
+                          "Suyak o'smasi (Tumor)",
+                          abstractText.includes('fracture') || abstractText.includes('Fracture') ? "Suyak sinishi (Fracture)" : "Noma'lum patologiya"
+                      ],
+                      correctAnswer: abstractText.includes('fracture') || abstractText.includes('Fracture') ? "Suyak sinishi (Fracture)" : "Normal anatomik tuzilish",
+                      answer: abstractText.includes('fracture') || abstractText.includes('Fracture') ? 1 : 0,
+                      topic: "Ortopediya (NIH Baza)",
+                      explanation: abstractText
+                  };
+              });
+
+          const payload = {
+              success: true,
+              tests: [],
+              xrays: localXrays,
+              cases: []
+          };
+
+          const docRef = await addDoc(collection(db, 'exams'), {
+              teacherId: user?.uid || 'unknown',
+              teacherName: user?.displayName || user?.email || 'O\'qituvchi',
+              title: `Avto Baza (NIH): ${localXrays.length} ta rentgen kesh`,
+              createdAt: serverTimestamp(),
+              data: payload,
+              status: 'published'
+          });
+
+          const link = `${window.location.origin}/test?id=${docRef.id}`;
+          setNihFetchResult({ count: localXrays.length, link });
+      } catch (err) {
+          console.error("Auto Fetch NIH Error:", err);
+          alert({ ru: 'Ошибка загрузки базы NIH!', uz: 'NIH bazasini yuklashda xatolik!', en: 'Error loading NIH database!' }[lang]);
+      } finally {
+          setIsAutoFetchingNIH(false);
       }
   };
 
@@ -739,6 +808,57 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                             </div>
                             <button
                                 onClick={() => { navigator.clipboard.writeText(publishedLink); alert('Nusxalandi!'); }}
+                                className="px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs text-white transition-colors"
+                                title="Nusxalash"
+                            >
+                                <i className="fa-solid fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Auto-Fetch NIH Baza */}
+            <div className="mb-6 p-5 rounded-xl bg-slate-900/40 border border-white/10 backdrop-blur-xl hover:border-violet-500/40 hover:shadow-[0_10px_30px_rgba(139,92,246,0.15)] transition-all duration-300">
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-full bg-violet-500/20 text-violet-400 flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.4)] animate-pulse-slow">
+                        <i className="fa-solid fa-satellite-dish"></i>
+                    </div>
+                    <h4 className="text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400 uppercase tracking-widest">
+                        { { ru: 'Авто-сбор базы (NIH Open-i)', uz: 'Avto-yig\'ish (NIH Open-i)', en: 'Auto-Fetch (NIH Open-i)' }[lang] || 'Avto-yig\'ish (NIH Open-i)' }
+                    </h4>
+                </div>
+                <p className="text-slate-400 text-xs mb-4 ml-11">
+                    { { ru: 'Автоматически собрать 25 реальных ортопедических рентгенов из открытой базы NIH и превратить их в тесты.', uz: 'AQSh Tibbiyot Milliy Kutubxonasidan (NIH) avtomatik ravishda tayyor ortopedik rentgenlarni tortib olish va testlarga aylantirish.', en: 'Automatically fetch 25 real orthopedic x-rays from the NIH open database and convert them into tests.' }[lang] || 'AQSh Tibbiyot Milliy Kutubxonasidan (NIH) avtomatik ravishda tayyor ortopedik rentgenlarni tortib olish va testlarga aylantirish.' }
+                </p>
+                <button
+                    onClick={handleAutoFetchNIH}
+                    disabled={isAutoFetchingNIH}
+                    className={`w-full py-3 flex items-center justify-center gap-2 font-black text-sm rounded-xl transition-all shadow-lg ${
+                        isAutoFetchingNIH
+                            ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-violet-500/30 hover:-translate-y-0.5 hover:shadow-[0_10px_20px_rgba(139,92,246,0.4)]'
+                    }`}
+                >
+                    {isAutoFetchingNIH ? (
+                        <><i className="fa-solid fa-circle-notch fa-spin"></i> Internetdan Qidirilmoqda...</>
+                    ) : (
+                        <><i className="fa-solid fa-cloud-bolt"></i> Ortopediya Bazasini Yaratish</>
+                    )}
+                </button>
+
+                {nihFetchResult && (
+                    <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+                        <p className="text-emerald-400 font-bold text-xs mb-2 flex items-center gap-2">
+                            <i className="fa-solid fa-check-circle"></i> {nihFetchResult.count} ta rentgen muvaffaqiyatli yuklandi!
+                        </p>
+                        <p className="text-slate-400 text-xs mb-2">Talabalar uchun havola:</p>
+                        <div className="flex gap-2">
+                            <div className="flex-1 bg-slate-900 rounded-lg px-3 py-2 text-xs text-slate-300 font-mono truncate border border-slate-700">
+                                {nihFetchResult.link}
+                            </div>
+                            <button
+                                onClick={() => { navigator.clipboard.writeText(nihFetchResult.link); alert('Nusxalandi!'); }}
                                 className="px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs text-white transition-colors"
                                 title="Nusxalash"
                             >
