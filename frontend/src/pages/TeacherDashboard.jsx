@@ -41,29 +41,56 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
               console.warn("Translation failed, using original query", err);
           }
 
-          // 2. Search Wikimedia Commons
-          // Append based on search type
-          let finalQuery = englishQuery;
-          if (type === 'xray') {
-              if (!englishQuery.toLowerCase().includes('x-ray') && !englishQuery.toLowerCase().includes('xray')) {
-                  finalQuery += " x-ray";
+          // 2. Search NIH Open-i (High Quality Medical Database)
+          let nihResults = [];
+          try {
+              const nihQuery = encodeURIComponent(englishQuery);
+              const nihType = type === 'xray' ? '&it=x' : ''; // 'it=x' filters specifically for X-rays in NIH Open-i
+              const nihUrl = `https://openi.nlm.nih.gov/api/search?query=${nihQuery}${nihType}&m=1&n=15`;
+              const nihRes = await fetch(nihUrl);
+              const nihData = await nihRes.json();
+              if (nihData && nihData.list) {
+                  nihResults = nihData.list
+                      .filter(item => item.imgLarge || item.image?.imageURL)
+                      .map(item => {
+                           const imgPath = item.imgLarge || item.image?.imageURL;
+                           return imgPath.startsWith('http') ? imgPath : `https://openi.nlm.nih.gov${imgPath}`;
+                      });
               }
-          } else if (type === 'medical') {
-              if (!englishQuery.toLowerCase().includes('medical') && !englishQuery.toLowerCase().includes('clinical') && !englishQuery.toLowerCase().includes('disease')) {
-                  finalQuery += " medical";
-              }
+          } catch(err) {
+              console.warn("NIH Open-i search failed", err);
           }
 
-          const searchQuery = encodeURIComponent(finalQuery);
-          const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${searchQuery}&gsrnamespace=6&gsrlimit=20&prop=imageinfo&iiprop=url&format=json&origin=*`;
-          const response = await fetch(url);
-          const data = await response.json();
-          let fetchedResults = [];
-          if (data.query && data.query.pages) {
-              fetchedResults = Object.values(data.query.pages)
-                  .map(page => page.imageinfo?.[0]?.url)
-                  .filter(url => url && (url.toLowerCase().endsWith('.jpg') || url.toLowerCase().endsWith('.png') || url.toLowerCase().endsWith('.jpeg') || url.toLowerCase().endsWith('.gif')));
+          // 3. Search Wikimedia Commons (Fallback/Extra)
+          let wikiResults = [];
+          try {
+              let finalQuery = englishQuery;
+              if (type === 'xray') {
+                  if (!englishQuery.toLowerCase().includes('x-ray') && !englishQuery.toLowerCase().includes('xray')) {
+                      finalQuery += " x-ray";
+                  }
+              } else if (type === 'medical') {
+                  if (!englishQuery.toLowerCase().includes('medical') && !englishQuery.toLowerCase().includes('clinical') && !englishQuery.toLowerCase().includes('disease')) {
+                      finalQuery += " medical";
+                  }
+              }
+              const searchQuery = encodeURIComponent(finalQuery);
+              const wikiUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${searchQuery}&gsrnamespace=6&gsrlimit=10&prop=imageinfo&iiprop=url&format=json&origin=*`;
+              const wikiRes = await fetch(wikiUrl);
+              const wikiData = await wikiRes.json();
+              if (wikiData.query && wikiData.query.pages) {
+                  wikiResults = Object.values(wikiData.query.pages)
+                      .map(page => page.imageinfo?.[0]?.url)
+                      .filter(url => url && (url.toLowerCase().endsWith('.jpg') || url.toLowerCase().endsWith('.png') || url.toLowerCase().endsWith('.jpeg') || url.toLowerCase().endsWith('.gif')));
+              }
+          } catch(err) {
+              console.warn("Wikimedia search failed", err);
           }
+
+          // Merge results
+          let fetchedResults = [...nihResults, ...wikiResults];
+          // Remove duplicates
+          fetchedResults = [...new Set(fetchedResults)];
           setImageSearchModal(prev => ({ ...prev, results: fetchedResults, isLoading: false }));
       } catch (e) {
           console.error("Image search error", e);
