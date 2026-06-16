@@ -1,11 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Groq from "groq-sdk";
-import mammoth from "mammoth";
-import * as pdfjsLib from "pdfjs-dist";
-import JSZip from "jszip";
 
-// ── PDF.js worker ─────────────────────────────────────────────────────────────
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+// Heavy libraries (mammoth, pdfjsLib, JSZip) are now dynamically imported in extractTextFromFile
+// to reduce the initial bundle size and optimize performance.
+
+// ── API Keys ──────────────────────────────────────────────────────────────────
 
 // ── API Keys ──────────────────────────────────────────────────────────────────
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
@@ -143,9 +142,12 @@ export const extractTextFromFile = async (file) => {
     const filename = file.name.toLowerCase();
 
     if (filename.endsWith(".docx")) {
+        const mammoth = (await import("mammoth")).default;
         const result = await mammoth.extractRawText({ arrayBuffer });
         return result.value;
     } else if (filename.endsWith(".pdf")) {
+        const pdfjsLib = await import("pdfjs-dist");
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
         const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
         const pdf = await loadingTask.promise;
         let fullText = "";
@@ -156,6 +158,7 @@ export const extractTextFromFile = async (file) => {
         }
         return fullText;
     } else if (filename.endsWith(".pptx")) {
+        const JSZip = (await import("jszip")).default;
         const zip = new JSZip();
         const loadedZip = await zip.loadAsync(arrayBuffer);
         let fullText = "";

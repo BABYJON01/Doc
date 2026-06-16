@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import MedZukkooApp from './components/MedZukkooApp';
-import StudentDashboard from './pages/StudentDashboard';
-import TeacherDashboard from './pages/TeacherDashboard';
-import TeacherLectures from './pages/TeacherLectures';
-import TeacherTests from './pages/TeacherTests';
-import TeacherStudents from './pages/TeacherStudents';
-import UserProfile from './pages/UserProfile';
-import AdminDashboard from './pages/AdminDashboard';
-import QuizTaking from './pages/QuizTaking';
-import Methodology from './pages/Methodology';
-import StudentLectures from './pages/StudentLectures';
 import { AppProvider, AppToolbar, useApp } from './context/AppContext';
+
+// Lazy loaded components for Code Splitting (Performance Optimization)
+const MedZukkooApp = lazy(() => import('./components/MedZukkooApp'));
+const StudentDashboard = lazy(() => import('./pages/StudentDashboard'));
+const TeacherDashboard = lazy(() => import('./pages/TeacherDashboard'));
+const TeacherLectures = lazy(() => import('./pages/TeacherLectures'));
+const TeacherTests = lazy(() => import('./pages/TeacherTests'));
+const TeacherStudents = lazy(() => import('./pages/TeacherStudents'));
+const UserProfile = lazy(() => import('./pages/UserProfile'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const QuizTaking = lazy(() => import('./pages/QuizTaking'));
+const Methodology = lazy(() => import('./pages/Methodology'));
+const StudentLectures = lazy(() => import('./pages/StudentLectures'));
 
 import { auth, googleProvider, db } from './firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
@@ -256,26 +258,32 @@ const App = () => {
             <AppProvider>
                 <BrowserRouter>
                     <AppToolbar user={user} role={role} onLogout={() => signOut(auth)} />
-                    <Routes>
-                        <Route path="/" element={<LoginSelector user={user} role={role} />} />
-                        
-                        <Route path="/student/lectures" element={<StudentLectures user={user} onLogout={() => signOut(auth)} />} />
-                        
-                        {/* Protected Routes */}
-                        <Route path="/admin" element={(role === 'admin' && user) ? <AdminDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
-                        <Route path="/teacher" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
-                        <Route path="/teacher/lectures" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherLectures user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
-                        <Route path="/teacher/tests" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherTests user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
-                        <Route path="/teacher/students" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherStudents user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
-                        <Route path="/teacher/profile" element={((role === 'admin' || role === 'teacher') && user) ? <UserProfile role="teacher" user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
-                        <Route path="/student/profile" element={user ? <UserProfile role="student" user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
-                        <Route path="/student/*" element={user ? <StudentDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
-                        <Route path="/test" element={user ? <QuizTaking user={user} onFinish={() => window.location.href = '/student'} /> : <Navigate to="/" replace />} />
-                        
-                        <Route path="/methodology" element={user ? <Methodology /> : <Navigate to="/" replace />} />
-                        <Route path="/app" element={<MedZukkooApp />} />
-                        <Route path="*" element={<Navigate to="/" replace />} />
-                    </Routes>
+                    <Suspense fallback={
+                        <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+                            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    }>
+                        <Routes>
+                            <Route path="/" element={<LoginSelector user={user} role={role} />} />
+                            
+                            <Route path="/student/lectures" element={<StudentLectures user={user} onLogout={() => signOut(auth)} />} />
+                            
+                            {/* Protected Routes */}
+                            <Route path="/admin" element={(role === 'admin' && user) ? <AdminDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
+                            <Route path="/teacher" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
+                            <Route path="/teacher/lectures" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherLectures user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
+                            <Route path="/teacher/tests" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherTests user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
+                            <Route path="/teacher/students" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherStudents user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
+                            <Route path="/teacher/profile" element={((role === 'admin' || role === 'teacher') && user) ? <UserProfile role="teacher" user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
+                            <Route path="/student/profile" element={user ? <UserProfile role="student" user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
+                            <Route path="/student/*" element={user ? <StudentDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
+                            <Route path="/test" element={user ? <QuizTaking user={user} onFinish={() => window.location.href = '/student'} /> : <Navigate to="/" replace />} />
+                            
+                            <Route path="/methodology" element={user ? <Methodology /> : <Navigate to="/" replace />} />
+                            <Route path="/app" element={<MedZukkooApp />} />
+                            <Route path="*" element={<Navigate to="/" replace />} />
+                        </Routes>
+                    </Suspense>
                 </BrowserRouter>
             </AppProvider>
         </ErrorBoundary>
