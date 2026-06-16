@@ -29,9 +29,9 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
   const handleSearchImage = async (idx, initialQuery) => {
       setImageSearchModal({ isOpen: true, idx, query: initialQuery, results: [], isLoading: true });
       try {
-          // Translate or use initial query directly. Adding 'xray' to get better results.
-          const searchQuery = encodeURIComponent(initialQuery + " xray");
-          const url = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${searchQuery}&gsrnamespace=6&gsrlimit=12&prop=imageinfo&iiprop=url&format=json&origin=*`;
+          // Remove automatic 'xray' append to allow pure searches, or let user decide
+          const searchQuery = encodeURIComponent(initialQuery);
+          const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${searchQuery}&gsrnamespace=6&gsrlimit=20&prop=imageinfo&iiprop=url&format=json&origin=*`;
           const response = await fetch(url);
           const data = await response.json();
           let fetchedResults = [];
