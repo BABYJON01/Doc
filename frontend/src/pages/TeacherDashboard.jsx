@@ -29,8 +29,20 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
   const handleSearchImage = async (idx, initialQuery) => {
       setImageSearchModal({ isOpen: true, idx, query: initialQuery, results: [], isLoading: true });
       try {
-          // Remove automatic 'xray' append to allow pure searches, or let user decide
-          const searchQuery = encodeURIComponent(initialQuery);
+          // 1. Translate query to English for better Wikimedia Commons results
+          let englishQuery = initialQuery;
+          try {
+              const transRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(initialQuery)}`);
+              const transData = await transRes.json();
+              if (transData && transData[0] && transData[0][0] && transData[0][0][0]) {
+                  englishQuery = transData[0][0][0];
+              }
+          } catch(err) {
+              console.warn("Translation failed, using original query", err);
+          }
+
+          // 2. Search Wikimedia Commons
+          const searchQuery = encodeURIComponent(englishQuery);
           const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${searchQuery}&gsrnamespace=6&gsrlimit=20&prop=imageinfo&iiprop=url&format=json&origin=*`;
           const response = await fetch(url);
           const data = await response.json();
