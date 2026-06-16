@@ -29,10 +29,19 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
   const handleSearchImage = async (idx, initialQuery, type = 'xray') => {
       setImageSearchModal(prev => ({ ...prev, isOpen: true, idx, query: initialQuery, searchType: type, results: [], isLoading: true }));
       try {
+          const fetchWithTimeout = async (resource, options = {}) => {
+              const { timeout = 10000 } = options;
+              const controller = new AbortController();
+              const id = setTimeout(() => controller.abort(), timeout);
+              const response = await fetch(resource, { ...options, signal: controller.signal });
+              clearTimeout(id);
+              return response;
+          };
+
           // 1. Translate query to English for better Wikimedia Commons results
           let englishQuery = initialQuery;
           try {
-              const transRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(initialQuery)}`);
+              const transRes = await fetchWithTimeout(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(initialQuery)}`, { timeout: 5000 });
               const transData = await transRes.json();
               if (transData && transData[0] && transData[0][0] && transData[0][0][0]) {
                   englishQuery = transData[0][0][0];
@@ -47,7 +56,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
               const nihQuery = encodeURIComponent(englishQuery);
               const nihType = type === 'xray' ? '&it=x' : ''; // 'it=x' filters specifically for X-rays in NIH Open-i
               const nihUrl = `https://openi.nlm.nih.gov/api/search?query=${nihQuery}${nihType}&m=1&n=15`;
-              const nihRes = await fetch(nihUrl);
+              const nihRes = await fetchWithTimeout(nihUrl, { timeout: 10000 }); // 10s timeout
               const nihData = await nihRes.json();
               if (nihData && nihData.list) {
                   nihResults = nihData.list
@@ -58,7 +67,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                       });
               }
           } catch(err) {
-              console.warn("NIH Open-i search failed", err);
+              console.warn("NIH Open-i search failed or timed out", err);
           }
 
           // 3. Search Wikimedia Commons (Fallback/Extra)
@@ -76,7 +85,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
               }
               const searchQuery = encodeURIComponent(finalQuery);
               const wikiUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${searchQuery}&gsrnamespace=6&gsrlimit=10&prop=imageinfo&iiprop=url&format=json&origin=*`;
-              const wikiRes = await fetch(wikiUrl);
+              const wikiRes = await fetchWithTimeout(wikiUrl, { timeout: 10000 }); // 10s timeout
               const wikiData = await wikiRes.json();
               if (wikiData.query && wikiData.query.pages) {
                   wikiResults = Object.values(wikiData.query.pages)
@@ -84,7 +93,7 @@ const TeacherDashboard = ({ onNavigate, user, onLogout }) => {
                       .filter(url => url && (url.toLowerCase().endsWith('.jpg') || url.toLowerCase().endsWith('.png') || url.toLowerCase().endsWith('.jpeg') || url.toLowerCase().endsWith('.gif')));
               }
           } catch(err) {
-              console.warn("Wikimedia search failed", err);
+              console.warn("Wikimedia search failed or timed out", err);
           }
 
           // Merge results
