@@ -33,7 +33,7 @@ let geminiModel = null;
 const getGemini = () => {
     if (!geminiModel && GEMINI_API_KEY && GEMINI_API_KEY !== 'YOUR_GEMINI_KEY_HERE') {
         const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-        geminiModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     }
     return geminiModel;
 };
@@ -335,7 +335,7 @@ export const chatWithAI = async (message, history = []) => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "llama-3.1-8b-instant",
+                model: "llama-3.3-70b-versatile",
                 messages: messages,
                 temperature: 0.7
             })
