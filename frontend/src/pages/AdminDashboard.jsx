@@ -3,7 +3,8 @@ import { useApp } from '../context/AppContext';
 import DashboardLayout from '../components/DashboardLayout';
 import { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp, query, orderBy, where, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../firebase';
+import { db, storage, secondaryAuth } from '../firebase';
+import { createUserWithEmailAndPassword, updatePassword, signInWithEmailAndPassword as secondarySignIn } from 'firebase/auth';
 
 const AdminDashboard = ({ user, onLogout }) => {
     const { theme, lang } = useApp();
@@ -16,6 +17,7 @@ const AdminDashboard = ({ user, onLogout }) => {
     const [editId, setEditId] = useState(null);
     const [formData, setFormData] = useState({ name: '', email: '', password: '', subject: '', experience: '', photo: null });
     const [uploading, setUploading] = useState(false);
+    const [authStatus, setAuthStatus] = useState(''); // feedback for Firebase Auth creation
     
     // Fetch teachers
     const fetchTeachers = async () => {
@@ -45,10 +47,15 @@ const AdminDashboard = ({ user, onLogout }) => {
             alert("Maksimal o'qituvchilar soniga yetildi (14/14)!");
             return;
         }
+        if (!editMode && !formData.password) {
+            alert("Yangi o'qituvchi uchun parol kiritish majburiy!");
+            return;
+        }
         
         setUploading(true);
+        setAuthStatus('');
         try {
-            // Check if email already exists
+            // Check if email already exists in Firestore
             if (!editMode || formData.email.toLowerCase().trim() !== teachers.find(t => t.id === editId)?.email) {
                 const qMatch = query(collection(db, "teachers"), where("email", "==", formData.email.toLowerCase().trim()));
                 const snap = await getDocs(qMatch);
@@ -59,7 +66,36 @@ const AdminDashboard = ({ user, onLogout }) => {
                 }
             }
 
-            // 1. Photo handling using Base64 encoding to bypass Firebase Storage completely!
+            // 1. Create / update Firebase Auth account (using secondaryAuth so admin stays logged in)
+            if (!editMode) {
+                // New teacher → create Firebase Auth user
+                try {
+                    await createUserWithEmailAndPassword(secondaryAuth, formData.email.toLowerCase().trim(), formData.password);
+                    await secondaryAuth.signOut();
+                    setAuthStatus('✅ Firebase Auth hisob yaratildi.');
+                } catch (authErr) {
+                    if (authErr.code === 'auth/email-already-in-use') {
+                        setAuthStatus('ℹ️ Bu email Firebase Auth da allaqachon mavjud.');
+                    } else {
+                        console.warn('Firebase Auth yaratishda xatolik:', authErr.message);
+                        setAuthStatus('⚠️ Auth hisob yaratilmadi: ' + authErr.message);
+                    }
+                }
+            } else if (formData.password) {
+                // Edit mode + password changed → re-sign in with secondary auth and update password
+                try {
+                    const oldPassword = teachers.find(t => t.id === editId)?.password || '';
+                    const cred = await secondarySignIn(secondaryAuth, formData.email.toLowerCase().trim(), oldPassword);
+                    await updatePassword(cred.user, formData.password);
+                    await secondaryAuth.signOut();
+                    setAuthStatus('✅ Parol yangilandi.');
+                } catch (authErr) {
+                    console.warn('Parol yangilashda xatolik:', authErr.message);
+                    setAuthStatus('⚠️ Parol Firebase Auth da yangilanmadi. Qo\'lda yangilang.');
+                }
+            }
+
+            // 2. Photo handling using Base64 encoding to bypass Firebase Storage completely!
             let photoUrl = "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg";
             if (formData.photo) {
                 // Check size (max 500KB)
@@ -79,7 +115,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 photoUrl = await convertToBase64(formData.photo);
             }
             
-            // 2. Save directly to Firestore
+            // 3. Save to Firestore
             if (editMode) {
                 const updateData = {
                     name: formData.name,
@@ -105,7 +141,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                     createdAt: serverTimestamp(),
                     photoURL: photoUrl
                 });
-                alert("O'qituvchi ruxsatnomasi muvaffaqiyatli saqlandi!");
+                alert("O'qituvchi muvaffaqiyatli qo'shildi va tizimga kirish huquqi berildi!");
             }
             
             setShowModal(false);
@@ -347,9 +383,18 @@ const AdminDashboard = ({ user, onLogout }) => {
                                     className={`w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'}`} />
                                 </div>
                                 <div>
-                                    <label className={`block text-xs font-bold mb-1 uppercase ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Parol (Ixtiyoriy)</label>
-                                    <input type="text" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="Parol kiriting" 
-                                    className={`w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'}`} />
+                                    <label className={`block text-xs font-bold mb-1 uppercase ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                                        Parol {!editMode && <span className="text-rose-400">*</span>}
+                                        {editMode && <span className="text-slate-500 normal-case font-normal ml-1">(o'zgartirish uchun kiriting)</span>}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required={!editMode}
+                                        value={formData.password}
+                                        onChange={e => setFormData({...formData, password: e.target.value})}
+                                        placeholder={editMode ? 'Yangi parol (ixtiyoriy)' : 'Kamida 6 ta belgi'}
+                                        className={`w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'}`}
+                                    />
                                 </div>
                             </div>
                             
@@ -370,8 +415,15 @@ const AdminDashboard = ({ user, onLogout }) => {
                                     className={`w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'}`} />
                                 </div>
                             </div>
-                            <button type="submit" disabled={uploading} className={`w-full mt-4 flex justify-center items-center gap-2 ${uploading ? 'bg-slate-600' : 'bg-blue-600 hover:bg-blue-500'} text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-blue-500/25`}>
-                                {uploading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : "Saqlash va Ruxsat berish"}
+                            {authStatus && (
+                                <div className={`text-xs px-3 py-2 rounded-lg ${
+                                    authStatus.startsWith('✅') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                    authStatus.startsWith('ℹ️') ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                                    'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                }`}>{authStatus}</div>
+                            )}
+                            <button type="submit" disabled={uploading} className={`w-full mt-2 flex justify-center items-center gap-2 ${uploading ? 'bg-slate-600' : 'bg-blue-600 hover:bg-blue-500'} text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-blue-500/25`}>
+                                {uploading ? <><i className="fa-solid fa-circle-notch fa-spin"></i> Saqlanmoqda...</> : <><i className="fa-solid fa-user-check"></i> Saqlash va Kirish Huquqi Berish</>}
                             </button>
                         </form>
                     </div>
