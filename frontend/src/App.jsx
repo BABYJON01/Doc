@@ -15,8 +15,8 @@ const QuizTaking = lazy(() => import('./pages/QuizTaking'));
 const Methodology = lazy(() => import('./pages/Methodology'));
 const StudentLectures = lazy(() => import('./pages/StudentLectures'));
 
-import { auth, googleProvider, db } from './firebase';
-import { signInWithPopup, signOut, onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
+import { auth, googleProvider, db, secondaryAuth } from './firebase';
+import { signInWithPopup, signOut, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { collection, query, orderBy, limit, onSnapshot, setDoc, doc, getDocs, where, serverTimestamp } from 'firebase/firestore';
 
 class ErrorBoundary extends React.Component {
@@ -101,16 +101,46 @@ const LoginSelector = ({ user, role }) => {
         setTeacherLoginError('');
         setIsTeacherLoggingIn(true);
         try {
-            await signInWithEmailAndPassword(auth, teacherEmail, teacherPassword);
+            const email = teacherEmail.trim().toLowerCase();
+            const password = teacherPassword;
+
+            // 1. Firestore'dan o'qituvchini tekshir
+            const q = query(collection(db, "teachers"), where("email", "==", email));
+            const snap = await getDocs(q);
+
+            if (snap.empty) {
+                setTeacherLoginError("Bu email tizimda ro'yxatdan o'tmagan. Admin bilan bog'laning.");
+                return;
+            }
+
+            const teacherData = snap.docs[0].data();
+            if (teacherData.password !== password) {
+                setTeacherLoginError("Parol noto'g'ri. Admin bergan parolni kiriting.");
+                return;
+            }
+
+            // 2. Firebase Auth orqali kirish (hisob bo'lmasa — avtomatik yaratamiz)
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (authErr) {
+                if (authErr.code === 'auth/user-not-found' || authErr.code === 'auth/invalid-credential') {
+                    // Hisob yo'q → secondaryAuth orqali yaratamiz (admin chiqarilmaydi)
+                    await createUserWithEmailAndPassword(secondaryAuth, email, password);
+                    await secondaryAuth.signOut();
+                    // Endi asosiy auth orqali kiramiz
+                    await signInWithEmailAndPassword(auth, email, password);
+                } else {
+                    throw authErr;
+                }
+            }
         } catch (error) {
+            console.error('Teacher login error:', error);
             const errMap = {
-                'auth/invalid-credential': 'Email yoki parol noto\'g\'ri.',
-                'auth/user-not-found': 'Bu email ro\'yxatda yo\'q.',
-                'auth/wrong-password': 'Parol noto\'g\'ri.',
                 'auth/too-many-requests': 'Ko\'p urinish. Biroz kuting.',
                 'auth/invalid-email': 'Email format noto\'g\'ri.',
+                'auth/network-request-failed': 'Internet aloqasini tekshiring.',
             };
-            setTeacherLoginError(errMap[error.code] || 'Xatolik: ' + error.message);
+            setTeacherLoginError(errMap[error.code] || 'Xatolik yuz berdi: ' + error.message);
         } finally {
             setIsTeacherLoggingIn(false);
         }
