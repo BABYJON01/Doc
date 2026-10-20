@@ -315,17 +315,22 @@ const TeacherTests = ({ user, onLogout }) => {
         if (!user) return;
         setIsLoadingExams(true);
         try {
-            const q = query(
-                collection(db, 'exams'), 
-                where("teacherId", "==", user.uid)
-                // Note: without composite index, orderBy might fail, we will sort in memory
-            );
-            const snapshot = await getDocs(q);
-            const examsData = [];
-            snapshot.forEach(docSnap => {
-                examsData.push({ id: docSnap.id, ...docSnap.data() });
-            });
-            // Sort by createdAt descending
+            // UID bo'yicha qidirish (Google login yoki eski hisob)
+            const qByUid = query(collection(db, 'exams'), where("teacherId", "==", user.uid));
+            const snapByUid = await getDocs(qByUid);
+
+            // Email bo'yicha qidirish (email/parol bilan kirgan bo'lsa yoki nom bo'yicha)
+            const userEmail = user.email || '';
+            const qByEmail = query(collection(db, 'exams'), where("teacherName", "==", userEmail));
+            const snapByEmail = await getDocs(qByEmail);
+
+            // Birlashtirib, ID bo'yicha takrorlanmaslik
+            const examsMap = new Map();
+            snapByUid.forEach(docSnap => examsMap.set(docSnap.id, { id: docSnap.id, ...docSnap.data() }));
+            snapByEmail.forEach(docSnap => examsMap.set(docSnap.id, { id: docSnap.id, ...docSnap.data() }));
+
+            const examsData = Array.from(examsMap.values());
+            // Vaqt bo'yicha tartibla
             examsData.sort((a, b) => {
                 const timeA = a.createdAt?.toMillis() || 0;
                 const timeB = b.createdAt?.toMillis() || 0;
@@ -496,17 +501,27 @@ const TeacherTests = ({ user, onLogout }) => {
     return (
         <DashboardLayout role="teacher" user={user} onLogout={onLogout}>
             <div className="max-w-5xl mx-auto animate-[fadeInUp_0.4s_ease-out]">
-                <div className="flex items-center gap-4 mb-8">
-                    <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-2xl flex items-center justify-center text-2xl shadow-lg">
-                        <i className="fa-solid fa-list-check"></i>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                    <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-2xl flex items-center justify-center text-2xl shadow-lg">
+                            <i className="fa-solid fa-list-check"></i>
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-black text-white">{ { ru: 'База тестов', uz: 'Testlar bazasi', en: 'Tests Database' }[lang] || 'Testlar bazasi' }</h2>
+                            <p className="text-slate-400 text-sm mt-1">
+                                { { ru: 'Управляйте тестами и загружайте массово (Word, PDF, PPTX).', uz: 'Testlarni boshqarish va ommaviy yuklash (Word, PDF, PPTX formatida).', en: 'Manage tests and upload in bulk (Word, PDF, PPTX).' }[lang] || 'Testlarni boshqarish va ommaviy yuklash (Word, PDF, PPTX formatida).' }
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 className="text-2xl font-black text-white">{ { ru: 'База тестов', uz: 'Testlar bazasi', en: 'Tests Database' }[lang] || 'Testlar bazasi' }</h2>
-                    <p className="text-slate-400 text-sm mt-1">
-                        { { ru: 'Управляйте тестами и загружайте массово (Word, PDF, PPTX).', uz: 'Testlarni boshqarish va ommaviy yuklash (Word, PDF, PPTX formatida).', en: 'Manage tests and upload in bulk (Word, PDF, PPTX).' }[lang] || 'Testlarni boshqarish va ommaviy yuklash (Word, PDF, PPTX formatida).' }
-                    </p>
+                    {/* AI generator ga o'tish tugmasi */}
+                    <button
+                        onClick={() => window.location.href = '/teacher'}
+                        className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white font-bold rounded-xl text-sm transition-all shadow-lg shadow-blue-900/40 hover:-translate-y-0.5 shrink-0"
+                    >
+                        <i className="fa-solid fa-wand-magic-sparkles"></i>
+                        { { ru: 'AI: Создать тест', uz: 'AI: Test Yaratish', en: 'AI: Create Test' }[lang] || 'AI: Test Yaratish' }
+                    </button>
                 </div>
-            </div>
 
             {/* YUKLASH BO'LIMI */}
             <div className="bg-slate-900 rounded-2xl p-6 md:p-8 border border-slate-700 shadow-xl mb-8">
