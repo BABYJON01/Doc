@@ -93,7 +93,10 @@ const LoginSelector = ({ user, role }) => {
 
 
     const handleLogout = async () => {
-        try { await signOut(auth); } catch (error) { console.error("Logout Error:", error); }
+        try {
+            sessionStorage.removeItem('medz_teacher_email');
+            await signOut(auth);
+        } catch (error) { console.error("Logout Error:", error); }
     };
 
     const handleTeacherEmailLogin = async (e) => {
@@ -133,6 +136,11 @@ const LoginSelector = ({ user, role }) => {
                     throw authErr;
                 }
             }
+
+            // 3. Muvaffaqiyatli! Teacher deb belgilab, to'g'ridan panel ga yo'naltiramiz
+            sessionStorage.setItem('medz_teacher_email', email);
+            window.location.href = '/teacher';
+
         } catch (error) {
             console.error('Teacher login error:', error);
             const errMap = {
@@ -332,25 +340,41 @@ const App = () => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
             if (currentUser) {
-                // Determine Role
                 const email = currentUser.email;
+
+                // 1. Admin tekshiruvi
                 if (email === 'rahmonjonwarrior@gmail.com') {
                     setRole('admin');
-                } else {
-                    // Check Firestore 'teachers' collection
-                    try {
-                        const q = query(collection(db, "teachers"), where("email", "==", email));
-                        const snapshot = await getDocs(q);
-                        if (!snapshot.empty) {
-                            setRole('teacher');
-                        } else {
-                            setRole('student');
-                        }
-                    } catch (err) {
-                        console.error('Role fetch error:', err);
+                    setLoading(false);
+                    return;
+                }
+
+                // 2. sessionStorage dan tez tekshiruv (teacher login orqali kirgan bo'lsa)
+                const cachedTeacher = sessionStorage.getItem('medz_teacher_email');
+                if (cachedTeacher && cachedTeacher === email) {
+                    setRole('teacher');
+                    setLoading(false);
+                    return;
+                }
+
+                // 3. Firestore dan tekshiruv (Google login yoki boshqa holatlar)
+                try {
+                    const q = query(collection(db, "teachers"), where("email", "==", email));
+                    const snapshot = await getDocs(q);
+                    if (!snapshot.empty) {
+                        // Topildi — sessionStorage ga ham saqlaymiz keyingi marta tez kirish uchun
+                        sessionStorage.setItem('medz_teacher_email', email);
+                        setRole('teacher');
+                    } else {
                         setRole('student');
                     }
+                } catch (err) {
+                    console.error('Role fetch error:', err);
+                    setRole('student');
                 }
+            } else {
+                // Foydalanuvchi chiqdi
+                sessionStorage.removeItem('medz_teacher_email');
             }
             setLoading(false);
         });
