@@ -305,7 +305,8 @@ const LoginSelector = ({ user, role }) => {
                                         </div>
                                     </button>
                                  )}
-                                 <button onClick={handleTeacherClick} className={`p-6 block border-l-4 border-t-0 border-blue-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-x-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`} style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
+                                 {(role === 'admin' || role === 'teacher') && (
+                                  <button onClick={handleTeacherClick} className={`p-6 block border-l-4 border-t-0 border-blue-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-x-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`} style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
                                      <div className="flex items-center gap-4">
                                          <i className="fa-solid fa-chalkboard-teacher text-3xl text-blue-500 w-10 text-center"></i>
                                          <div>
@@ -314,6 +315,7 @@ const LoginSelector = ({ user, role }) => {
                                          </div>
                                      </div>
                                  </button>
+                                 )}
                                  <button onClick={() => window.location.href = '/student'} className={`p-6 block border-l-4 border-t-0 border-emerald-500 text-left transition-all rounded-2xl shadow-xl hover:-translate-x-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`} style={{ background: theme==='dark' ? 'rgba(30,41,59,0.7)' : '#fff' }}>
                                      <div className="flex items-center gap-4">
                                          <i className="fa-solid fa-user-graduate text-3xl text-emerald-500 w-10 text-center"></i>
