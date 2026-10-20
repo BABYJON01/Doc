@@ -107,37 +107,37 @@ const LoginSelector = ({ user, role }) => {
             const email = teacherEmail.trim().toLowerCase();
             const password = teacherPassword;
 
-            // 1. Firestore'dan o'qituvchini tekshir
-            const q = query(collection(db, "teachers"), where("email", "==", email));
-            const snap = await getDocs(q);
-
-            if (snap.empty) {
-                setTeacherLoginError("Bu email tizimda ro'yxatdan o'tmagan. Admin bilan bog'laning.");
-                return;
-            }
-
-            const teacherData = snap.docs[0].data();
-            if (teacherData.password !== password) {
-                setTeacherLoginError("Parol noto'g'ri. Admin bergan parolni kiriting.");
-                return;
-            }
-
-            // 2. Firebase Auth orqali kirish (hisob bo'lmasa — avtomatik yaratamiz)
+            // Firebase Auth orqali to'g'ridan kirish
             try {
                 await signInWithEmailAndPassword(auth, email, password);
             } catch (authErr) {
                 if (authErr.code === 'auth/user-not-found' || authErr.code === 'auth/invalid-credential') {
-                    // Hisob yo'q → secondaryAuth orqali yaratamiz (admin chiqarilmaydi)
+                    // Firebase Auth da hisob yo'q → Firestore dan tekshirib, avtomatik yaratamiz
+                    const q = query(collection(db, "teachers"), where("email", "==", email));
+                    const snap = await getDocs(q);
+                    if (snap.empty) {
+                        setTeacherLoginError("Bu email tizimda ro'yxatdan o'tmagan. Admin bilan bog'laning.");
+                        return;
+                    }
+                    const teacherData = snap.docs[0].data();
+                    if (!teacherData.password || teacherData.password !== password) {
+                        setTeacherLoginError("Parol noto'g'ri. Admin bergan parolni kiriting.");
+                        return;
+                    }
+                    // Hisob yo'q → secondaryAuth orqali yaratamiz
                     await createUserWithEmailAndPassword(secondaryAuth, email, password);
                     await secondaryAuth.signOut();
                     // Endi asosiy auth orqali kiramiz
                     await signInWithEmailAndPassword(auth, email, password);
+                } else if (authErr.code === 'auth/wrong-password') {
+                    setTeacherLoginError("Parol noto'g'ri. Admin bergan parolni kiriting.");
+                    return;
                 } else {
                     throw authErr;
                 }
             }
 
-            // 3. Muvaffaqiyatli! Teacher deb belgilab, to'g'ridan panel ga yo'naltiramiz
+            // Muvaffaqiyatli! sessionStorage ga saqlab, teacher paneliga yo'naltiramiz
             sessionStorage.setItem('medz_teacher_email', email);
             window.location.href = '/teacher';
 
@@ -147,8 +147,9 @@ const LoginSelector = ({ user, role }) => {
                 'auth/too-many-requests': 'Ko\'p urinish. Biroz kuting.',
                 'auth/invalid-email': 'Email format noto\'g\'ri.',
                 'auth/network-request-failed': 'Internet aloqasini tekshiring.',
+                'auth/operation-not-allowed': 'Email/parol tizimi yoqilmagan. Admin bilan bog\'laning.',
             };
-            setTeacherLoginError(errMap[error.code] || 'Xatolik yuz berdi: ' + error.message);
+            setTeacherLoginError(errMap[error.code] || 'Xatolik: ' + error.message);
         } finally {
             setIsTeacherLoggingIn(false);
         }

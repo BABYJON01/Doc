@@ -18,6 +18,7 @@ const AdminDashboard = ({ user, onLogout }) => {
     const [formData, setFormData] = useState({ name: '', email: '', password: '', subject: '', experience: '', photo: null });
     const [uploading, setUploading] = useState(false);
     const [authStatus, setAuthStatus] = useState(''); // feedback for Firebase Auth creation
+    const [syncing, setSyncing] = useState(false);
     
     // Fetch teachers
     const fetchTeachers = async () => {
@@ -210,6 +211,30 @@ const AdminDashboard = ({ user, onLogout }) => {
         }
     };
 
+    // Mavjud barcha o'qituvchilar uchun Firebase Auth hisob yaratish
+    const handleSyncAllTeachers = async () => {
+        if (!window.confirm(`Barcha ${teachers.length} ta o'qituvchi uchun Firebase Auth hisob yaratilsinmi? (Allaqachon bor bo'lganlar o'tkazib yuboriladi)`)) return;
+        setSyncing(true);
+        let created = 0, skipped = 0, failed = 0;
+        for (const t of teachers) {
+            if (!t.email || !t.password) { skipped++; continue; }
+            try {
+                await createUserWithEmailAndPassword(secondaryAuth, t.email.trim().toLowerCase(), t.password);
+                await secondaryAuth.signOut();
+                created++;
+            } catch (err) {
+                if (err.code === 'auth/email-already-in-use') {
+                    skipped++;
+                } else {
+                    console.error(`Xatolik (${t.email}):`, err.code, err.message);
+                    failed++;
+                }
+            }
+        }
+        setSyncing(false);
+        alert(`✅ Sinxronlash tugadi!\n\n✅ Yangi yaratildi: ${created}\n⏭️ Allaqachon bor: ${skipped}\n❌ Xatolik: ${failed}\n\nEndi barcha o'qituvchilar kirishi mumkin!`);
+    };
+
     const isDark = theme === 'dark';
 
     return (
@@ -275,6 +300,17 @@ const AdminDashboard = ({ user, onLogout }) => {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{{ ru: 'Зарегистрированные Преподаватели', uz: 'Ro\'yxatdan o\'tgan O\'qituvchilar', en: 'Registered Teachers' }[lang] || 'Ro\'yxatdan o\'tgan O\'qituvchilar'}</h2>
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={handleSyncAllTeachers}
+                            disabled={syncing || teachers.length === 0}
+                            className={`px-4 py-2 font-bold text-sm rounded-lg flex items-center gap-2 transition-all bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 disabled:opacity-50`}
+                            title="Barcha o'qituvchilar uchun Firebase Auth hisob yaratish"
+                        >
+                            {syncing
+                                ? <><i className="fa-solid fa-circle-notch fa-spin"></i> Sinxronlanmoqda...</>
+                                : <><i className="fa-solid fa-key"></i> Barchani Aktivlashtirish</>
+                            }
+                        </button>
                         <button 
                             onClick={handleClearAllTests}
                             className={`px-4 py-2 font-bold text-sm rounded-lg flex items-center gap-2 transition-all bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/30`}
