@@ -33,7 +33,7 @@ let geminiModel = null;
 const getGemini = () => {
     if (!geminiModel && GEMINI_API_KEY && GEMINI_API_KEY !== 'YOUR_GEMINI_KEY_HERE') {
         const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-        geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        geminiModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
     }
     return geminiModel;
 };
@@ -77,7 +77,7 @@ const generateWithGroq = async (prompt) => {
             { role: "system", content: SYSTEM_PROMPT },
             { role: "user",   content: prompt }
         ],
-        model: "llama-3.3-70b-versatile",
+        model: "meta-llama/llama-4-scout-17b-16e-instruct",
         response_format: { type: "json_object" },
         temperature: 0.6
     });
@@ -335,7 +335,7 @@ export const chatWithAI = async (message, history = []) => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "llama-3.3-70b-versatile",
+                model: "meta-llama/llama-4-scout-17b-16e-instruct",
                 messages: messages,
                 temperature: 0.7
             })
