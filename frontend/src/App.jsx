@@ -222,60 +222,6 @@ const LoginSelector = ({ user, role }) => {
                                     )}
                                 </button>
 
-                                {/* Divider */}
-                                <div className="flex items-center gap-3 my-2">
-                                    <div className="flex-1 h-px bg-slate-700"></div>
-                                    <span className="text-slate-500 text-xs uppercase tracking-widest">yoki</span>
-                                    <div className="flex-1 h-px bg-slate-700"></div>
-                                </div>
-
-                                {/* Teacher Email/Password Login */}
-                                <button
-                                    type="button"
-                                    onClick={() => { setShowTeacherForm(v => !v); setTeacherLoginError(''); }}
-                                    className="w-full py-3.5 border border-blue-500/40 hover:border-blue-400 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 flex items-center justify-center gap-2 rounded-xl font-bold text-sm transition-all"
-                                >
-                                    <i className="fa-solid fa-chalkboard-teacher"></i>
-                                    {{ ru: 'Вход для преподавателей', uz: 'O\'qituvchi kirishi', en: 'Teacher Login' }[lang] || 'O\'qituvchi kirishi'}
-                                    <i className={`fa-solid fa-chevron-${showTeacherForm ? 'up' : 'down'} text-xs ml-auto`}></i>
-                                </button>
-
-                                {showTeacherForm && (
-                                    <form onSubmit={handleTeacherEmailLogin} className="mt-1 flex flex-col gap-3 animate-[fadeIn_0.3s_ease]">
-                                        {teacherLoginError && (
-                                            <div className="p-3 bg-rose-500/20 border border-rose-500/50 rounded-xl text-rose-300 text-xs flex items-center gap-2">
-                                                <i className="fa-solid fa-triangle-exclamation"></i>
-                                                {teacherLoginError}
-                                            </div>
-                                        )}
-                                        <input
-                                            type="email"
-                                            required
-                                            placeholder={{ ru: 'Email', uz: 'Email', en: 'Email' }[lang] || 'Email'}
-                                            value={teacherEmail}
-                                            onChange={e => setTeacherEmail(e.target.value)}
-                                            className="w-full px-4 py-3 bg-slate-800/80 border border-slate-600/60 focus:border-blue-500 rounded-xl text-white placeholder-slate-500 text-sm outline-none transition-colors"
-                                        />
-                                        <input
-                                            type="password"
-                                            required
-                                            placeholder={{ ru: 'Пароль', uz: 'Parol', en: 'Password' }[lang] || 'Parol'}
-                                            value={teacherPassword}
-                                            onChange={e => setTeacherPassword(e.target.value)}
-                                            className="w-full px-4 py-3 bg-slate-800/80 border border-slate-600/60 focus:border-blue-500 rounded-xl text-white placeholder-slate-500 text-sm outline-none transition-colors"
-                                        />
-                                        <button
-                                            type="submit"
-                                            disabled={isTeacherLoggingIn}
-                                            className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2"
-                                        >
-                                            {isTeacherLoggingIn
-                                                ? <><i className="fa-solid fa-circle-notch fa-spin"></i> Kirilmoqda...</>
-                                                : <><i className="fa-solid fa-right-to-bracket"></i> {{ ru: 'Войти', uz: 'Kirish', en: 'Sign In' }[lang] || 'Kirish'}</>
-                                            }
-                                        </button>
-                                    </form>
-                                )}
                             </div>
                         </div>
                      </>
@@ -409,7 +355,7 @@ const App = () => {
                             
                             {/* Protected Routes */}
                             <Route path="/admin" element={(role === 'admin' && user) ? <AdminDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
-                            <Route path="/teacher" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
+                            <Route path="/teacher" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherDashboard user={user} onLogout={() => signOut(auth)} /> : <TeacherLogin />} />
                             <Route path="/teacher/lectures" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherLectures user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                             <Route path="/teacher/tests" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherTests user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                             <Route path="/teacher/students" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherStudents user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
