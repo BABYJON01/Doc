@@ -500,6 +500,43 @@ const TeacherTests = ({ user, onLogout }) => {
         }
     };
 
+    const downloadTestAsWord = async (exam) => {
+        const { Document, Packer, Paragraph, TextRun } = await import('docx');
+        const { saveAs } = await import('file-saver');
+
+        const children = [];
+
+        // Title
+        children.push(
+            new Paragraph({
+                children: [new TextRun({ text: exam.title || 'Test', bold: true, size: 32 })],
+            })
+        );
+        children.push(new Paragraph({ children: [new TextRun({ text: '' })] }));
+
+        // Questions and options
+        exam.data?.tests?.forEach((t, idx) => {
+            children.push(
+                new Paragraph({
+                    children: [new TextRun({ text: `${idx + 1}. ${t.question}`, bold: true })],
+                })
+            );
+            t.options?.forEach((opt, oIdx) => {
+                children.push(
+                    new Paragraph({
+                        children: [new TextRun({ text: `   ${String.fromCharCode(65 + oIdx)}. ${opt}` })],
+                        indent: { left: 360 },
+                    })
+                );
+            });
+            children.push(new Paragraph({ children: [new TextRun({ text: '' })] }));
+        });
+
+        const doc = new Document({ sections: [{ children }] });
+        const blob = await Packer.toBlob(doc);
+        saveAs(blob, `${exam.title || 'test'}.docx`);
+    };
+
     return (
         <DashboardLayout role="teacher" user={user} onLogout={onLogout}>
             <div className="max-w-5xl mx-auto animate-[fadeInUp_0.4s_ease-out]">
