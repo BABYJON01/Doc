@@ -14,6 +14,7 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const QuizTaking = lazy(() => import('./pages/QuizTaking'));
 const Methodology = lazy(() => import('./pages/Methodology'));
 const StudentLectures = lazy(() => import('./pages/StudentLectures'));
+const CreateLobby = lazy(() => import('./pages/CreateLobby'));
 
 import { auth, googleProvider, db, secondaryAuth } from './firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
@@ -434,6 +435,7 @@ const App = () => {
                             <Route path="/teacher/lectures" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherLectures user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                             <Route path="/teacher/tests" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherTests user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                             <Route path="/teacher/students" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherStudents user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
+                            <Route path="/teacher/lobby" element={((role === 'admin' || role === 'teacher') && user) ? <CreateLobby user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                             <Route path="/teacher/profile" element={((role === 'admin' || role === 'teacher') && user) ? <UserProfile role="teacher" user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                             <Route path="/student/profile" element={user ? <UserProfile role="student" user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                             <Route path="/student/*" element={user ? <StudentDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />

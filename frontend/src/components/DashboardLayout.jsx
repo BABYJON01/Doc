@@ -67,6 +67,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                     { name: 'Ma\'ruzalar', icon: 'fa-solid fa-folder-open', path: '/teacher/lectures' },
                     { name: 'Testlar', icon: 'fa-solid fa-list-check', path: '/teacher/tests' },
                     { name: 'Talabalar', icon: 'fa-solid fa-users', path: '/teacher/students' },
+                    { name: '🎮 Lobby', icon: 'fa-solid fa-gamepad', path: '/teacher/lobby' },
                     { name: 'Profil', icon: 'fa-solid fa-user-doctor', path: '/teacher/profile' },
                 ],
                 student: [
@@ -86,6 +87,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                     { name: 'Лекции', icon: 'fa-solid fa-folder-open', path: '/teacher/lectures' },
                     { name: 'Тесты', icon: 'fa-solid fa-list-check', path: '/teacher/tests' },
                     { name: 'Студенты', icon: 'fa-solid fa-users', path: '/teacher/students' },
+                    { name: '🎮 Лобби', icon: 'fa-solid fa-gamepad', path: '/teacher/lobby' },
                     { name: 'Профиль', icon: 'fa-solid fa-user-doctor', path: '/teacher/profile' },
                 ],
                 student: [
@@ -105,6 +107,7 @@ const DashboardLayout = ({ children, role, user, onLogout }) => {
                     { name: 'Lectures', icon: 'fa-solid fa-folder-open', path: '/teacher/lectures' },
                     { name: 'Tests', icon: 'fa-solid fa-list-check', path: '/teacher/tests' },
                     { name: 'Students', icon: 'fa-solid fa-users', path: '/teacher/students' },
+                    { name: '🎮 Lobby', icon: 'fa-solid fa-gamepad', path: '/teacher/lobby' },
                     { name: 'Profile', icon: 'fa-solid fa-user-doctor', path: '/teacher/profile' },
                 ],
                 student: [
