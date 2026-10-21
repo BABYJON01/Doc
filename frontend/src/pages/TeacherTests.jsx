@@ -4,6 +4,8 @@ import DashboardLayout from '../components/DashboardLayout';
 import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, deleteDoc, doc, updateDoc, orderBy } from 'firebase/firestore';
 import { extractTextFromFile } from '../services/aiService';
+import { Document, Packer, Paragraph, TextRun } from 'docx';
+import { saveAs } from 'file-saver';
 
 const parseDocumentTests = (text) => {
     const tests = [];
@@ -614,6 +616,13 @@ const TeacherTests = ({ user, onLogout }) => {
                                             <h4 className="font-bold text-white text-base">{exam.title}</h4>
                                             <button onClick={() => handleEditTitle(exam.id, exam.title)} className="text-slate-500 hover:text-blue-400 text-xs px-2" title={ { ru: 'Изменить имя', uz: 'Nomini o\'zgartirish', en: 'Change name' }[lang] || 'Nomini o\'zgartirish' }>
                                                 <i className="fa-solid fa-pen"></i>
+                                            </button>
+                                            <button
+                                              onClick={() => downloadTestAsWord(exam)}
+                                              className="px-3 py-1.5 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-lg text-xs font-bold border border-indigo-500/30 transition-all"
+                                              title={ { ru: 'Скачать тест в Word', uz: 'Testni Word formatida yuklab olish', en: 'Download test as Word' }[lang] || 'Download test as Word' }
+                                            >
+                                              <i className="fa-solid fa-file-word mr-1"></i> { { ru: 'Word', uz: 'Word', en: 'Word' }[lang] || 'Word' }
                                             </button>
                                         </div>
                                         <div className="flex items-center gap-4 text-xs text-slate-400">
