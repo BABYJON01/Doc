@@ -222,6 +222,56 @@ const LoginSelector = ({ user, role }) => {
                                     )}
                                 </button>
 
+                                {/* Divider */}
+                                <div className="flex items-center gap-3 my-6">
+                                    <div className="flex-1 h-px bg-slate-700"></div>
+                                    <span className="text-slate-500 text-xs uppercase tracking-widest font-bold">
+                                        {{ ru: 'или', uz: 'yoki', en: 'or' }[lang] || 'yoki'}
+                                    </span>
+                                    <div className="flex-1 h-px bg-slate-700"></div>
+                                </div>
+
+                                {/* O'qituvchi login formi */}
+                                <div className="flex items-center gap-2 mb-4">
+                                    <i className="fa-solid fa-chalkboard-teacher text-blue-400 text-lg"></i>
+                                    <span className="text-sm font-bold text-blue-400 uppercase tracking-wider">
+                                        {{ ru: 'Вход для преподавателя', uz: "O'qituvchi kirishi", en: 'Teacher Sign In' }[lang] || "O'qituvchi kirishi"}
+                                    </span>
+                                </div>
+                                <form onSubmit={handleTeacherEmailLogin} className="flex flex-col gap-3">
+                                    <input
+                                        type="email"
+                                        value={teacherEmail}
+                                        onChange={e => setTeacherEmail(e.target.value)}
+                                        placeholder={{ ru: 'Email преподавателя', uz: "O'qituvchi emaili", en: 'Teacher email' }[lang] || "O'qituvchi emaili"}
+                                        required
+                                        className="w-full px-4 py-3 bg-slate-800/80 border border-slate-600 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+                                    />
+                                    <input
+                                        type="password"
+                                        value={teacherPassword}
+                                        onChange={e => setTeacherPassword(e.target.value)}
+                                        placeholder={{ ru: 'Пароль', uz: 'Parol', en: 'Password' }[lang] || 'Parol'}
+                                        required
+                                        className="w-full px-4 py-3 bg-slate-800/80 border border-slate-600 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+                                    />
+                                    {teacherLoginError && (
+                                        <p className="text-rose-400 text-xs bg-rose-500/10 border border-rose-500/30 rounded-lg px-3 py-2">
+                                            <i className="fa-solid fa-triangle-exclamation mr-1"></i>{teacherLoginError}
+                                        </p>
+                                    )}
+                                    <button
+                                        type="submit"
+                                        disabled={isTeacherLoggingIn}
+                                        className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl text-sm tracking-wide transition-all shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                                    >
+                                        {isTeacherLoggingIn
+                                            ? <i className="fa-solid fa-circle-notch fa-spin"></i>
+                                            : <><i className="fa-solid fa-right-to-bracket"></i> {{ ru: 'Войти', uz: 'Kirish', en: 'Sign In' }[lang] || 'Kirish'}</>
+                                        }
+                                    </button>
+                                </form>
+
                             </div>
                         </div>
                      </>
