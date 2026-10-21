@@ -355,7 +355,7 @@ const App = () => {
                             
                             {/* Protected Routes */}
                             <Route path="/admin" element={(role === 'admin' && user) ? <AdminDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
-                            <Route path="/teacher" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherDashboard user={user} onLogout={() => signOut(auth)} /> : <TeacherLogin />} />
+                            <Route path="/teacher" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherDashboard user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                             <Route path="/teacher/lectures" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherLectures user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                             <Route path="/teacher/tests" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherTests user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
                             <Route path="/teacher/students" element={((role === 'admin' || role === 'teacher') && user) ? <TeacherStudents user={user} onLogout={() => signOut(auth)} /> : <Navigate to="/" replace />} />
