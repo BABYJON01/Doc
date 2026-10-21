@@ -231,19 +231,13 @@ const LoginSelector = ({ user, role }) => {
                                     <div className="flex-1 h-px bg-slate-700"></div>
                                 </div>
 
-                                {/* O'qituvchi login formi */}
-                                <div className="flex items-center gap-2 mb-4">
-                                    <i className="fa-solid fa-chalkboard-teacher text-blue-400 text-lg"></i>
-                                    <span className="text-sm font-bold text-blue-400 uppercase tracking-wider">
-                                        {{ ru: 'Вход для преподавателя', uz: "O'qituvchi kirishi", en: 'Teacher Sign In' }[lang] || "O'qituvchi kirishi"}
-                                    </span>
-                                </div>
+                                {/* Login + Parol formi */}
                                 <form onSubmit={handleTeacherEmailLogin} className="flex flex-col gap-3">
                                     <input
                                         type="email"
                                         value={teacherEmail}
                                         onChange={e => setTeacherEmail(e.target.value)}
-                                        placeholder={{ ru: 'Email преподавателя', uz: "O'qituvchi emaili", en: 'Teacher email' }[lang] || "O'qituvchi emaili"}
+                                        placeholder={{ ru: 'Логин (Email)', uz: 'Login (Email)', en: 'Login (Email)' }[lang] || 'Login (Email)'}
                                         required
                                         className="w-full px-4 py-3 bg-slate-800/80 border border-slate-600 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
                                     />
